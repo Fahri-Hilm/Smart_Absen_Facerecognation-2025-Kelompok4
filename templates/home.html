@@ -6,110 +6,346 @@
   <title>Absensi Karyawan Makan Gratis</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .main-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      margin: 20px auto;
+      max-width: 1400px;
+      padding: 30px;
+    }
+    
+    .header-section {
+      background: linear-gradient(135deg, #0b4c61 0%, #2c5282 100%);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .header-section h1 {
+      font-weight: 700;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .header-section h3, .header-section h4 {
+      opacity: 0.9;
+      font-weight: 400;
+    }
+    
+    .date-info {
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      backdrop-filter: blur(5px);
+    }
+    
+    .camera-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .btn-modern {
+      border-radius: 12px;
+      padding: 12px 25px;
+      font-weight: 500;
+      border: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .btn-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary.btn-modern {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+    
+    .btn-warning.btn-modern {
+      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    }
+    
+    .btn-success.btn-modern {
+      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    }
+    
+    .btn-danger.btn-modern {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+    
+    .btn-dark.btn-modern {
+      background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+    }
+    
+    .card-modern {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .card-modern:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .card-header-modern {
+      background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+      border-bottom: none;
+      padding: 20px;
+    }
+    
+    .card-header-info {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+    
+    .form-control-modern {
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+      padding: 12px 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .form-control-modern:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    .table-modern {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .table-modern th {
+      background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+      border: none;
+      font-weight: 600;
+      padding: 15px;
+    }
+    
+    .table-modern td {
+      padding: 12px 15px;
+      border-color: #f8f9fa;
+      vertical-align: middle;
+    }
+    
+    .table-modern tbody tr:hover {
+      background-color: rgba(0,123,255,0.05);
+      transform: scale(1.005);
+      transition: all 0.2s ease;
+    }
+    
+    .message-success {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      color: #155724;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #c3e6cb;
+      font-weight: 600;
+    }
+    
+    .select-modern {
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+      padding: 10px 15px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+    
+    .select-modern:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    .stats-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #007bff;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+  </style>
 </head>
 <body>
-  <div class='mt-3 text-center'>
-    <h1 style="color: #0b4c61;padding: 10px;font-size: 40px;">Absensi Karyawan</h1>
-    <h3 style="color: gray;">Makan Gratis - Badan Gizi Nasional</h3>
-    <h4 style="color: brown;">Kota Sorong, Papua</h4>
-    <p>Minggu Ini: <strong>{{ date_range_week }}</strong></p>
-    <p>Hari Ini: <strong>{{ tanggal_hari_ini }}</strong></p>
-  </div>
+  <div class="main-container">
+    <div class='header-section text-center'>
+      <h1>Absensi Karyawan</h1>
+      <h3>Makan Gratis - Badan Gizi Nasional</h3>
+      <h4>Kota Bogor, Jawa Barat</h4>
+      <div class="date-info">
+        <p class="mb-2">Minggu Ini: <strong>{{ date_range_week }}</strong></p>
+        <p class="mb-0">Hari Ini: <strong>{{ tanggal_hari_ini }}</strong></p>
+      </div>
+    </div>
 
-  {% if mess %}
-  <p class="text-center" style="color: green; font-weight: bold; font-size: 20px;">{{ mess }}</p>
-  {% endif %}
+    {% if mess %}
+    <div class="message-success text-center">
+      {{ mess }}
+    </div>
+    {% endif %}
 
-  <div class="container mt-4">
-    <form method="POST" action="{{ url_for('set_camera') }}" class="text-center mb-4">
-      <label for="camera" class="form-label"><b>Pilih Kamera:</b></label>
-      <select name="camera" id="camera" class="form-select w-50 mx-auto">
-        {% for i in range(6) %}
-        <option value="{{ i }}" {% if selected_camera == i %}selected{% endif %}>
-          Kamera {{ i }} {% if i == 3 %} {% endif %}
-        </option>
-        {% endfor %}
-      </select>
-      <button type="submit" class="btn btn-primary mt-2">Gunakan Kamera</button>
-    </form>
+    <div class="camera-section">
+      <form method="POST" action="{{ url_for('set_camera') }}" class="text-center mb-4">
+        <label for="camera" class="form-label fw-bold mb-3">
+          <i class="material-icons align-middle me-2">videocam</i>Pilih Kamera:
+        </label>
+        <select name="camera" id="camera" class="form-select select-modern w-50 mx-auto">
+          {% for i in range(6) %}
+          <option value="{{ i }}" {% if selected_camera == i %}selected{% endif %}>
+            Kamera {{ i }} {% if i == 3 %} {% endif %}
+          </option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-modern mt-3">
+          <i class="material-icons align-middle me-2">camera_alt</i>Gunakan Kamera
+        </button>
+      </form>
 
-    <div class="text-center">
-      <a href="{{ url_for('test_camera') }}">
-        <button class="btn btn-warning mb-4">Uji Kamera</button>
-      </a>
+      <div class="text-center">
+        <a href="{{ url_for('test_camera') }}">
+          <button class="btn btn-warning btn-modern">
+            <i class="material-icons align-middle me-2">settings</i>Uji Kamera
+          </button>
+        </a>
+      </div>
     </div>
 
     {% if selected_camera is not none %}
     <div class="text-center mb-4">
       <a href="{{ url_for('absen_masuk') }}">
-        <button class="btn btn-success me-2">Absen Masuk</button>
+        <button class="btn btn-success btn-modern me-3">
+          <i class="material-icons align-middle me-2">login</i>Absen Masuk
+        </button>
       </a>
       <a href="{{ url_for('absen_pulang') }}">
-        <button class="btn btn-danger">Absen Pulang</button>
+        <button class="btn btn-danger btn-modern">
+          <i class="material-icons align-middle me-2">logout</i>Absen Pulang
+        </button>
       </a>
     </div>
     {% endif %}
 
-    <div class="row">
+    <div class="row g-4">
       <div class="col-md-8">
-        <div class="card">
-          <div class="card-header bg-dark text-white">
-            <h4 class="mb-0">Data Kehadiran Minggu Ini</h4>
+        <div class="card card-modern">
+          <div class="card-header card-header-modern text-white">
+            <h4 class="mb-0">
+              <i class="material-icons align-middle me-2">table_chart</i>Data Kehadiran Minggu Ini
+            </h4>
           </div>
           <div class="card-body">
-            <p>Total Terdaftar: {{ totalreg }}</p>
-            <table class="table table-striped table-bordered">
-              <thead class="table-dark">
-                <tr>
-                  <th>No</th>
-                  <th>Nama</th>
-                  <th>Bagian</th>
-                  <th>Tanggal</th>
-                  <th>Jam Masuk</th>
-                  <th>Jam Pulang</th>
-                  <th>Total Jam Kerja</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for i in range(l) %}
-                <tr>
-                  <td>{{ i+1 }}</td>
-                  <td>{{ names[i] }}</td>
-                  <td>{{ rolls[i] }}</td>
-                  <td>{{ tanggal[i] }}</td>
-                  <td>{{ times[i][0] }}</td>
-                  <td>{{ times[i][1] }}</td>
-                  <td>{{ times[i][2] }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="stats-card">
+              <h6 class="mb-0">
+                <i class="material-icons align-middle me-2">people</i>Total Terdaftar: <strong>{{ totalreg }}</strong>
+              </h6>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-modern">
+                <thead class="table-dark">
+                  <tr>
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>Bagian</th>
+                    <th>Tanggal</th>
+                    <th>Jam Masuk</th>
+                    <th>Jam Pulang</th>
+                    <th>Total Jam Kerja</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for i in range(l) %}
+                  <tr>
+                    <td>{{ i+1 }}</td>
+                    <td>{{ names[i] }}</td>
+                    <td>{{ rolls[i] }}</td>
+                    <td>{{ tanggal[i] }}</td>
+                    <td>{{ times[i][0] }}</td>
+                    <td>{{ times[i][1] }}</td>
+                    <td>{{ times[i][2] }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="col-md-4">
-        <div class="card">
-          <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Tambah Karyawan Baru</h5>
+        <div class="card card-modern">
+          <div class="card-header card-header-info text-white">
+            <h5 class="mb-0">
+              <i class="material-icons align-middle me-2">person_add</i>Tambah Karyawan Baru
+            </h5>
           </div>
           <div class="card-body">
             <form action='/add' method="POST" enctype="multipart/form-data">
               <div class="mb-3">
-                <label class="form-label">Nama Karyawan*</label>
-                <input type="text" class="form-control" name='newusername' required>
+                <label class="form-label fw-semibold">
+                  <i class="material-icons align-middle me-2">badge</i>Nama Karyawan*
+                </label>
+                <input type="text" class="form-control form-control-modern" name='newusername' required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Bagian*</label>
-                <input type="text" class="form-control" name='newuserid' required>
+                <label class="form-label fw-semibold">
+                  <i class="material-icons align-middle me-2">business</i>Bagian*
+                </label>
+                <input type="text" class="form-control form-control-modern" name='newuserid' required>
               </div>
-              <button type="submit" class="btn btn-dark w-100">Tambah</button>
+              <button type="submit" class="btn btn-dark btn-modern w-100">
+                <i class="material-icons align-middle me-2">add</i>Tambah Karyawan
+              </button>
             </form>
-            <h6 class="mt-3 text-center">Total Karyawan Terdaftar: {{ totalreg }}</h6>
+            <div class="stats-card mt-4">
+              <h6 class="mb-0 text-center">
+                <i class="material-icons align-middle me-2">group</i>Total Karyawan Terdaftar: <strong>{{ totalreg }}</strong>
+              </h6>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
