@@ -1,0 +1,16 @@
+# Commands untuk push ke GitHub setelah repository dibuat
+# Ganti [YOUR-USERNAME] dengan username GitHub Anda
+
+# Set remote origin
+git remote add origin https://github.com/[YOUR-USERNAME]/SISTEM-ABSENSI-FACE.git
+
+# Set branch utama ke main
+git branch -M main
+
+# Push ke GitHub
+git push -u origin main
+
+# Contoh jika username Anda adalah "fj-dev":
+# git remote add origin https://github.com/fj-dev/SISTEM-ABSENSI-FACE.git
+# git branch -M main  
+# git push -u origin main
