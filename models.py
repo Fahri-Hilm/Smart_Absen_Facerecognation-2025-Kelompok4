@@ -55,6 +55,29 @@ class Employee:
         """Cek apakah karyawan sudah ada"""
         employee = Employee.get_employee_by_name_bagian(name, bagian)
         return employee is not None
+    
+    @staticmethod
+    def delete_employee(employee_id):
+        """Hapus karyawan dan semua data terkait"""
+        try:
+            db = get_db_manager()
+            
+            # Hapus data attendance
+            db.execute_query("DELETE FROM attendance WHERE employee_id = %s", (employee_id,))
+            
+            # Hapus data activity log
+            db.execute_query("DELETE FROM activity_log WHERE employee_id = %s", (employee_id,))
+            
+            # Hapus employee
+            result = db.execute_query("DELETE FROM employees WHERE id = %s", (employee_id,))
+            
+            if result > 0:
+                logger.info(f"Employee ID {employee_id} berhasil dihapus")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Gagal menghapus employee: {e}")
+            return False
 
 
 class Attendance:
@@ -176,6 +199,21 @@ class Attendance:
         except Exception as e:
             logger.error(f"Gagal menghitung jam kerja: {e}")
             return None
+    
+    @staticmethod
+    def delete_attendance(employee_id, tanggal):
+        """Hapus data absensi untuk employee dan tanggal tertentu"""
+        try:
+            db = get_db_manager()
+            result = db.execute_query("DELETE FROM attendance WHERE employee_id = %s AND tanggal = %s", 
+                                    (employee_id, tanggal))
+            if result > 0:
+                logger.info(f"Attendance deleted for employee_id {employee_id} on {tanggal}")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Gagal menghapus attendance: {e}")
+            return False
 
 
 class ActivityLog:

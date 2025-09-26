@@ -2,7 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="    .btn-success.btn-modern {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .btn-danger.btn-modern {
+      background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    }
+    
+    .btn-modern:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    #notificationArea {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+      max-width: 400px;
+    }
+    
+    .alert {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      backdrop-filter: blur(10px);
+    }
+    
+    .alert-success {
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.9) 0%, rgba(32, 201, 151, 0.9) 100%);
+      color: white;
+    }
+    
+    .alert-info {
+      background: linear-gradient(135deg, rgba(23, 162, 184, 0.9) 0%, rgba(0, 123, 255, 0.9) 100%);
+      color: white;
+    }
+    
+    .alert-warning {
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.9) 0%, rgba(253, 126, 20, 0.9) 100%);
+      color: white;
+    }
+    
+    .alert-danger {
+      background: linear-gradient(135deg, rgba(220, 53, 69, 0.9) 0%, rgba(253, 126, 20, 0.9) 100%);
+      color: white;
+    }
+    
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+    }evice-width, initial-scale=1">
   <title>Absensi Karyawan Makan Gratis</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -251,18 +303,36 @@
 
     {% if selected_camera is not none %}
     <div class="text-center mb-4">
-      <a href="{{ url_for('absen_masuk') }}">
-        <button class="btn btn-success btn-modern me-3">
-          <i class="material-icons align-middle me-2">login</i>Absen Masuk
-        </button>
-      </a>
-      <a href="{{ url_for('absen_pulang') }}">
-        <button class="btn btn-danger btn-modern">
-          <i class="material-icons align-middle me-2">logout</i>Absen Pulang
-        </button>
-      </a>
+      <button class="btn btn-success btn-modern me-3" id="btnAbsenMasuk" onclick="startAttendance('masuk')">
+        <i class="material-icons align-middle me-2">login</i>
+        <span class="btn-text">Absen Masuk</span>
+        <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </button>
+      <button class="btn btn-danger btn-modern" id="btnAbsenPulang" onclick="startAttendance('pulang')">
+        <i class="material-icons align-middle me-2">logout</i>
+        <span class="btn-text">Absen Pulang</span>
+        <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </button>
     </div>
     {% endif %}
+
+    <!-- Notification Area -->
+    <div id="notificationArea" class="mb-4" style="display: none;">
+      <div class="alert alert-dismissible fade show" role="alert" id="alertNotification">
+        <div class="d-flex align-items-center">
+          <i class="material-icons me-2" id="alertIcon">info</i>
+          <div>
+            <strong id="alertTitle">Info</strong>
+            <div id="alertMessage">Message</div>
+          </div>
+        </div>
+        <button type="button" class="btn-close" onclick="hideNotification()"></button>
+      </div>
+    </div>
 
     <div class="row g-4">
       <div class="col-md-8">
@@ -271,15 +341,20 @@
             <h4 class="mb-0">
               <i class="material-icons align-middle me-2">table_chart</i>Data Kehadiran Minggu Ini
             </h4>
+            <small class="mt-1 d-block opacity-75">{{ date_range_week }}</small>
           </div>
           <div class="card-body">
             <div class="stats-card">
               <h6 class="mb-0">
                 <i class="material-icons align-middle me-2">people</i>Total Terdaftar: <strong>{{ totalreg }}</strong>
               </h6>
+              <small class="text-muted mt-1 d-block">
+                <i class="material-icons align-middle me-1" style="font-size: 14px;">info</i>
+                Tabel menampilkan data absensi minggu ini. Karyawan terdaftar harus melakukan absensi untuk muncul di tabel.
+              </small>
             </div>
             <div class="table-responsive">
-              <table class="table table-striped table-modern">
+              <table class="table table-striped table-modern" id="attendanceTable">
                 <thead class="table-dark">
                   <tr>
                     <th>No</th>
@@ -289,20 +364,42 @@
                     <th>Jam Masuk</th>
                     <th>Jam Pulang</th>
                     <th>Total Jam Kerja</th>
+                    <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for i in range(l) %}
-                  <tr>
-                    <td>{{ i+1 }}</td>
-                    <td>{{ names[i] }}</td>
-                    <td>{{ rolls[i] }}</td>
-                    <td>{{ tanggal[i] }}</td>
-                    <td>{{ times[i][0] }}</td>
-                    <td>{{ times[i][1] }}</td>
-                    <td>{{ times[i][2] }}</td>
-                  </tr>
-                  {% endfor %}
+                  {% if l > 0 %}
+                    {% for i in range(l) %}
+                    <tr>
+                      <td>{{ i+1 }}</td>
+                      <td>{{ names[i] }}</td>
+                      <td>{{ rolls[i] }}</td>
+                      <td>{{ tanggal[i] }}</td>
+                      <td>{{ times[i][0] }}</td>
+                      <td>{{ times[i][1] }}</td>
+                      <td>{{ times[i][2] }}</td>
+                      <td>
+                        <button class="btn btn-sm btn-danger" onclick="deleteAttendance('{{ names[i] }}', '{{ rolls[i] }}', '{{ tanggal[i] }}')">
+                          <i class="material-icons" style="font-size: 16px;">delete</i>
+                        </button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="8" class="text-center py-4">
+                        <i class="material-icons" style="font-size: 48px; color: #ccc;">event_busy</i>
+                        <p class="mb-1 mt-2"><strong>Belum Ada Data Absensi Minggu Ini</strong></p>
+                        <small class="text-muted">
+                          {% if totalreg > 0 %}
+                            {{ totalreg }} karyawan terdaftar. Silakan lakukan absensi masuk/pulang untuk menampilkan data.
+                          {% else %}
+                            Belum ada karyawan terdaftar. Tambahkan karyawan baru terlebih dahulu.
+                          {% endif %}
+                        </small>
+                      </td>
+                    </tr>
+                  {% endif %}
                 </tbody>
               </table>
             </div>
@@ -318,7 +415,7 @@
             </h5>
           </div>
           <div class="card-body">
-            <form action='/add' method="POST" enctype="multipart/form-data">
+            <form id="addEmployeeForm" action='/add' method="POST" enctype="multipart/form-data">
               <div class="mb-3">
                 <label class="form-label fw-semibold">
                   <i class="material-icons align-middle me-2">badge</i>Nama Karyawan*
@@ -340,6 +437,30 @@
                 <i class="material-icons align-middle me-2">group</i>Total Karyawan Terdaftar: <strong>{{ totalreg }}</strong>
               </h6>
             </div>
+            
+            <!-- Employee Management Section -->
+            <div class="card mt-4">
+              <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                  <i class="material-icons align-middle me-2">manage_accounts</i>Kelola Karyawan
+                </h6>
+              </div>
+              <div class="card-body">
+                <p class="small text-muted mb-3">Hapus karyawan dari sistem (akan menghapus semua data terkait)</p>
+                <div class="row">
+                  <div class="col">
+                    <select class="form-select" id="employeeSelect">
+                      <option value="">Pilih karyawan untuk dihapus...</option>
+                    </select>
+                  </div>
+                  <div class="col-auto">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedEmployee()">
+                      <i class="material-icons align-middle me-1">delete</i>Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -347,5 +468,390 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Real-time synchronization JavaScript -->
+  <script>
+    let autoRefreshInterval;
+    let isAutoRefreshEnabled = true;
+    
+    // Function to refresh attendance data
+    function refreshAttendanceData() {
+      fetch('/get_attendance_data')
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            updateAttendanceTable(data.data);
+            updateStats(data.data);
+            console.log('Data berhasil diperbarui:', new Date().toLocaleTimeString());
+          } else {
+            console.error('Error refreshing data:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Network error:', error);
+        });
+    }
+    
+    // Function to update attendance table
+    function updateAttendanceTable(data) {
+      const tbody = document.querySelector('#attendanceTable tbody');
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+      
+      for (let i = 0; i < data.names.length; i++) {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${data.names[i]}</td>
+          <td>${data.bagian[i]}</td>
+          <td>${data.tanggal[i]}</td>
+          <td>${data.times[i][0]}</td>
+          <td>${data.times[i][1]}</td>
+          <td>${data.times[i][2]}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${data.names[i]}', '${data.bagian[i]}', '${data.tanggal[i]}')">
+              <i class="material-icons" style="font-size: 16px;">delete</i>
+            </button>
+          </td>
+        `;
+      }
+    }
+    
+    // Function to update statistics
+    function updateStats(data) {
+      const totalRegElement = document.querySelector('.stats-card h6 strong');
+      if (totalRegElement) {
+        totalRegElement.textContent = data.totalreg;
+      }
+      
+      // Update total attendance count
+      const totalAttendanceElement = document.querySelector('#totalAttendance');
+      if (totalAttendanceElement) {
+        totalAttendanceElement.textContent = data.total;
+      }
+    }
+    
+    // Function to delete attendance
+    function deleteAttendance(name, bagian, tanggal) {
+      if (!confirm(`Hapus data absensi ${name} (${bagian}) tanggal ${tanggal}?`)) {
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('bagian', bagian);
+      formData.append('tanggal', tanggal);
+      
+      fetch('/delete_attendance', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert(data.message);
+          refreshAttendanceData(); // Refresh data immediately
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        alert('Network error: ' + error);
+      });
+    }
+    
+    // Function to delete employee with callback
+    function deleteEmployeeWithCallback(name, bagian, callback) {
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('bagian', bagian);
+      
+      fetch('/delete_employee', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert(data.message);
+          console.log('Employee deletion successful');
+          if (callback) callback(true);
+        } else {
+          alert('Error: ' + data.message);
+          console.log('Employee deletion failed:', data.message);
+          if (callback) callback(false);
+        }
+      })
+      .catch(error => {
+        alert('Network error: ' + error);
+        console.log('Network error during deletion:', error);
+        if (callback) callback(false);
+      });
+    }
+    
+    // Function to delete employee (legacy - for compatibility)
+    function deleteEmployee(name, bagian) {
+      if (!confirm(`Hapus karyawan ${name} (${bagian})? Ini akan menghapus SEMUA data absensi karyawan tersebut.`)) {
+        return;
+      }
+      
+      deleteEmployeeWithCallback(name, bagian, function(success) {
+        if (success) {
+          refreshAttendanceData(); // Refresh data immediately
+        }
+      });
+    }
+    
+    // Function to load employees into dropdown
+    function loadEmployeeDropdown() {
+      console.log('Loading employee dropdown...');
+      fetch('/get_employees')
+        .then(response => response.json())
+        .then(data => {
+          console.log('Employee data received:', data);
+          if (data.status === 'success') {
+            const select = document.getElementById('employeeSelect');
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Pilih karyawan untuk dihapus...</option>';
+            
+            // Add employee options
+            if (data.employees && data.employees.length > 0) {
+              data.employees.forEach(employee => {
+                const option = document.createElement('option');
+                option.value = `${employee.name}|${employee.bagian}`;
+                option.textContent = employee.display;
+                select.appendChild(option);
+              });
+              console.log(`Added ${data.employees.length} employees to dropdown`);
+            } else {
+              // Add "no employees" option
+              const option = document.createElement('option');
+              option.value = '';
+              option.textContent = 'Tidak ada karyawan tersedia';
+              option.disabled = true;
+              select.appendChild(option);
+              console.log('No employees found');
+            }
+          } else {
+            console.error('Error in employee data:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading employees:', error);
+          // Show error in dropdown
+          const select = document.getElementById('employeeSelect');
+          select.innerHTML = '<option value="">Error loading data...</option>';
+        });
+    }
+    
+    // Function to delete selected employee from dropdown
+    function deleteSelectedEmployee() {
+      const select = document.getElementById('employeeSelect');
+      const selectedValue = select.value;
+      
+      if (!selectedValue) {
+        alert('Pilih karyawan yang ingin dihapus!');
+        return;
+      }
+      
+      const [name, bagian] = selectedValue.split('|');
+      
+      if (confirm(`Yakin ingin menghapus karyawan ${name} (${bagian})?\n\nPeringatan: Ini akan menghapus:\n- Data karyawan\n- Semua data absensi\n- Foto wajah\n- Model face recognition akan dilatih ulang`)) {
+        console.log(`Deleting employee: ${name} (${bagian})`);
+        
+        // Show loading state
+        select.innerHTML = '<option value="">Menghapus karyawan...</option>';
+        select.disabled = true;
+        
+        // Call delete function with callback
+        deleteEmployeeWithCallback(name, bagian, function(success) {
+          // Re-enable dropdown
+          select.disabled = false;
+          
+          if (success) {
+            console.log('Employee deleted successfully, reloading dropdown...');
+            // Reload dropdown immediately
+            loadEmployeeDropdown();
+            // Also refresh attendance data to update total count
+            refreshAttendanceData();
+          } else {
+            console.log('Delete failed, reloading dropdown...');
+            // Still reload dropdown in case of error
+            loadEmployeeDropdown();
+          }
+        });
+      }
+    }
+    
+    // Toggle auto-refresh
+    function toggleAutoRefresh() {
+      const button = document.querySelector('#autoRefreshBtn');
+      const status = document.querySelector('#refreshStatus');
+      
+      if (isAutoRefreshEnabled) {
+        clearInterval(autoRefreshInterval);
+        isAutoRefreshEnabled = false;
+        button.textContent = 'Aktifkan Auto-Refresh';
+        button.className = 'btn btn-success btn-modern btn-sm';
+        status.textContent = 'MATI';
+        status.className = 'badge bg-danger';
+      } else {
+        startAutoRefresh();
+        isAutoRefreshEnabled = true;
+        button.textContent = 'Matikan Auto-Refresh';
+        button.className = 'btn btn-warning btn-modern btn-sm';
+        status.textContent = 'AKTIF';
+        status.className = 'badge bg-success';
+      }
+    }
+    
+    // Start auto-refresh
+    function startAutoRefresh() {
+      autoRefreshInterval = setInterval(refreshAttendanceData, 5000); // Refresh every 5 seconds
+    }
+    
+    // Initialize auto-refresh when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Sistem sinkronisasi real-time dimulai');
+      startAutoRefresh();
+      loadEmployeeDropdown(); // Load employee list for deletion dropdown
+      
+      // Reload employee dropdown every 10 seconds to stay synced
+      setInterval(function() {
+        console.log('Periodic employee dropdown reload');
+        loadEmployeeDropdown();
+      }, 10000);
+      
+      // Add event listener for add employee form
+      const addEmployeeForm = document.getElementById('addEmployeeForm');
+      if (addEmployeeForm) {
+        addEmployeeForm.addEventListener('submit', function(e) {
+          console.log('Employee form submitted, will reload dropdown after page refresh');
+          // The dropdown will be reloaded automatically when page reloads after form submission
+        });
+      }
+      
+      // Add refresh status indicator
+      const header = document.querySelector('.header-section');
+      if (header) {
+        const refreshDiv = document.createElement('div');
+        refreshDiv.innerHTML = `
+          <div style="position: absolute; top: 10px; right: 20px; text-align: right;">
+            <div>
+              <span class="badge bg-success" id="refreshStatus">AKTIF</span>
+              <small style="display: block; opacity: 0.8; margin-top: 5px;">Auto-Refresh Database</small>
+            </div>
+            <button class="btn btn-warning btn-modern btn-sm mt-2" id="autoRefreshBtn" onclick="toggleAutoRefresh()">
+              Matikan Auto-Refresh
+            </button>
+            <button class="btn btn-info btn-modern btn-sm mt-1" onclick="refreshAttendanceData()">
+              <i class="material-icons" style="font-size: 14px;">refresh</i> Refresh Manual
+            </button>
+          </div>
+        `;
+        header.appendChild(refreshDiv);
+      }
+    });
+    
+    // Handle visibility change (when user switches tabs)
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        // Page is hidden, reduce refresh frequency
+        if (isAutoRefreshEnabled) {
+          clearInterval(autoRefreshInterval);
+          autoRefreshInterval = setInterval(refreshAttendanceData, 30000); // 30 seconds
+        }
+      } else {
+        // Page is visible, restore normal refresh frequency
+        if (isAutoRefreshEnabled) {
+          clearInterval(autoRefreshInterval);
+          startAutoRefresh();
+          refreshAttendanceData(); // Immediate refresh when returning to tab
+        }
+      }
+    });
+    
+    // Attendance functions with loading and notifications
+    function startAttendance(mode) {
+      const btnId = mode === 'masuk' ? 'btnAbsenMasuk' : 'btnAbsenPulang';
+      const btn = document.getElementById(btnId);
+      const btnText = btn.querySelector('.btn-text');
+      const spinner = btn.querySelector('.spinner-border');
+      
+      // Show loading state
+      btn.disabled = true;
+      btnText.textContent = mode === 'masuk' ? 'Memproses...' : 'Memproses...';
+      spinner.classList.remove('d-none');
+      
+      // Show info notification
+      showNotification('info', 'Memproses Absensi', 
+        `Posisikan wajah di depan kamera untuk absensi ${mode}. Kamera akan terbuka sebentar...`);
+      
+      // Redirect to attendance route (camera will open)
+      window.location.href = mode === 'masuk' ? '/absen_masuk' : '/absen_pulang';
+    }
+    
+    // Notification functions
+    function showNotification(type, title, message) {
+      const notificationArea = document.getElementById('notificationArea');
+      const alert = document.getElementById('alertNotification');
+      const icon = document.getElementById('alertIcon');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertMessage = document.getElementById('alertMessage');
+      
+      // Set notification type
+      alert.className = 'alert alert-dismissible fade show';
+      switch(type) {
+        case 'success':
+          alert.classList.add('alert-success');
+          icon.textContent = 'check_circle';
+          break;
+        case 'error':
+          alert.classList.add('alert-danger');
+          icon.textContent = 'error';
+          break;
+        case 'warning':
+          alert.classList.add('alert-warning');
+          icon.textContent = 'warning';
+          break;
+        default:
+          alert.classList.add('alert-info');
+          icon.textContent = 'info';
+      }
+      
+      // Set content
+      alertTitle.textContent = title;
+      alertMessage.textContent = message;
+      
+      // Show notification
+      notificationArea.style.display = 'block';
+      
+      // Auto hide after 5 seconds for success/info
+      if (type === 'success' || type === 'info') {
+        setTimeout(hideNotification, 5000);
+      }
+    }
+    
+    function hideNotification() {
+      const notificationArea = document.getElementById('notificationArea');
+      notificationArea.style.display = 'none';
+    }
+    
+    // Check for success message from server
+    document.addEventListener('DOMContentLoaded', function() {
+      const messElement = document.querySelector('.alert-success');
+      if (messElement) {
+        const message = messElement.textContent.trim();
+        if (message.includes('Absensi') && message.includes('berhasil')) {
+          showNotification('success', 'Absensi Berhasil!', message);
+          // Refresh data immediately
+          refreshAttendanceData();
+          // Hide server message
+          messElement.style.display = 'none';
+        }
+      }
+    });
+  </script>
 </body>
 </html>
