@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Admin - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light-bg: #f8f9fa;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        body { background-color: var(--light-bg); }
+        .navbar { background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); }
+        .card { border: none; border-radius: 15px; box-shadow: var(--shadow); }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-person"></i> Profil Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/admin/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <!-- Profile Card -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">
+                        <div class="mb-3">
+                            <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="bi bi-person-circle text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                        </div>
+                        <h4>{{ admin_username|title }}</h4>
+                        <p class="mb-0">Administrator</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-person"></i> Informasi Admin</h6>
+                                <p><strong>Username:</strong> {{ admin_username }}</p>
+                                <p><strong>Role:</strong> Administrator</p>
+                                <p><strong>Status:</strong> <span class="badge bg-success">Active</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-graph-up"></i> Statistik</h6>
+                                <p><strong>Total Karyawan:</strong> {{ totalreg }}</p>
+                                <p><strong>Kamera Aktif:</strong> {{ selected_camera }}</p>
+                                <p><strong>Login Terakhir:</strong> Sekarang</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <a href="/admin" class="btn btn-primary me-2">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                            <a href="/admin/settings" class="btn btn-secondary">
+                                <i class="bi bi-gear"></i> Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

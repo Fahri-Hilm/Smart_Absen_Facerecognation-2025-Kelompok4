@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafebasabasi - Sistem Absensi Karyawan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --coffee-dark: #3C2415;
+            --coffee-medium: #8B4513;
+            --coffee-light: #D2691E;
+            --cream: #F5DEB3;
+            --warm-white: #FDF6E3;
+            --accent-gold: #DAA520;
+            --shadow-coffee: rgba(60, 36, 21, 0.2);
+            --shadow-light: rgba(139, 69, 19, 0.1);
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Coffee decorations */
+        .coffee-decoration {
+            position: fixed;
+            font-size: 2rem;
+            color: var(--coffee-light);
+            opacity: 0.15;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .coffee-decoration:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .coffee-decoration:nth-child(2) { top: 60%; right: 8%; animation-delay: 4s; }
+        .coffee-decoration:nth-child(3) { bottom: 20%; left: 12%; animation-delay: 2s; }
+        .coffee-decoration:nth-child(4) { top: 30%; right: 15%; animation-delay: 6s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.2; }
+        }
+
+        /* Header */
+        .navbar {
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+            box-shadow: 0 4px 20px var(--shadow-coffee);
+            border-bottom: 3px solid var(--accent-gold);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Caveat', cursive;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--warm-white) !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand i {
+            color: var(--accent-gold);
+            margin-right: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .page-title {
+            color: var(--coffee-dark);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--coffee-medium);
+            font-style: italic;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-motto {
+            color: var(--coffee-medium);
+            font-style: italic;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.6));
+            border-radius: 25px;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 15px 35px var(--shadow-coffee);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow-coffee);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gold);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: var(--warm-white);
+            border-radius: 21px 21px 0 0 !important;
+            border: none;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* Attendance Buttons */
+        .attendance-section {
+            margin: 2rem 0;
+        }
+
+        .attendance-btn {
+            width: 100%;
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .attendance-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .attendance-btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-masuk {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .btn-masuk:hover {
+            background: linear-gradient(45deg, #229954, #27ae60);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-pulang {
+            background: linear-gradient(45deg, #e74c3c, #ec7063);
+            color: white;
+        }
+
+        .btn-pulang:hover {
+            background: linear-gradient(45deg, #c0392b, #e74c3c);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.4));
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 10px 30px var(--shadow-light);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--shadow-coffee);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--coffee-medium);
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--coffee-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--coffee-medium);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        /* Form Controls */
+        .camera-section {
+            margin: 2rem 0;
+        }
+
+        .form-label {
+            color: var(--coffee-dark);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--coffee-light);
+            border-radius: 15px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 0.2rem rgba(218, 165, 32, 0.25);
+        }
+
+        /* Status Messages */
+        .status-message {
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Admin Link */
+        .admin-link {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, var(--coffee-dark), var(--coffee-medium));
+            color: white;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 8px 25px var(--shadow-coffee);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .admin-link:hover {
+            background: linear-gradient(45deg, var(--accent-gold), var(--coffee-light));
+            color: white;
+            transform: scale(1.1);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 2rem 1rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .navbar-brand {
+                font-size: 2rem;
+            }
+            
+            .attendance-btn {
+                font-size: 1rem;
+                padding: 1.2rem;
+            }
+            
+            .admin-link {
+                width: 60px;
+                height: 60px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .stat-card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Coffee decorations -->
+    <div class="coffee-decoration">☕</div>
+    <div class="coffee-decoration">🫘</div>
+    <div class="coffee-decoration">☕</div>
+    <div class="coffee-decoration">🫘</div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-cup-hot"></i>
+                Kafebasabasi
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container main-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 class="page-title">Selamat Datang</h1>
+            <p class="page-subtitle">Sistem Absensi Karyawan Kafebasabasi</p>
+            <p class="page-motto">"Setiap cangkir kopi yang sempurna dimulai dengan kedisiplinan yang baik"</p>
+        </div>
+
+        <div class="row">
+            <!-- Attendance Card -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="bi bi-calendar-check"></i>
+                            Absensi Harian
+                        </h2>
+                        <p class="card-subtitle">{{tanggal_hari_ini}}</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Camera Selection -->
+                        <div class="camera-section">
+                            <label for="cameraSelect" class="form-label">
+                                <i class="bi bi-camera"></i>
+                                Pilih Kamera
+                            </label>
+                            <select class="form-select" id="cameraSelect">
+                                <option value="">Memuat kamera...</option>
+                            </select>
+                        </div>
+
+                        <!-- Attendance Buttons -->
+                        <div class="attendance-section">
+                            <p class="text-center mb-3" style="color: var(--coffee-medium);">
+                                Posisikan wajah di depan kamera dengan jelas
+                            </p>
+                            
+                            <button class="attendance-btn btn-masuk" onclick="markAttendance('masuk')">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                Absen Masuk
+                            </button>
+                            
+                            <button class="attendance-btn btn-pulang" onclick="markAttendance('pulang')">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Absen Pulang
+                            </button>
+                        </div>
+
+                        <!-- Status Messages -->
+                        <div id="statusMessage"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="bi bi-graph-up"></i>
+                            Statistik Cafe
+                        </h2>
+                        <p class="card-subtitle">Data Real-time</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                    <div class="stat-number" id="totalEmployees">{{totalreg}}</div>
+                                    <div class="stat-label">Total Karyawan</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-calendar-check"></i>
+                                    </div>
+                                    <div class="stat-number" id="todayAttendance">{{l}}</div>
+                                    <div class="stat-label">Hadir Hari Ini</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-clock"></i>
+                                    </div>
+                                    <div class="stat-number" id="currentShift">
+                                        <span id="shiftIcon">🌅</span>
+                                        <span id="shiftName">Pagi</span>
+                                    </div>
+                                    <div class="stat-label">Shift Sekarang</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Summary -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="bi bi-calendar-week"></i>
+                            Ringkasan Minggu Ini
+                        </h2>
+                        <p class="card-subtitle">{{date_range_week}}</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr style="color: var(--coffee-dark);">
+                                        <th>Nama</th>
+                                        <th>Bagian</th>
+                                        <th>Tanggal</th>
+                                        <th>Jam Masuk</th>
+                                        <th>Jam Pulang</th>
+                                        <th>Total Jam</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceTable">
+                                    {% for i in range(l) %}
+                                    <tr>
+                                        <td>{{names[i]}}</td>
+                                        <td>{{rolls[i]}}</td>
+                                        <td>{{tanggal[i]}}</td>
+                                        <td>{{times[i][0]}}</td>
+                                        <td>{{times[i][1]}}</td>
+                                        <td>{{times[i][2]}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Link -->
+    <a href="/admin" class="admin-link" title="Panel Admin">
+        <i class="bi bi-gear-fill"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load page data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCameras();
+            updateAttendanceData();
+            updateCurrentShift();
+            
+            // Refresh data every 30 seconds
+            setInterval(updateAttendanceData, 30000);
+            setInterval(updateCurrentShift, 60000);
+        });
+
+        // Load available cameras
+        function loadCameras() {
+            fetch('/get_cameras')
+                .then(response => response.json())
+                .then(cameras => {
+                    const select = document.getElementById('cameraSelect');
+                    select.innerHTML = '';
+                    
+                    cameras.forEach((camera, index) => {
+                        const option = document.createElement('option');
+                        option.value = camera.id;
+                        option.textContent = camera.name;
+                        if (index === 0) option.selected = true;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading cameras:', error);
+                    document.getElementById('cameraSelect').innerHTML = 
+                        '<option value="0">Kamera Default</option>';
+                });
+        }
+
+        // Update attendance data
+        function updateAttendanceData() {
+            fetch('/get_attendance_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('totalEmployees').textContent = data.data.totalreg || 0;
+                        document.getElementById('todayAttendance').textContent = data.data.total || 0;
+                        updateAttendanceTable(data.data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating attendance data:', error);
+                });
+        }
+
+        // Update attendance table
+        function updateAttendanceTable(data) {
+            const tbody = document.getElementById('attendanceTable');
+            tbody.innerHTML = '';
+            
+            if (data.names && data.names.length > 0) {
+                for (let i = 0; i < data.names.length; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${data.names[i] || '-'}</td>
+                        <td>${data.bagian[i] || '-'}</td>
+                        <td>${data.tanggal[i] || '-'}</td>
+                        <td>${data.times[i] ? data.times[i][0] : '-'}</td>
+                        <td>${data.times[i] ? data.times[i][1] : '-'}</td>
+                        <td>${data.times[i] ? data.times[i][2] : '-'}</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">Belum ada data absensi</td></tr>';
+            }
+        }
+
+        // Update current shift
+        function updateCurrentShift() {
+            const now = new Date();
+            const hour = now.getHours();
+            let shift, icon;
+            
+            if (hour >= 6 && hour < 14) {
+                shift = "Pagi";
+                icon = "🌅";
+            } else if (hour >= 14 && hour < 22) {
+                shift = "Siang";
+                icon = "☀️";
+            } else {
+                shift = "Malam";
+                icon = "🌙";
+            }
+            
+            document.getElementById('shiftName').textContent = shift;
+            document.getElementById('shiftIcon').textContent = icon;
+        }
+
+        // Mark attendance
+        function markAttendance(mode) {
+            const cameraSelect = document.getElementById('cameraSelect');
+            const selectedCamera = cameraSelect.value;
+            const statusDiv = document.getElementById('statusMessage');
+            
+            if (!selectedCamera) {
+                showStatus('⚠️ Pilih kamera terlebih dahulu!', 'warning');
+                return;
+            }
+            
+            // Show loading
+            showStatus('📹 Memproses absensi dengan kamera...', 'info');
+            
+            // Process attendance directly (removed timeout simulation)
+            fetch('/mark_attendance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `mode=${mode}&camera_id=${selectedCamera}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showStatus(`✅ ${data.message}`, 'success');
+                    updateAttendanceData();
+                } else if (data.status === 'warning') {
+                    showStatus(`⚠️ ${data.message}`, 'warning');
+                    updateAttendanceData();
+                } else {
+                    showStatus(`❌ ${data.message}`, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error marking attendance:', error);
+                showStatus('❌ Terjadi kesalahan koneksi saat memproses absensi', 'danger');
+            });
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `
+                <div class="status-message alert alert-${type} fade show" role="alert">
+                    ${message}
+                </div>
+            `;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Kafebasabasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --coffee-dark: #3C2415;
+            --coffee-medium: #8B4513;
+            --coffee-light: #D2691E;
+            --cream: #F5DEB3;
+            --warm-white: #FDF6E3;
+            --accent-gold: #DAA520;
+            --success-green: #28a745;
+            --warning-orange: #fd7e14;
+            --info-blue: #17a2b8;
+            --shadow-coffee: rgba(60, 36, 21, 0.15);
+            --shadow-light: rgba(139, 69, 19, 0.1);
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+            box-shadow: 0 4px 20px var(--shadow-coffee);
+            border-bottom: 3px solid var(--accent-gold);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--warm-white) !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand i {
+            color: var(--accent-gold);
+            margin-right: 10px;
+        }
+
+        .nav-link {
+            color: rgba(253, 246, 227, 0.9) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-gold) !important;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            color: var(--coffee-dark);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--coffee-medium);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        /* Stats cards */
+        .stats-row {
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.6));
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 8px 25px var(--shadow-light);
+            transition: all 0.3s ease;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px var(--shadow-coffee);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gold);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--coffee-medium);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--coffee-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--coffee-medium);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        /* Action cards */
+        .action-cards {
+            margin-bottom: 3rem;
+        }
+
+        .action-card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.4));
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 8px 25px var(--shadow-light);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--coffee-dark);
+            height: 100%;
+            display: block;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px var(--shadow-coffee);
+            color: var(--coffee-dark);
+            text-decoration: none;
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--coffee-medium);
+        }
+
+        .action-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-desc {
+            font-size: 0.95rem;
+            opacity: 0.8;
+        }
+
+        /* Quick stats section */
+        .quick-stats {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.8));
+            border-radius: 25px;
+            padding: 2.5rem;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 15px 35px var(--shadow-coffee);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: var(--coffee-dark);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--accent-gold);
+            padding-bottom: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .mini-stat {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            border: 1px solid var(--coffee-light);
+        }
+
+        .mini-stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--coffee-dark);
+        }
+
+        .mini-stat-label {
+            font-size: 0.9rem;
+            color: var(--coffee-medium);
+            margin-top: 0.5rem;
+        }
+
+        /* Loading animation */
+        .loading {
+            opacity: 0.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .stat-card, .action-card {
+                margin-bottom: 1.5rem;
+            }
+            
+            .quick-stats {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Coffee decorations */
+        .coffee-decoration {
+            position: fixed;
+            font-size: 1.5rem;
+            color: var(--coffee-light);
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .coffee-decoration:nth-child(1) { top: 20%; left: 5%; animation-delay: 0s; }
+        .coffee-decoration:nth-child(2) { top: 60%; right: 8%; animation-delay: 4s; }
+        .coffee-decoration:nth-child(3) { bottom: 30%; left: 12%; animation-delay: 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-15px) rotate(180deg); opacity: 0.2; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Coffee decorations -->
+    <div class="coffee-decoration">☕</div>
+    <div class="coffee-decoration">🫘</div>
+    <div class="coffee-decoration">☕</div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-cup-hot"></i>
+                Kafebasabasi Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="bi bi-house"></i> Beranda
+                </a>
+                <a class="nav-link" href="/admin/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="page-title">Dashboard Manajemen</h1>
+            <p class="page-subtitle">"Mengelola cafe dengan kehangatan dan profesionalitas"</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row stats-row g-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stat-number" id="totalEmployees">-</div>
+                    <div class="stat-label">Total Karyawan</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <div class="stat-number" id="todayAttendance">-</div>
+                    <div class="stat-label">Hadir Hari Ini</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <div class="stat-number" id="activeShift">-</div>
+                    <div class="stat-label">Shift Aktif</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-cup-hot"></i>
+                    </div>
+                    <div class="stat-number">Open</div>
+                    <div class="stat-label">Status Cafe</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="row action-cards g-4">
+            <div class="col-md-4">
+                <a href="/admin/employees" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <div class="action-title">Kelola Karyawan</div>
+                    <div class="action-desc">Tambah, edit, dan kelola data karyawan cafe</div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/admin/attendance" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div class="action-title">Data Absensi</div>
+                    <div class="action-desc">Lihat dan kelola riwayat absensi harian</div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/admin/reports" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="action-title">Laporan</div>
+                    <div class="action-desc">Generate laporan kehadiran dan analisis</div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/admin/camera" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-camera"></i>
+                    </div>
+                    <div class="action-title">Pengaturan Kamera</div>
+                    <div class="action-desc">Konfigurasi sistem pengenalan wajah</div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/admin/database" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-database"></i>
+                    </div>
+                    <div class="action-title">Database</div>
+                    <div class="action-desc">Kelola dan backup data sistem</div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/admin/settings" class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <div class="action-title">Pengaturan</div>
+                    <div class="action-desc">Konfigurasi sistem dan preferensi</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <h3 class="section-title">
+                <i class="bi bi-speedometer2"></i>
+                Statistik Cepat
+            </h3>
+            <div class="stats-grid">
+                <div class="mini-stat">
+                    <div class="mini-stat-number" id="weeklyAvg">-</div>
+                    <div class="mini-stat-label">Rata-rata Mingguan</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-number" id="monthlyTotal">-</div>
+                    <div class="mini-stat-label">Total Bulan Ini</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-number" id="onTimeRate">-</div>
+                    <div class="mini-stat-label">Tingkat Ketepatan</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-number" id="activeCameras">-</div>
+                    <div class="mini-stat-label">Kamera Aktif</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load dashboard data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardStats();
+            updateShiftInfo();
+        });
+
+        function loadDashboardStats() {
+            // Load employees count
+            fetch('/admin/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalEmployees').textContent = data.totalEmployees || 0;
+                    document.getElementById('todayAttendance').textContent = data.todayAttendance || 0;
+                    document.getElementById('weeklyAvg').textContent = data.weeklyAverage || 0;
+                    document.getElementById('monthlyTotal').textContent = data.monthlyTotal || 0;
+                    document.getElementById('onTimeRate').textContent = (data.onTimeRate || 0) + '%';
+                    document.getElementById('activeCameras').textContent = data.activeCameras || 0;
+                })
+                .catch(error => {
+                    console.error('Error loading stats:', error);
+                });
+        }
+
+        function updateShiftInfo() {
+            const now = new Date();
+            const hour = now.getHours();
+            let shift;
+            
+            if (hour >= 6 && hour < 14) {
+                shift = "Pagi";
+            } else if (hour >= 14 && hour < 22) {
+                shift = "Siang";
+            } else {
+                shift = "Malam";
+            }
+            
+            document.getElementById('activeShift').textContent = shift;
+        }
+
+        // Refresh stats every 30 seconds
+        setInterval(loadDashboardStats, 30000);
+        setInterval(updateShiftInfo, 60000);
+    </script>
+</body>
+</html>

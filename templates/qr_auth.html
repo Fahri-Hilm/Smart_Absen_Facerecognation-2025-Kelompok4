@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafebasabasi - QR Authentication</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #D2691E;
+            --accent-color: #F4A460;
+            --text-color: #654321;
+            --bg-color: #FFF8DC;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-color) 0%, #F5E6D3 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(139, 69, 19, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .cafe-logo {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 25px rgba(139, 69, 19, 0.2);
+        }
+
+        .cafe-logo i {
+            font-size: 36px;
+            color: white;
+        }
+
+        .title {
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--secondary-color);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .qr-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid var(--accent-color);
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.1);
+        }
+
+        .qr-code {
+            max-width: 250px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .unit-code {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.3);
+        }
+
+        .countdown-timer {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 20px 0;
+            display: inline-block;
+        }
+
+        .instructions {
+            background: rgba(139, 69, 19, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .instructions h5 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .instructions ul {
+            color: var(--text-color);
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+        }
+
+        .loading {
+            display: none;
+            color: var(--secondary-color);
+            margin: 20px 0;
+        }
+
+        .spinner-border {
+            color: var(--primary-color);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .qr-container {
+            animation: pulse 3s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Logo -->
+            <div class="cafe-logo">
+                <i class="fas fa-coffee"></i>
+            </div>
+
+            <!-- Title -->
+            <h1 class="title">Selamat Datang</h1>
+            <p class="subtitle">Sistem Absensi Karyawan Kafebasabasi</p>
+
+            <!-- QR Code Container -->
+            <div class="qr-container">
+                <div class="loading" id="loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Generating QR Code...</p>
+                </div>
+                
+                <div id="qrContent">
+                    <img id="qrImage" src="data:image/png;base64,{{ qr_image }}" alt="QR Code" class="qr-code">
+                    
+                    <div class="unit-code">
+                        Kode Unit: <span id="unitCode">{{ unit_code }}</span>
+                    </div>
+                    
+                    <div class="countdown-timer" id="countdown">
+                        <i class="fas fa-clock"></i> Berlaku: <span id="timeLeft">10:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="instructions">
+                <h5><i class="fas fa-info-circle"></i> Cara Menggunakan:</h5>
+                <ul>
+                    <li>Scan QR Code di atas menggunakan aplikasi kamera atau QR scanner</li>
+                    <li>QR Code akan mengarahkan ke halaman sistem absensi</li>
+                    <li>Kode unit berubah setiap 10 menit untuk keamanan</li>
+                    <li>Pastikan scan sebelum waktu berlaku habis</li>
+                </ul>
+            </div>
+
+            <!-- Manual Refresh Button -->
+            <button class="refresh-btn" onclick="refreshQR()">
+                <i class="fas fa-sync-alt"></i> Refresh QR Code
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let countdownSeconds = {{ remaining_seconds }};
+        let countdownInterval;
+
+        function updateCountdown() {
+            const minutes = Math.floor(countdownSeconds / 60);
+            const seconds = countdownSeconds % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('timeLeft').textContent = timeString;
+            
+            if (countdownSeconds <= 0) {
+                clearInterval(countdownInterval);
+                autoRefreshQR();
+            } else {
+                countdownSeconds--;
+            }
+        }
+
+        function startCountdown() {
+            countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown(); // Initial call
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('qrContent').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('qrContent').style.display = 'block';
+        }
+
+        function refreshQR() {
+            showLoading();
+            
+            fetch('/generate_qr')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('qrImage').src = 'data:image/png;base64,' + data.qr_image;
+                        document.getElementById('unitCode').textContent = data.unit_code;
+                        countdownSeconds = data.remaining_seconds;
+                        
+                        // Restart countdown
+                        clearInterval(countdownInterval);
+                        startCountdown();
+                        
+                        hideLoading();
+                    } else {
+                        alert('Gagal memuat QR Code baru');
+                        hideLoading();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat memuat QR Code');
+                    hideLoading();
+                });
+        }
+
+        function autoRefreshQR() {
+            // Auto refresh when countdown reaches 0
+            setTimeout(() => {
+                refreshQR();
+            }, 1000);
+        }
+
+        // Start countdown on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            startCountdown();
+        });
+
+        // Auto refresh every 9 minutes 30 seconds (before expiration)
+        setInterval(() => {
+            if (countdownSeconds < 30) {
+                refreshQR();
+            }
+        }, 30000); // Check every 30 seconds
+    </script>
+</body>
+</html>

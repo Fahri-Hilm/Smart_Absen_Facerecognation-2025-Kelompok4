@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Kafebasabasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/css/modern-ui.css" rel="stylesheet">
+    <style>
+        .offline-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .coffee-beans {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+        
+        .coffee-bean {
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            background: #8B4513;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .coffee-bean::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 60%;
+            background: #654321;
+            border-radius: 1px;
+        }
+        
+        .offline-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .offline-icon {
+            font-size: 4rem;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .offline-title {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .offline-message {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: blink 1.5s infinite;
+        }
+        
+        .status-indicator.online {
+            background: #28a745;
+            animation: none;
+        }
+        
+        .retry-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        
+        .queue-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        @media (max-width: 768px) {
+            .offline-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .offline-title {
+                font-size: 1.5rem;
+            }
+            
+            .offline-message {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <!-- Animated coffee beans background -->
+        <div class="coffee-beans">
+            <div class="coffee-bean" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
+            <div class="coffee-bean" style="top: 20%; left: 80%; animation-delay: 1s;"></div>
+            <div class="coffee-bean" style="top: 50%; left: 5%; animation-delay: 2s;"></div>
+            <div class="coffee-bean" style="top: 70%; left: 70%; animation-delay: 3s;"></div>
+            <div class="coffee-bean" style="top: 30%; left: 90%; animation-delay: 4s;"></div>
+            <div class="coffee-bean" style="top: 80%; left: 15%; animation-delay: 5s;"></div>
+        </div>
+        
+        <div class="offline-card">
+            <div class="offline-icon">
+                <i class="bi bi-wifi-off"></i>
+            </div>
+            
+            <h1 class="offline-title">Koneksi Terputus</h1>
+            
+            <p class="offline-message">
+                Tidak dapat terhubung ke server. Pastikan koneksi internet Anda aktif dan coba lagi.
+            </p>
+            
+            <div class="connection-status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">Offline</span>
+            </div>
+            
+            <a href="/" class="retry-btn" id="retryBtn">
+                <i class="bi bi-arrow-clockwise me-2"></i>
+                Coba Lagi
+            </a>
+            
+            <div class="queue-info" id="queueInfo" style="display: none;">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="bi bi-clock-history me-2"></i>
+                    <span id="queueText">Data absensi tersimpan dan akan dikirim saat koneksi pulih</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class OfflinePage {
+            constructor() {
+                this.isOnline = navigator.onLine;
+                this.checkInterval = null;
+                this.init();
+            }
+            
+            init() {
+                this.updateStatus();
+                this.setupEventListeners();
+                this.startConnectionCheck();
+                this.checkOfflineQueue();
+            }
+            
+            setupEventListeners() {
+                window.addEventListener('online', () => {
+                    this.isOnline = true;
+                    this.updateStatus();
+                    this.redirectToHome();
+                });
+                
+                window.addEventListener('offline', () => {
+                    this.isOnline = false;
+                    this.updateStatus();
+                });
+                
+                // Service Worker messages
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.addEventListener('message', (event) => {
+                        const { data } = event;
+                        
+                        if (data.type === 'offline-queue-status') {
+                            this.updateQueueInfo(data.count);
+                        } else if (data.type === 'offline-queue-processed') {
+                            this.showProcessedMessage(data.processed, data.remaining);
+                        }
+                    });
+                }
+            }
+            
+            updateStatus() {
+                const indicator = document.getElementById('statusIndicator');
+                const text = document.getElementById('statusText');
+                const retryBtn = document.getElementById('retryBtn');
+                
+                if (this.isOnline) {
+                    indicator.classList.add('online');
+                    text.textContent = 'Online';
+                    retryBtn.innerHTML = '<i class="bi bi-house me-2"></i>Kembali ke Beranda';
+                } else {
+                    indicator.classList.remove('online');
+                    text.textContent = 'Offline';
+                    retryBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Coba Lagi';
+                }
+            }
+            
+            startConnectionCheck() {
+                this.checkInterval = setInterval(() => {
+                    // Try to fetch a small resource to test connection
+                    fetch('/static/css/modern-ui.css', { 
+                        method: 'HEAD',
+                        cache: 'no-cache'
+                    })
+                    .then(() => {
+                        if (!this.isOnline) {
+                            this.isOnline = true;
+                            this.updateStatus();
+                            this.redirectToHome();
+                        }
+                    })
+                    .catch(() => {
+                        if (this.isOnline) {
+                            this.isOnline = false;
+                            this.updateStatus();
+                        }
+                    });
+                }, 5000); // Check every 5 seconds
+            }
+            
+            redirectToHome() {
+                setTimeout(() => {
+                    if (this.isOnline) {
+                        window.location.href = '/';
+                    }
+                }, 1500);
+            }
+            
+            checkOfflineQueue() {
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    const messageChannel = new MessageChannel();
+                    
+                    messageChannel.port1.onmessage = (event) => {
+                        const { data } = event;
+                        if (data.type === 'offline-queue-status') {
+                            this.updateQueueInfo(data.count);
+                        }
+                    };
+                    
+                    navigator.serviceWorker.controller.postMessage(
+                        { type: 'check-offline-queue' },
+                        [messageChannel.port2]
+                    );
+                }
+            }
+            
+            updateQueueInfo(count) {
+                const queueInfo = document.getElementById('queueInfo');
+                const queueText = document.getElementById('queueText');
+                
+                if (count > 0) {
+                    queueInfo.style.display = 'block';
+                    queueText.textContent = `${count} data absensi tersimpan dan akan dikirim saat koneksi pulih`;
+                } else {
+                    queueInfo.style.display = 'none';
+                }
+            }
+            
+            showProcessedMessage(processed, remaining) {
+                const queueText = document.getElementById('queueText');
+                
+                if (processed > 0) {
+                    queueText.innerHTML = `
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        ${processed} data berhasil dikirim${remaining > 0 ? `, ${remaining} masih dalam antrian` : ''}
+                    `;
+                    
+                    setTimeout(() => {
+                        this.updateQueueInfo(remaining);
+                    }, 3000);
+                }
+            }
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new OfflinePage();
+        });
+        
+        // Generate random coffee beans
+        function addRandomCoffeeBeans() {
+            const container = document.querySelector('.coffee-beans');
+            const numberOfBeans = Math.floor(Math.random() * 5) + 3;
+            
+            for (let i = 0; i < numberOfBeans; i++) {
+                const bean = document.createElement('div');
+                bean.className = 'coffee-bean';
+                bean.style.top = Math.random() * 100 + '%';
+                bean.style.left = Math.random() * 100 + '%';
+                bean.style.animationDelay = Math.random() * 6 + 's';
+                bean.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                
+                container.appendChild(bean);
+                
+                // Remove bean after animation
+                setTimeout(() => {
+                    if (bean.parentNode) {
+                        bean.remove();
+                    }
+                }, 10000);
+            }
+        }
+        
+        // Add random beans periodically
+        setInterval(addRandomCoffeeBeans, 8000);
+        
+        // Add initial random beans
+        setTimeout(addRandomCoffeeBeans, 1000);
+    </script>
+</body>
+</html>

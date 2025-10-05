@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfigurasi Kamera - Kafebasabasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --coffee-dark: #3C2415;
+            --coffee-medium: #8B4513;
+            --coffee-light: #D2691E;
+            --cream: #F5DEB3;
+            --warm-white: #FDF6E3;
+            --accent-gold: #DAA520;
+            --shadow-coffee: rgba(60, 36, 21, 0.15);
+            --shadow-light: rgba(139, 69, 19, 0.1);
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+            box-shadow: 0 4px 20px var(--shadow-coffee);
+            border-bottom: 3px solid var(--accent-gold);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--warm-white) !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand i {
+            color: var(--accent-gold);
+            margin-right: 10px;
+        }
+
+        .nav-link {
+            color: rgba(253, 246, 227, 0.9) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-gold) !important;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            color: var(--coffee-dark);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--coffee-medium);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.6));
+            border-radius: 25px;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 15px 35px var(--shadow-coffee);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow-coffee);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gold);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: var(--warm-white);
+            border-radius: 21px 21px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        /* Camera preview */
+        .camera-preview {
+            background: #000;
+            border-radius: 15px;
+            border: 3px solid var(--coffee-light);
+            overflow: hidden;
+            position: relative;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+
+        .camera-placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        /* Camera status */
+        .camera-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(39, 174, 96, 0.9) !important;
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.9) !important;
+        }
+
+        /* Camera controls */
+        .camera-controls {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.8));
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 10px 30px var(--shadow-light);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(45deg, var(--coffee-medium), var(--coffee-light));
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--coffee-dark), var(--coffee-medium));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #3498db, #5dade2);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        /* Forms */
+        .form-control {
+            border: 2px solid var(--coffee-light);
+            border-radius: 15px;
+            padding: 0.8rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 0.2rem rgba(218, 165, 32, 0.25);
+        }
+
+        .form-label {
+            color: var(--coffee-dark);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Camera list */
+        .camera-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid var(--coffee-light);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .camera-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(5px);
+        }
+
+        .camera-item.active {
+            background: linear-gradient(145deg, rgba(218, 165, 32, 0.2), rgba(139, 69, 19, 0.1));
+            border-color: var(--accent-gold);
+        }
+
+        /* Coffee decorations */
+        .coffee-decoration {
+            position: fixed;
+            font-size: 1.5rem;
+            color: var(--coffee-light);
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .coffee-decoration:nth-child(1) { top: 20%; left: 5%; animation-delay: 0s; }
+        .coffee-decoration:nth-child(2) { top: 60%; right: 8%; animation-delay: 4s; }
+        .coffee-decoration:nth-child(3) { bottom: 30%; left: 12%; animation-delay: 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-15px) rotate(180deg); opacity: 0.2; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .camera-preview {
+                min-height: 200px;
+            }
+        }
+
+        /* Settings panel */
+        .settings-panel {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.6));
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 10px 30px var(--shadow-light);
+        }
+    </style>
+</head>
+<body>
+    <!-- Coffee decorations -->
+    <div class="coffee-decoration">☕</div>
+    <div class="coffee-decoration">🫘</div>
+    <div class="coffee-decoration">☕</div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-cup-hot"></i>
+                Kafebasabasi Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/admin">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link" href="/">
+                    <i class="bi bi-house"></i> Beranda
+                </a>
+                <a class="nav-link" href="/admin/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Page Header -->
+        <div class="text-center mb-4">
+            <h1 class="page-title">Konfigurasi Kamera</h1>
+            <p class="page-subtitle">"Teknologi canggih untuk pengalaman absensi yang sempurna"</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Camera Preview -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-camera-video"></i>
+                            Preview Kamera
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="camera-preview position-relative">
+                            <div class="camera-status status-active">
+                                <i class="bi bi-record-circle"></i>
+                                Aktif
+                            </div>
+                            <video id="cameraPreview" class="camera-feed" autoplay muted style="display: none;"></video>
+                            <div id="cameraPlaceholder" class="camera-placeholder">
+                                <i class="bi bi-camera-video display-1 mb-3"></i>
+                                <div>Klik "Aktifkan Kamera" untuk melihat preview</div>
+                            </div>
+                        </div>
+                        
+                        <div class="camera-controls mt-4">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <button class="btn btn-success w-100" id="startCamera">
+                                        <i class="bi bi-play-fill"></i>
+                                        Aktifkan Kamera
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-danger w-100" id="stopCamera" disabled>
+                                        <i class="bi bi-stop-fill"></i>
+                                        Matikan Kamera
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-info w-100" id="testCamera">
+                                        <i class="bi bi-lightning"></i>
+                                        Test Deteksi
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary w-100" id="captureTest">
+                                        <i class="bi bi-camera"></i>
+                                        Capture Test
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Camera Settings -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-gear"></i>
+                            Pengaturan Kamera
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="cameraSettingsForm">
+                            <div class="mb-3">
+                                <label for="cameraSelect" class="form-label">Pilih Kamera</label>
+                                <select class="form-control" id="cameraSelect" required>
+                                    <option value="">Memuat kamera...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="resolution" class="form-label">Resolusi</label>
+                                <select class="form-control" id="resolution">
+                                    <option value="640x480">640x480 (VGA)</option>
+                                    <option value="1280x720" selected>1280x720 (HD)</option>
+                                    <option value="1920x1080">1920x1080 (Full HD)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="frameRate" class="form-label">Frame Rate</label>
+                                <select class="form-control" id="frameRate">
+                                    <option value="15">15 FPS</option>
+                                    <option value="30" selected>30 FPS</option>
+                                    <option value="60">60 FPS</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="brightness" class="form-label">Kecerahan</label>
+                                <input type="range" class="form-range" id="brightness" min="0" max="100" value="50">
+                                <div class="text-center">
+                                    <small class="text-muted">Nilai: <span id="brightnessValue">50</span>%</small>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="contrast" class="form-label">Kontras</label>
+                                <input type="range" class="form-range" id="contrast" min="0" max="100" value="50">
+                                <div class="text-center">
+                                    <small class="text-muted">Nilai: <span id="contrastValue">50</span>%</small>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-check-circle"></i>
+                                Simpan Pengaturan
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Cameras -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-list"></i>
+                            Daftar Kamera Tersedia
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="cameraList">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div class="mt-2">Memuat daftar kamera...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-sliders"></i>
+                            Pengaturan Lanjutan
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="settings-panel">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <h5 style="color: var(--coffee-dark); margin-bottom: 1rem;">
+                                        <i class="bi bi-eye"></i>
+                                        Deteksi Wajah
+                                    </h5>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="enableFaceDetection" checked>
+                                            <label class="form-check-label" for="enableFaceDetection">
+                                                Aktifkan deteksi wajah
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="detectionThreshold" class="form-label">Threshold Deteksi</label>
+                                        <input type="range" class="form-range" id="detectionThreshold" min="0.1" max="1.0" step="0.1" value="0.7">
+                                        <div class="text-center">
+                                            <small class="text-muted">Nilai: <span id="thresholdValue">0.7</span></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h5 style="color: var(--coffee-dark); margin-bottom: 1rem;">
+                                        <i class="bi bi-shield-check"></i>
+                                        Keamanan
+                                    </h5>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="saveImages" checked>
+                                            <label class="form-check-label" for="saveImages">
+                                                Simpan gambar absensi
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="enableLogging" checked>
+                                            <label class="form-check-label" for="enableLogging">
+                                                Log aktivitas kamera
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-primary me-3" id="saveAdvancedSettings">
+                                    <i class="bi bi-check-circle"></i>
+                                    Simpan Pengaturan Lanjutan
+                                </button>
+                                <button class="btn btn-info" id="resetSettings">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                    Reset ke Default
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentStream = null;
+        let availableCameras = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAvailableCameras();
+            setupEventListeners();
+            updateRangeValues();
+        });
+
+        function setupEventListeners() {
+            // Camera controls
+            document.getElementById('startCamera').addEventListener('click', startCamera);
+            document.getElementById('stopCamera').addEventListener('click', stopCamera);
+            document.getElementById('testCamera').addEventListener('click', testDetection);
+            document.getElementById('captureTest').addEventListener('click', captureTest);
+
+            // Settings form
+            document.getElementById('cameraSettingsForm').addEventListener('submit', saveCameraSettings);
+            document.getElementById('saveAdvancedSettings').addEventListener('click', saveAdvancedSettings);
+            document.getElementById('resetSettings').addEventListener('click', resetSettings);
+
+            // Range sliders
+            document.getElementById('brightness').addEventListener('input', updateRangeValues);
+            document.getElementById('contrast').addEventListener('input', updateRangeValues);
+            document.getElementById('detectionThreshold').addEventListener('input', updateRangeValues);
+        }
+
+        function updateRangeValues() {
+            document.getElementById('brightnessValue').textContent = document.getElementById('brightness').value;
+            document.getElementById('contrastValue').textContent = document.getElementById('contrast').value;
+            document.getElementById('thresholdValue').textContent = document.getElementById('detectionThreshold').value;
+        }
+
+        async function loadAvailableCameras() {
+            try {
+                const response = await fetch('/get_cameras');
+                const cameras = await response.json();
+                availableCameras = cameras;
+                
+                updateCameraSelect(cameras);
+                updateCameraList(cameras);
+            } catch (error) {
+                console.error('Error loading cameras:', error);
+                showNotification('Gagal memuat daftar kamera', 'error');
+            }
+        }
+
+        function updateCameraSelect(cameras) {
+            const select = document.getElementById('cameraSelect');
+            select.innerHTML = '<option value="">Pilih kamera...</option>';
+            
+            cameras.forEach((camera, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = camera.name || `Kamera ${index + 1}`;
+                if (index === 0) option.selected = true;
+                select.appendChild(option);
+            });
+        }
+
+        function updateCameraList(cameras) {
+            const listContainer = document.getElementById('cameraList');
+            
+            if (cameras.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-camera-video-off display-1 text-muted"></i>
+                        <div class="mt-2">Tidak ada kamera yang terdeteksi</div>
+                    </div>
+                `;
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            cameras.forEach((camera, index) => {
+                const cameraItem = document.createElement('div');
+                cameraItem.className = 'camera-item';
+                if (index === 0) cameraItem.classList.add('active');
+                
+                cameraItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1" style="color: var(--coffee-dark);">
+                                <i class="bi bi-camera"></i>
+                                ${camera.name || `Kamera ${index + 1}`}
+                            </h6>
+                            <small class="text-muted">ID: ${camera.deviceId}</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-primary" onclick="selectCamera(${index})">
+                                <i class="bi bi-check-circle"></i>
+                                Pilih
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                listContainer.appendChild(cameraItem);
+            });
+        }
+
+        function selectCamera(index) {
+            document.getElementById('cameraSelect').value = index;
+            
+            // Update active camera in list
+            document.querySelectorAll('.camera-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelectorAll('.camera-item')[index].classList.add('active');
+            
+            showNotification(`Kamera ${index + 1} dipilih`, 'success');
+        }
+
+        async function startCamera() {
+            try {
+                const selectedCamera = document.getElementById('cameraSelect').value;
+                if (!selectedCamera) {
+                    showNotification('Silakan pilih kamera terlebih dahulu', 'warning');
+                    return;
+                }
+
+                const constraints = {
+                    video: {
+                        deviceId: availableCameras[selectedCamera].deviceId,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const videoElement = document.getElementById('cameraPreview');
+                
+                videoElement.srcObject = currentStream;
+                videoElement.style.display = 'block';
+                document.getElementById('cameraPlaceholder').style.display = 'none';
+
+                // Update controls
+                document.getElementById('startCamera').disabled = true;
+                document.getElementById('stopCamera').disabled = false;
+                
+                // Update status
+                const status = document.querySelector('.camera-status');
+                status.className = 'camera-status status-active';
+                status.innerHTML = '<i class="bi bi-record-circle"></i> Aktif';
+
+                showNotification('Kamera berhasil diaktifkan', 'success');
+            } catch (error) {
+                console.error('Error starting camera:', error);
+                showNotification('Gagal mengaktifkan kamera', 'error');
+            }
+        }
+
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+
+            const videoElement = document.getElementById('cameraPreview');
+            videoElement.style.display = 'none';
+            document.getElementById('cameraPlaceholder').style.display = 'block';
+
+            // Update controls
+            document.getElementById('startCamera').disabled = false;
+            document.getElementById('stopCamera').disabled = true;
+
+            // Update status
+            const status = document.querySelector('.camera-status');
+            status.className = 'camera-status status-inactive';
+            status.innerHTML = '<i class="bi bi-pause-circle"></i> Tidak Aktif';
+
+            showNotification('Kamera dimatikan', 'info');
+        }
+
+        function testDetection() {
+            if (!currentStream) {
+                showNotification('Aktifkan kamera terlebih dahulu', 'warning');
+                return;
+            }
+
+            showNotification('Menjalankan test deteksi wajah...', 'info');
+            // Implementation for face detection test
+        }
+
+        function captureTest() {
+            if (!currentStream) {
+                showNotification('Aktifkan kamera terlebih dahulu', 'warning');
+                return;
+            }
+
+            const video = document.getElementById('cameraPreview');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `test-capture-${new Date().getTime()}.jpg`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showNotification('Gambar test berhasil disimpan', 'success');
+            });
+        }
+
+        function saveCameraSettings(e) {
+            e.preventDefault();
+            
+            const settings = {
+                camera: document.getElementById('cameraSelect').value,
+                resolution: document.getElementById('resolution').value,
+                frameRate: document.getElementById('frameRate').value,
+                brightness: document.getElementById('brightness').value,
+                contrast: document.getElementById('contrast').value
+            };
+
+            // Save to server
+            fetch('/save_camera_settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(settings)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showNotification('Pengaturan kamera berhasil disimpan', 'success');
+            })
+            .catch(error => {
+                showNotification('Gagal menyimpan pengaturan', 'error');
+            });
+        }
+
+        function saveAdvancedSettings() {
+            const settings = {
+                faceDetection: document.getElementById('enableFaceDetection').checked,
+                detectionThreshold: document.getElementById('detectionThreshold').value,
+                saveImages: document.getElementById('saveImages').checked,
+                enableLogging: document.getElementById('enableLogging').checked
+            };
+
+            // Save to server
+            fetch('/save_advanced_camera_settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(settings)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showNotification('Pengaturan lanjutan berhasil disimpan', 'success');
+            })
+            .catch(error => {
+                showNotification('Gagal menyimpan pengaturan lanjutan', 'error');
+            });
+        }
+
+        function resetSettings() {
+            if (confirm('Apakah Anda yakin ingin mereset semua pengaturan ke default?')) {
+                // Reset form values
+                document.getElementById('resolution').value = '1280x720';
+                document.getElementById('frameRate').value = '30';
+                document.getElementById('brightness').value = '50';
+                document.getElementById('contrast').value = '50';
+                document.getElementById('detectionThreshold').value = '0.7';
+                document.getElementById('enableFaceDetection').checked = true;
+                document.getElementById('saveImages').checked = true;
+                document.getElementById('enableLogging').checked = true;
+                
+                updateRangeValues();
+                showNotification('Pengaturan direset ke default', 'info');
+            }
+        }
+
+        function showNotification(message, type) {
+            const alertType = type === 'error' ? 'danger' : type;
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${alertType} alert-dismissible fade show position-fixed`;
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Karyawan - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        body { background-color: var(--light-bg); }
+        .navbar { background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); }
+        .sidebar { background: white; min-height: calc(100vh - 56px); box-shadow: var(--shadow); }
+        .sidebar .nav-link { color: var(--primary-color); padding: 1rem 1.5rem; border-bottom: 1px solid #dee2e6; }
+        .sidebar .nav-link:hover { background-color: var(--light-bg); color: var(--secondary-color); }
+        .card { border: none; border-radius: 15px; box-shadow: var(--shadow); }
+        .table th { background-color: var(--primary-color); color: white; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-people"></i> Kelola Karyawan
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/admin/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-xl-2 px-0">
+                <div class="sidebar">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="/admin">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                        <a class="nav-link active" href="/admin/employees">
+                            <i class="bi bi-people"></i> Kelola Karyawan
+                        </a>
+                        <a class="nav-link" href="/admin/attendance">
+                            <i class="bi bi-calendar-check"></i> Data Absensi
+                        </a>
+                        <a class="nav-link" href="/admin/reports">
+                            <i class="bi bi-file-earmark-text"></i> Laporan
+                        </a>
+                        <a class="nav-link" href="/admin/camera">
+                            <i class="bi bi-camera"></i> Test Kamera
+                        </a>
+                        <a class="nav-link" href="/admin/database">
+                            <i class="bi bi-database"></i> Database
+                        </a>
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house"></i> Halaman Utama
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 col-xl-10">
+                <div class="container-fluid py-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="bi bi-people"></i> Manajemen Karyawan</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                            <i class="bi bi-person-plus"></i> Tambah Karyawan
+                        </button>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card text-center text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                                <div class="card-body">
+                                    <h3>{{ totalreg }}</h3>
+                                    <p class="mb-0">Total Karyawan</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center text-white" style="background: linear-gradient(135deg, var(--success-color), #2ecc71);">
+                                <div class="card-body">
+                                    <h3>{{ employees|length }}</h3>
+                                    <p class="mb-0">Terdaftar</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center text-white" style="background: linear-gradient(135deg, var(--warning-color), #e67e22);">
+                                <div class="card-body">
+                                    <h3>{{ selected_camera }}</h3>
+                                    <p class="mb-0">Kamera Aktif</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employee List -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-list"></i> Daftar Karyawan</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nama</th>
+                                            <th>Bagian</th>
+                                            <th>Tanggal Daftar</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for employee in employees %}
+                                        <tr>
+                                            <td>{{ employee.id or employee['id'] }}</td>
+                                            <td class="fw-bold">{{ employee.name or employee['name'] }}</td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ employee.bagian or employee['bagian'] }}</span>
+                                            </td>
+                                            <td>{{ employee.created_at or employee.get('created_at', '-') }}</td>
+                                            <td>
+                                                <span class="badge bg-success">Aktif</span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning me-1" onclick="editEmployee({{ employee.id or employee['id'] }}, '{{ employee.name or employee['name'] }}', '{{ employee.bagian or employee['bagian'] }}')">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteEmployee({{ employee.id or employee['id'] }}, '{{ employee.name or employee['name'] }}')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% if not employees or employees|length == 0 %}
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4 text-muted">
+                                                <i class="bi bi-inbox"></i> Belum ada karyawan terdaftar
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Employee Modal -->
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--primary-color); color: white;">
+                    <h5 class="modal-title"><i class="bi bi-person-plus"></i> Tambah Karyawan Baru</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/admin/add_employee">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="employeeName" class="form-label">Nama Karyawan</label>
+                            <input type="text" class="form-control" id="employeeName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="employeeDepartment" class="form-label">Bagian</label>
+                            <input type="text" class="form-control" id="employeeDepartment" name="bagian" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Tambah Karyawan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function editEmployee(id, name, bagian) {
+            // Implementasi edit karyawan
+            alert(`Edit karyawan: ${name} (ID: ${id})`);
+        }
+
+        function deleteEmployee(id, name) {
+            if (confirm(`Apakah Anda yakin ingin menghapus karyawan ${name}?`)) {
+                fetch('/admin/delete_employee', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `employee_id=${id}`
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -18,6 +18,13 @@ joblib==1.3.2
 # Data Processing
 pandas==2.0.3
 
+# QR Code Generation
+qrcode==7.4.2
+Pillow==10.0.1
+
+# Ngrok Integration
+pyngrok==7.0.0
+
 # Logging (built-in Python, no need to install)
 # datetime (built-in Python, no need to install)
 # os (built-in Python, no need to install)

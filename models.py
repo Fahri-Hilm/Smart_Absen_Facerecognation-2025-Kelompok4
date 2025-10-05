@@ -4,7 +4,7 @@ Berisi class-class untuk mengelola data karyawan dan absensi
 """
 
 from database import get_db_manager
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -161,7 +161,20 @@ class Attendance:
             WHERE a.tanggal BETWEEN %s AND %s 
             ORDER BY a.tanggal DESC, e.name
             """
-            return db.execute_query(query, (start_date, end_date))
+            result = db.execute_query(query, (start_date, end_date))
+            
+            # Pastikan result adalah list, bukan int atau None
+            if result is None:
+                logger.warning("Database query returned None")
+                return []
+            elif isinstance(result, int):
+                logger.warning(f"Database query returned int: {result}")
+                return []
+            elif not isinstance(result, (list, tuple)):
+                logger.warning(f"Database query returned unexpected type: {type(result)}")
+                return []
+            
+            return result
         except Exception as e:
             logger.error(f"Gagal mendapatkan data absensi mingguan: {e}")
             return []
@@ -176,9 +189,23 @@ class Attendance:
     def calculate_work_hours(jam_masuk, jam_pulang):
         """Menghitung total jam kerja"""
         try:
-            if isinstance(jam_masuk, str):
+            # Handle timedelta objects dari database
+            if isinstance(jam_masuk, timedelta):
+                total_seconds_masuk = int(jam_masuk.total_seconds())
+                hours_masuk = total_seconds_masuk // 3600
+                minutes_masuk = (total_seconds_masuk % 3600) // 60
+                seconds_masuk = total_seconds_masuk % 60
+                jam_masuk = time(hours_masuk, minutes_masuk, seconds_masuk)
+            elif isinstance(jam_masuk, str):
                 jam_masuk = datetime.strptime(jam_masuk, "%H:%M:%S").time()
-            if isinstance(jam_pulang, str):
+            
+            if isinstance(jam_pulang, timedelta):
+                total_seconds_pulang = int(jam_pulang.total_seconds())
+                hours_pulang = total_seconds_pulang // 3600
+                minutes_pulang = (total_seconds_pulang % 3600) // 60
+                seconds_pulang = total_seconds_pulang % 60
+                jam_pulang = time(hours_pulang, minutes_pulang, seconds_pulang)
+            elif isinstance(jam_pulang, str):
                 jam_pulang = datetime.strptime(jam_pulang, "%H:%M:%S").time()
             
             # Convert to datetime untuk perhitungan
@@ -189,11 +216,7 @@ class Attendance:
             # Hitung selisih
             if dt_pulang > dt_masuk:
                 diff = dt_pulang - dt_masuk
-                total_seconds = int(diff.total_seconds())
-                hours = total_seconds // 3600
-                minutes = (total_seconds % 3600) // 60
-                seconds = total_seconds % 60
-                return time(hours, minutes, seconds)
+                return diff  # Return timedelta object langsung
             
             return None
         except Exception as e:

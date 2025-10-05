@@ -3,12 +3,12 @@
 
 import os
 
-# Konfigurasi Database MySQL (Laragon default settings)
+# Konfigurasi Database MariaDB (Devilbox default settings)
 DATABASE_CONFIG = {
-    'host': 'localhost',
+    'host': '127.0.0.1',  # Devilbox host
     'port': 3306,
     'user': 'root',
-    'password': '',  # Laragon default: no password for root
+    'password': '',  # Devilbox default: no password for root
     'database': 'absensi_karyawan_db',  # Nama database baru
     'charset': 'utf8mb4',
     'autocommit': True
@@ -18,7 +18,7 @@ DATABASE_CONFIG = {
 APP_CONFIG = {
     'secret_key': 'absensi-karyawan-secret-key-2025',
     'debug': True,
-    'host': '127.0.0.1',
+    'host': '0.0.0.0',  # Ubah ke 0.0.0.0 agar bisa diakses dari jaringan lokal
     'port': 5001
 }
 
