@@ -1,4 +1,4 @@
-# 🏢 ABSENN - Advanced Biometric System for Employee Network Management
+# 🏢 FaceAttend - Advanced Biometric System for Employee Network Management
 
 <div align="center">
 
@@ -15,9 +15,9 @@
 
 *Solusi comprehensive untuk manajemen kehadiran karyawan dengan teknologi Computer Vision dan dual access capability*
 
-[![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)](https://github.com/Fahri-Hilm/ABSENN)
-[![Security](https://img.shields.io/badge/Security-Audited-success.svg)](https://github.com/Fahri-Hilm/ABSENN)
-[![Uptime](https://img.shields.io/badge/Uptime-99.9%25-success.svg)](https://github.com/Fahri-Hilm/ABSENN)
+[![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)](https://github.com/Fahri-Hilm/FaceAttend)
+[![Security](https://img.shields.io/badge/Security-Audited-success.svg)](https://github.com/Fahri-Hilm/FaceAttend)
+[![Uptime](https://img.shields.io/badge/Uptime-99.9%25-success.svg)](https://github.com/Fahri-Hilm/FaceAttend)
 
 </div>
 
@@ -44,7 +44,7 @@
 
 ## 🎯 **Overview**
 
-**ABSENN** (Advanced Biometric System for Employee Network Management) adalah sistem absensi enterprise-grade yang dikembangkan untuk **Kafebasabasi** dan bisnis modern lainnya. Sistem ini mengintegrasikan teknologi **Computer Vision AI**, **QR Authentication**, dan **Progressive Web App (PWA)** untuk memberikan pengalaman absensi yang seamless, secure, dan scalable.
+**FaceAttend** (Advanced Biometric System for Employee Network Management) adalah sistem absensi enterprise-grade yang dikembangkan untuk **Kafebasabasi** dan bisnis modern lainnya. Sistem ini mengintegrasikan teknologi **Computer Vision AI**, **QR Authentication**, dan **Progressive Web App (PWA)** untuk memberikan pengalaman absensi yang seamless, secure, dan scalable.
 
 ### 🏆 **Keunggulan Teknologi**
 - 🔬 **AI-Powered Face Recognition** dengan accuracy 99.2% (Eigen Faces + SVM)
@@ -133,8 +133,8 @@
 ### ⚡ **One-Line Install**
 ```bash
 # Clone repository
-git clone https://github.com/Fahri-Hilm/ABSENN.git
-cd ABSENN
+git clone https://github.com/Fahri-Hilm/FaceAttend.git
+cd FaceAttend
 
 # Run setup script
 chmod +x scripts/setup.sh && ./scripts/setup.sh
@@ -158,8 +158,8 @@ chmod +x scripts/setup.sh && ./scripts/setup.sh
 
 ### 1️⃣ **Clone Repository**
 ```bash
-git clone https://github.com/Fahri-Hilm/ABSENN.git
-cd ABSENN
+git clone https://github.com/Fahri-Hilm/FaceAttend.git
+cd FaceAttend
 ```
 
 ### 2️⃣ **Setup Environment**
@@ -360,7 +360,7 @@ We welcome contributions! 🎉
 ### 🔄 **Development Workflow**
 ```bash
 # Fork repository
-git fork https://github.com/Fahri-Hilm/ABSENN
+git fork https://github.com/Fahri-Hilm/FaceAttend
 
 # Create feature branch
 git checkout -b feature/amazing-feature
@@ -409,8 +409,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ### 🆘 **Get Help**
 - 📖 **Documentation**: [docs/](docs/)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Fahri-Hilm/ABSENN/issues)
-- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/Fahri-Hilm/ABSENN/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Fahri-Hilm/FaceAttend/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/Fahri-Hilm/FaceAttend/discussions)
 - 📧 **Email**: fahri.hilm@kafebasabasi.com
 
 ### 🌟 **Show Your Support**
@@ -424,7 +424,7 @@ Give a ⭐️ if this project helped you!
 
 *Sistem Absensi Modern untuk Era Digital*
 
-[![GitHub stars](https://img.shields.io/github/stars/Fahri-Hilm/ABSENN.svg?style=social&label=Star)](https://github.com/Fahri-Hilm/ABSENN)
-[![GitHub forks](https://img.shields.io/github/forks/Fahri-Hilm/ABSENN.svg?style=social&label=Fork)](https://github.com/Fahri-Hilm/ABSENN/fork)
+[![GitHub stars](https://img.shields.io/github/stars/Fahri-Hilm/FaceAttend.svg?style=social&label=Star)](https://github.com/Fahri-Hilm/FaceAttend)
+[![GitHub forks](https://img.shields.io/github/forks/Fahri-Hilm/FaceAttend.svg?style=social&label=Fork)](https://github.com/Fahri-Hilm/FaceAttend/fork)
 
 </div>
