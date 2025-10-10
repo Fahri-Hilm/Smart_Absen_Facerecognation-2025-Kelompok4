@@ -1,0 +1,157 @@
+@startuml DeploymentDiagram
+!theme cerulean-outline
+
+title Kafebasabasi Attendance System - Deployment Diagram
+
+node "Development Server" as DevServer {
+  node "Devilbox Container Environment" as Devilbox {
+    node "Web Server Container" as WebContainer {
+      component "Apache/Nginx" as WebServer
+      artifact "Flask Application" as FlaskApp
+      ARTIFACT "Static Files" as StaticFiles
+      ARTIFACT "Templates" as Templates
+    }
+    
+    node "Database Container" as DBContainer {
+      component "MySQL 8.0" as MySQL
+      ARTIFACT "kafebasabasi Database" as Database
+    }
+    
+    node "PHP Container" as PHPContainer {
+      component "PHP 8.1" as PHP
+      ARTIFACT "phpMyAdmin" as phpMyAdmin
+    }
+  }
+  
+  node "Host System" as HostSystem {
+    ARTIFACT "Face Recognition Model" as FRModel
+    ARTIFACT "Face Images Storage" as FaceImages
+    ARTIFACT "Attendance Exports" as AttendanceCSV
+    component "Camera Hardware" as Camera
+    component "USB Camera Device" as USBCamera
+  }
+}
+
+node "Production Server (Optional)" as ProdServer {
+  node "Ubuntu/CentOS Server" as LinuxServer {
+    component "Nginx Web Server" as NginxProd
+    ARTIFACT "Flask Application (Production)" as FlaskProd
+    component "Gunicorn WSGI Server" as Gunicorn
+    
+    node "Database Server" as ProdDB {
+      component "MySQL Server" as MySQLProd
+      ARTIFACT "Production Database" as ProdDatabase
+    }
+    
+    component "SSL Certificate" as SSL
+    ARTIFACT "Backup Storage" as Backups
+  }
+}
+
+node "Network Infrastructure" as Network {
+  component "Local Network Router" as Router
+  component "Internet Gateway" as Gateway
+  component "Ngrok Tunnel (Optional)" as Ngrok
+}
+
+node "Client Devices" as Clients {
+  node "Desktop Browser" as Desktop {
+    ARTIFACT "Chrome/Firefox" as Browser
+    ARTIFACT "Admin Interface" as AdminUI
+  }
+  
+  node "Mobile Device" as Mobile {
+    ARTIFACT "QR Code Scanner" as QRScanner
+    ARTIFACT "Mobile Browser" as MobileBrowser
+  }
+  
+  node "Camera Station" as CameraStation {
+    component "USB Camera" as StationCamera
+    ARTIFACT "Camera Preview Window" as CameraPreview
+  }
+}
+
+' Development Environment Connections
+WebServer --> FlaskApp : hosts
+FlaskApp --> StaticFiles : serves
+FlaskApp --> Templates : renders
+FlaskApp --> MySQL : connects to
+FlaskApp --> FRModel : loads
+FlaskApp --> FaceImages : reads/writes
+FlaskApp --> Camera : accesses
+Camera --> USBCamera : controls
+
+PHP --> phpMyAdmin : runs
+phpMyAdmin --> MySQL : manages
+
+' Production Environment Connections
+NginxProd --> Gunicorn : reverse proxy
+Gunicorn --> FlaskProd : WSGI
+FlaskProd --> MySQLProd : connects to
+NginxProd --> SSL : secured by
+ProdDatabase --> Backups : backed up to
+
+' Network Connections
+DevServer --> Router : connected to
+ProdServer --> Gateway : connected to
+Router --> Gateway : routes through
+Ngrok --> Gateway : tunnels through
+
+' Client Connections
+Desktop --> Router : connects to
+Mobile --> Router : connects to
+CameraStation --> DevServer : direct connection
+
+Browser --> FlaskApp : HTTP requests
+AdminUI --> FlaskApp : admin panel
+QRScanner --> FlaskApp : QR verification
+MobileBrowser --> FlaskApp : mobile interface
+CameraPreview --> FlaskApp : camera feed
+
+note top of Devilbox
+  **Development Environment**
+  - Docker containers for easy setup
+  - Consistent across different machines
+  - Includes database management tools
+end note
+
+note top of ProdServer
+  **Production Deployment**
+  - Linux server with proper security
+  - Load balancing capability
+  - SSL/TLS encryption
+  - Regular automated backups
+end note
+
+note bottom of Network
+  **Network Options**
+  - Local network for internal use
+  - Ngrok tunnel for external access
+  - VPN setup for secure remote access
+end note
+
+note right of Clients
+  **Multi-Device Support**
+  - Desktop for admin functions
+  - Mobile for QR authentication
+  - Dedicated camera stations
+end note
+
+' Deployment artifacts
+ARTIFACT "requirements.txt" as Requirements
+ARTIFACT "docker-compose.yml" as DockerCompose
+ARTIFACT "nginx.conf" as NginxConfig
+ARTIFACT "systemd service files" as SystemdServices
+
+Requirements --> FlaskApp : dependencies
+DockerCompose --> Devilbox : configuration
+NginxConfig --> NginxProd : configuration
+SystemdServices --> LinuxServer : service management
+
+' Color coding for clarity
+DevServer #LightBlue
+ProdServer #LightGreen
+Network #Yellow
+Clients #Pink
+
+@enduml

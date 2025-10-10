@@ -1,0 +1,184 @@
+@startuml ActivityDiagram
+!theme cerulean-outline
+
+title Kafebasabasi Attendance System - Activity Diagram
+
+|User|
+start
+:Access attendance system;
+
+|System|
+:Check QR verification status;
+
+if (QR verification valid?) then (no)
+  |User|
+  :Redirected to QR auth page;
+  :Scan QR code with mobile device;
+  |System|
+  :Verify QR unit code;
+  if (Valid unit code?) then (no)
+    :Show error message;
+    stop
+  else (yes)
+    :Store QR verification;
+    :Redirect to home page;
+  endif
+else (yes)
+  :Show attendance interface;
+endif
+
+|User|
+:Choose attendance mode;
+
+if (Mode selected?) then (Absen Masuk)
+  |System|
+  :Initialize camera subprocess;
+  :Start isolated camera process;
+  
+  |User|
+  :Position face in camera;
+  
+  |System|
+  :Capture camera frame;
+  :Detect face in frame;
+  
+  if (Face detected?) then (no)
+    :Continue monitoring;
+    note right: Keep camera active
+  else (yes)
+    :Extract face features;
+    :Convert to grayscale;
+    :Resize to 50x50;
+    :Load face recognition model;
+    :Identify face using KNN;
+    
+    if (Face recognized?) then (no)
+      :Show "Unknown face" message;
+      :Cleanup camera resources;
+      stop
+    else (yes)
+      :Get employee data from database;
+      :Check existing attendance today;
+      
+      if (Already attended today?) then (yes)
+        :Show "Already attended" message;
+        :Cleanup camera resources;
+        stop
+      else (no)
+        :Record jam_masuk attendance;
+        :Save to database;
+        :Show success message;
+        :Cleanup camera resources;
+      endif
+    endif
+  endif
+
+else (Absen Pulang)
+  |System|
+  :Initialize camera subprocess;
+  :Start isolated camera process;
+  
+  |User|
+  :Position face in camera;
+  
+  |System|
+  :Capture camera frame;
+  :Detect face in frame;
+  
+  if (Face detected?) then (no)
+    :Continue monitoring;
+  else (yes)
+    :Extract face features;
+    :Load face recognition model;
+    :Identify face using KNN;
+    
+    if (Face recognized?) then (no)
+      :Show "Unknown face" message;
+      :Cleanup camera resources;
+      stop
+    else (yes)
+      :Get employee data from database;
+      :Check existing attendance today;
+      
+      if (No masuk attendance today?) then (yes)
+        :Show "Must check in first" message;
+        :Cleanup camera resources;
+        stop
+      else if (Already checked out?) then (yes)
+        :Show "Already checked out" message;
+        :Cleanup camera resources;
+        stop
+      else (no)
+        :Record jam_pulang attendance;
+        :Calculate total_jam_kerja;
+        note right
+          total_jam_kerja = jam_pulang - jam_masuk
+          (in hours with decimal precision)
+        end note
+        :Update attendance record;
+        :Show success message;
+        :Cleanup camera resources;
+      endif
+    endif
+  endif
+
+else (Admin Access)
+  |System|
+  :Check admin authentication;
+  if (Admin logged in?) then (no)
+    :Redirect to admin login;
+    |User|
+    :Enter admin credentials;
+    |System|
+    :Validate credentials;
+    if (Valid credentials?) then (no)
+      :Show login error;
+      stop
+    else (yes)
+      :Create admin session;
+    endif
+  else (yes)
+  endif
+  
+  :Show admin dashboard;
+  |User|
+  :Select admin function;
+  
+  if (Function selected?) then (View Attendance)
+    |System|
+    :Display attendance records;
+    :Show weekly/monthly reports;
+  else if (Manage Employees) then
+    |System|
+    :Show employee list;
+    :Allow add/edit/delete operations;
+  else if (Database Management) then
+    |System|
+    :Show database statistics;
+    :Provide reset functionality;
+    if (Reset requested?) then (yes)
+      :Show safety confirmation;
+      |User|
+      :Confirm reset operation;
+      |System|
+      :Execute database reset;
+      :Clear all attendance data;
+      :Remove face images;
+      :Reset model files;
+      :Show reset completion;
+    endif
+  else if (Camera Test) then
+    |System|
+    :Initialize camera for testing;
+    :Show camera preview;
+    :Allow face detection testing;
+  endif
+endif
+
+|System|
+:Log activity to database;
+:Update system statistics;
+
+stop
+
+@enduml

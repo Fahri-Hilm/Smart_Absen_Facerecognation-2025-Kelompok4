@@ -103,3 +103,10 @@ instance/
 # Windows
 desktop.ini
 $RECYCLE.BIN/
+
+# PlantUML JAR files
+*.jar
+plantuml.jar
+
+# Generated diagram images (optional - keep PNG files for documentation)
+# docs/*.png

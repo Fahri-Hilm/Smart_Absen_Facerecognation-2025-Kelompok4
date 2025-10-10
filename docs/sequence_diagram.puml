@@ -1,0 +1,95 @@
+@startuml SequenceDiagram
+!theme cerulean-outline
+
+title Kafebasabasi Attendance System - Face Recognition Sequence Diagram
+
+actor User
+participant "Web Browser" as Browser
+participant "Flask App" as App
+participant "QR Manager" as QR
+participant "Attendance Controller" as Controller
+participant "Camera Isolated" as Camera
+participant "Face Recognition" as FR
+participant "Database Manager" as DB
+participant "Attendance Model" as AttendanceModel
+
+== QR Authentication ==
+User -> Browser: Access attendance page
+Browser -> App: GET /
+App -> QR: check_qr_verification()
+QR -> App: verification_expired
+App -> Browser: redirect to /auth
+Browser -> User: Show QR code page
+
+User -> Browser: Scan QR code
+Browser -> App: GET /verify?unit=CODE
+App -> QR: verify_unit_code(CODE)
+QR -> App: verification_success
+App -> Browser: redirect to home
+Browser -> User: Show attendance interface
+
+== Attendance Process ==
+User -> Browser: Click "Absen Masuk"
+Browser -> App: POST /mark_attendance {mode: "masuk", camera_id: 0}
+App -> Controller: mark_attendance("masuk", 0)
+
+Controller -> QR: verify_qr_session()
+QR -> Controller: session_valid
+
+Controller -> Controller: cleanup_camera_resources()
+Controller -> Camera: spawn subprocess camera_isolated.py
+note right: Isolated process to prevent GUI conflicts
+
+Camera -> Camera: initialize_camera(0)
+Camera -> Camera: create_window("ISOLATED_CAMERA_MASUK")
+Camera -> User: Show camera preview
+
+User -> Camera: Position face in camera
+Camera -> FR: detect_face(frame)
+FR -> Camera: face_detected
+
+Camera -> FR: extract_face_features(face_image)
+FR -> FR: convert_to_grayscale()
+FR -> FR: resize_to_50x50()
+FR -> FR: flatten_features()
+
+Camera -> FR: load_face_recognition_model()
+FR -> FR: joblib.load("face_recognition_model.pkl")
+FR -> Camera: model_loaded
+
+Camera -> FR: identify_face(face_features)
+FR -> FR: model.predict(features)
+FR -> Camera: identified_name
+
+Camera -> DB: update_attendance_in_db(name, "masuk")
+Camera -> AttendanceModel: get_employee_by_name_bagian(name, bagian)
+AttendanceModel -> DB: SELECT * FROM employees WHERE...
+DB -> AttendanceModel: employee_data
+AttendanceModel -> Camera: employee_found
+
+Camera -> AttendanceModel: get_attendance_by_employee_date(id, today)
+AttendanceModel -> DB: SELECT * FROM attendance WHERE...
+DB -> AttendanceModel: existing_attendance
+AttendanceModel -> Camera: attendance_status
+
+alt No existing attendance
+    Camera -> AttendanceModel: add_or_update_attendance(id, today, jam_masuk)
+    AttendanceModel -> DB: INSERT INTO attendance...
+    DB -> AttendanceModel: success
+    AttendanceModel -> Camera: attendance_saved
+else Already attended
+    Camera -> Camera: return_error("Already attended")
+end
+
+Camera -> Camera: cleanup_camera_resources()
+Camera -> Controller: return_result(success/failure)
+
+Controller -> App: attendance_result
+App -> Browser: JSON response
+Browser -> User: Show success/error message
+
+== Database Update ==
+note over DB: Automatic total_jam_kerja calculation
+note over DB: when both jam_masuk and jam_pulang exist
+
+@enduml
