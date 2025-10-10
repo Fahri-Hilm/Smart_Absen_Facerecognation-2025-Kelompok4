@@ -291,6 +291,46 @@
                 font-size: 0.9rem;
             }
         }
+        
+        /* Face Capture Styles */
+        .face-capture-option {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .face-capture-option:hover {
+            background-color: var(--cream);
+            border-color: var(--accent-gold) !important;
+        }
+        
+        .mobile-camera-container {
+            text-align: center;
+            background: var(--warm-white);
+        }
+        
+        #faceCaptureSection {
+            background: rgba(218, 165, 32, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .capture-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .capture-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .capture-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -307,6 +347,9 @@
                 Kafebasabasi Admin
             </a>
             <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/localhost" target="_blank">
+                    <i class="bi bi-person-check"></i> Halaman Absensi
+                </a>
                 <a class="nav-link" href="/admin">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
@@ -360,7 +403,7 @@
                         </h3>
                     </div>
                     <div class="card-body p-4">
-                        <form action="/admin/add_employee" method="POST" class="row g-3">
+                        <form id="addEmployeeForm" class="row g-3">
                             <div class="col-md-4">
                                 <label for="name" class="form-label">Nama Lengkap</label>
                                 <input type="text" class="form-control" id="name" name="name" required placeholder="Masukkan nama lengkap">
@@ -377,12 +420,76 @@
                                 </select>
                             </div>
                             <div class="col-md-4 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="bi bi-person-check"></i>
-                                    Tambah Karyawan
+                                <button type="button" id="nextStep" class="btn btn-primary w-100">
+                                    <i class="bi bi-arrow-right"></i>
+                                    Lanjut ke Capture Wajah
                                 </button>
                             </div>
                         </form>
+                        
+                        <!-- Face Capture Section (Hidden initially) -->
+                        <div id="faceCaptureSection" class="mt-4" style="display: none;">
+                            <hr>
+                            <h5 class="mb-3">
+                                <i class="bi bi-camera"></i>
+                                Capture Wajah Karyawan
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="face-capture-option p-3 border rounded mb-3">
+                                        <h6><i class="bi bi-camera-video"></i> Kamera Desktop (GUI)</h6>
+                                        <p class="text-muted small">Menggunakan kamera komputer dengan window GUI</p>
+                                        <button type="button" id="captureWithGUI" class="btn btn-outline-primary">
+                                            <i class="bi bi-camera-video"></i>
+                                            Buka Kamera GUI
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="face-capture-option p-3 border rounded mb-3">
+                                        <h6><i class="bi bi-phone"></i> Kamera Mobile</h6>
+                                        <p class="text-muted small">Menggunakan kamera browser (WebRTC)</p>
+                                        <button type="button" id="captureWithMobile" class="btn btn-outline-success">
+                                            <i class="bi bi-phone"></i>
+                                            Aktifkan Kamera Browser
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Mobile Camera Section -->
+                            <div id="mobileCameraSection" style="display: none;">
+                                <div class="mobile-camera-container p-3 border rounded">
+                                    <video id="video" autoplay playsinline muted style="width: 100%; max-width: 400px; height: 300px; border-radius: 8px; transform: scaleX(-1);"></video>
+                                    <canvas id="canvas" style="display: none;"></canvas>
+                                    <div class="mt-3">
+                                        <button type="button" id="capturePhoto" class="btn btn-success me-2">
+                                            <i class="bi bi-camera"></i>
+                                            Ambil Foto
+                                        </button>
+                                        <button type="button" id="stopCamera" class="btn btn-secondary">
+                                            <i class="bi bi-camera-video-off"></i>
+                                            Tutup Kamera
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Status and Final Submit -->
+                            <div id="captureStatus" class="mt-3"></div>
+                            <div id="finalSubmitSection" style="display: none;" class="mt-3">
+                                <div class="d-flex gap-2">
+                                    <button type="button" id="submitEmployee" class="btn btn-success">
+                                        <i class="bi bi-check-circle"></i>
+                                        Simpan Karyawan
+                                    </button>
+                                    <button type="button" id="resetForm" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                        Reset Form
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -571,6 +678,193 @@
                 }
             }, 5000);
         }
+        
+        // Face Capture Functionality
+        class EmployeeFaceCapture {
+            constructor() {
+                this.video = null;
+                this.canvas = null;
+                this.ctx = null;
+                this.stream = null;
+                this.capturedImageData = null;
+                this.currentEmployeeData = null;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('nextStep').addEventListener('click', () => this.showFaceCaptureSection());
+                document.getElementById('captureWithGUI').addEventListener('click', () => this.captureWithGUI());
+                document.getElementById('captureWithMobile').addEventListener('click', () => this.captureWithMobile());
+                document.getElementById('capturePhoto').addEventListener('click', () => this.capturePhoto());
+                document.getElementById('stopCamera').addEventListener('click', () => this.stopCamera());
+                document.getElementById('submitEmployee').addEventListener('click', () => this.submitEmployee());
+                document.getElementById('resetForm').addEventListener('click', () => this.resetForm());
+            }
+            
+            showFaceCaptureSection() {
+                const name = document.getElementById('name').value;
+                const bagian = document.getElementById('bagian').value;
+                
+                if (!name || !bagian) {
+                    showAlert('Harap isi nama dan bagian terlebih dahulu!', 'warning');
+                    return;
+                }
+                
+                this.currentEmployeeData = { name, bagian };
+                document.getElementById('faceCaptureSection').style.display = 'block';
+                this.showStatus('Pilih metode capture wajah untuk karyawan: ' + name, 'info');
+            }
+            
+            async captureWithMobile() {
+                try {
+                    this.showStatus('Mengaktifkan kamera browser...', 'info');
+                    
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width: 640, height: 480 },
+                        audio: false
+                    });
+                    
+                    this.video = document.getElementById('video');
+                    this.canvas = document.getElementById('canvas');
+                    this.ctx = this.canvas.getContext('2d');
+                    
+                    this.video.srcObject = this.stream;
+                    document.getElementById('mobileCameraSection').style.display = 'block';
+                    
+                    this.showStatus('Kamera aktif. Posisikan wajah dan klik "Ambil Foto"', 'success');
+                    
+                } catch (error) {
+                    console.error('Error accessing camera:', error);
+                    this.showStatus('Gagal mengakses kamera: ' + error.message, 'error');
+                }
+            }
+            
+            capturePhoto() {
+                if (!this.video || !this.stream) {
+                    this.showStatus('Kamera belum aktif!', 'error');
+                    return;
+                }
+                
+                this.canvas.width = this.video.videoWidth;
+                this.canvas.height = this.video.videoHeight;
+                this.ctx.drawImage(this.video, 0, 0);
+                
+                this.capturedImageData = this.canvas.toDataURL('image/jpeg', 0.8);
+                this.stopCamera();
+                
+                this.showStatus('✅ Foto berhasil diambil! Klik "Simpan Karyawan" untuk melanjutkan.', 'success');
+                document.getElementById('finalSubmitSection').style.display = 'block';
+            }
+            
+            async captureWithGUI() {
+                try {
+                    this.showStatus('Membuka kamera GUI...', 'info');
+                    
+                    const response = await fetch('/admin/capture_face_gui', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: this.currentEmployeeData.name,
+                            bagian: this.currentEmployeeData.bagian
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        this.capturedImageData = 'gui_captured'; // Marker untuk GUI capture
+                        this.showStatus('✅ ' + result.message, 'success');
+                        document.getElementById('finalSubmitSection').style.display = 'block';
+                    } else {
+                        this.showStatus('❌ ' + result.message, 'error');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error with GUI capture:', error);
+                    this.showStatus('❌ Terjadi kesalahan saat membuka kamera GUI', 'error');
+                }
+            }
+            
+            stopCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                    this.video.srcObject = null;
+                    document.getElementById('mobileCameraSection').style.display = 'none';
+                }
+            }
+            
+            async submitEmployee() {
+                if (!this.capturedImageData) {
+                    this.showStatus('Belum ada foto yang diambil!', 'error');
+                    return;
+                }
+                
+                try {
+                    this.showStatus('Menyimpan karyawan...', 'info');
+                    
+                    const formData = new FormData();
+                    formData.append('name', this.currentEmployeeData.name);
+                    formData.append('bagian', this.currentEmployeeData.bagian);
+                    
+                    if (this.capturedImageData !== 'gui_captured') {
+                        formData.append('face_image', this.capturedImageData);
+                        formData.append('capture_method', 'mobile');
+                    } else {
+                        formData.append('capture_method', 'gui');
+                    }
+                    
+                    const response = await fetch('/admin/add_employee_with_face', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        this.showStatus('✅ ' + result.message, 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        this.showStatus('❌ ' + result.message, 'error');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error submitting employee:', error);
+                    this.showStatus('❌ Terjadi kesalahan saat menyimpan karyawan', 'error');
+                }
+            }
+            
+            resetForm() {
+                document.getElementById('addEmployeeForm').reset();
+                document.getElementById('faceCaptureSection').style.display = 'none';
+                document.getElementById('finalSubmitSection').style.display = 'none';
+                this.stopCamera();
+                this.capturedImageData = null;
+                this.currentEmployeeData = null;
+                this.showStatus('', '');
+            }
+            
+            showStatus(message, type) {
+                const statusDiv = document.getElementById('captureStatus');
+                if (message) {
+                    statusDiv.innerHTML = `<div class="capture-status capture-${type}">${message}</div>`;
+                } else {
+                    statusDiv.innerHTML = '';
+                }
+            }
+        }
+        
+        // Initialize face capture system
+        document.addEventListener('DOMContentLoaded', function() {
+            new EmployeeFaceCapture();
+        });
     </script>
 </body>
 </html>

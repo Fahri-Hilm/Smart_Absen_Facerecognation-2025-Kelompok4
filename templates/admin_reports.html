@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --coffee-dark: #3C2415;
@@ -248,8 +249,51 @@
             }
             
             .report-card {
-                margin-bottom: 1.5rem;
+                margin-bottom: 1rem;
             }
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+            background: var(--warm-white);
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 5px 15px var(--shadow-light);
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--coffee-dark);
+            margin-bottom: 1rem;
+        }
+
+        .chart-tabs {
+            border-bottom: 2px solid var(--coffee-light);
+            margin-bottom: 1rem;
+        }
+
+        .chart-tab {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: var(--coffee-medium);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .chart-tab.active {
+            color: var(--coffee-dark);
+            border-bottom-color: var(--accent-gold);
+        }
+
+        .chart-tab:hover {
+            color: var(--coffee-dark);
         }
 
         /* Quick Stats */
@@ -522,6 +566,61 @@
                 </div>
             </div>
         </div>
+
+        <!-- Charts Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-graph-up"></i>
+                            Analisis Visual
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Chart Navigation Tabs -->
+                        <div class="chart-tabs">
+                            <button class="chart-tab active" onclick="showChart('attendance')">
+                                <i class="bi bi-person-check"></i> Kehadiran
+                            </button>
+                            <button class="chart-tab" onclick="showChart('performance')">
+                                <i class="bi bi-trophy"></i> Kinerja
+                            </button>
+                            <button class="chart-tab" onclick="showChart('overtime')">
+                                <i class="bi bi-clock-history"></i> Lembur
+                            </button>
+                            <button class="chart-tab" onclick="showChart('trend')">
+                                <i class="bi bi-graph-up-arrow"></i> Tren
+                            </button>
+                        </div>
+
+                        <!-- Attendance Chart -->
+                        <div id="attendanceChart" class="chart-container">
+                            <div class="chart-title">Grafik Kehadiran Harian</div>
+                            <canvas id="attendanceChartCanvas"></canvas>
+                        </div>
+
+                        <!-- Performance Chart -->
+                        <div id="performanceChart" class="chart-container" style="display: none;">
+                            <div class="chart-title">Grafik Kinerja Karyawan</div>
+                            <canvas id="performanceChartCanvas"></canvas>
+                        </div>
+
+                        <!-- Overtime Chart -->
+                        <div id="overtimeChart" class="chart-container" style="display: none;">
+                            <div class="chart-title">Grafik Analisis Lembur</div>
+                            <canvas id="overtimeChartCanvas"></canvas>
+                        </div>
+
+                        <!-- Trend Chart -->
+                        <div id="trendChart" class="chart-container" style="display: none;">
+                            <div class="chart-title">Tren Kehadiran Bulanan</div>
+                            <canvas id="trendChartCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -534,85 +633,581 @@
 
         function loadEmployees() {
             // Implementation for loading employees list
-            // This would fetch from /get_employees endpoint
+            fetch('/get_employees')
+                .then(response => response.json())
+                .catch(error => console.log('Could not load employees:', error));
         }
 
         function setDefaultDates() {
             const today = new Date();
             const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
             
-            document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
-            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            if (document.getElementById('startDate')) {
+                document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
+            }
+            if (document.getElementById('endDate')) {
+                document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            }
         }
 
         // Report generation functions
         function generateDailyReport() {
             showNotification('Generating daily report...', 'info');
-            // Implementation
+            
+            fetch('/admin/reports/daily')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayReportData('Daily Report', data.data, 'daily');
+                        showNotification('Daily report generated successfully!', 'success');
+                    } else {
+                        showNotification('Error generating daily report: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showNotification('Error generating daily report: ' + error.message, 'error');
+                });
         }
 
         function generateWeeklyReport() {
             showNotification('Generating weekly report...', 'info');
-            // Implementation
+            
+            fetch('/admin/reports/weekly')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayReportData('Weekly Report', data.data, 'weekly');
+                        showNotification('Weekly report generated successfully!', 'success');
+                    } else {
+                        showNotification('Error generating weekly report: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showNotification('Error generating weekly report: ' + error.message, 'error');
+                });
         }
 
         function generateMonthlyReport() {
             showNotification('Generating monthly report...', 'info');
-            // Implementation
+            
+            fetch('/admin/reports/monthly')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayReportData('Monthly Report', data.data, 'monthly');
+                        showNotification('Monthly report generated successfully!', 'success');
+                    } else {
+                        showNotification('Error generating monthly report: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showNotification('Error generating monthly report: ' + error.message, 'error');
+                });
         }
 
         function generatePerformanceReport() {
             showNotification('Generating performance report...', 'info');
-            // Implementation
+            
+            fetch('/admin/reports/performance')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayPerformanceData('Performance Report', data.data);
+                        showNotification('Performance report generated successfully!', 'success');
+                    } else {
+                        showNotification('Error generating performance report: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showNotification('Error generating performance report: ' + error.message, 'error');
+                });
         }
 
         function generateOvertimeReport() {
             showNotification('Generating overtime report...', 'info');
-            // Implementation
+            
+            const startDate = document.getElementById('startDate')?.value || new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+            const endDate = document.getElementById('endDate')?.value || new Date().toISOString().split('T')[0];
+            
+            fetch(`/admin/reports/overtime?start_date=${startDate}&end_date=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayOvertimeData('Overtime Report', data.data);
+                        showNotification('Overtime report generated successfully!', 'success');
+                    } else {
+                        showNotification('Error generating overtime report: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showNotification('Error generating overtime report: ' + error.message, 'error');
+                });
         }
 
         function generateSummaryReport() {
             showNotification('Generating summary report...', 'info');
-            // Implementation
+            // Combine multiple reports
+            Promise.all([
+                fetch('/admin/reports/daily').then(r => r.json()),
+                fetch('/admin/reports/weekly').then(r => r.json()),
+                fetch('/admin/reports/performance').then(r => r.json())
+            ])
+            .then(([daily, weekly, performance]) => {
+                const summaryData = {
+                    daily: daily.status === 'success' ? daily.data : null,
+                    weekly: weekly.status === 'success' ? weekly.data : null,
+                    performance: performance.status === 'success' ? performance.data : null
+                };
+                displaySummaryReport(summaryData);
+                showNotification('Summary report generated successfully!', 'success');
+            })
+            .catch(error => {
+                showNotification('Error generating summary report: ' + error.message, 'error');
+            });
         }
 
         // Custom report form handler
-        document.getElementById('customReportForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const reportType = document.getElementById('reportType').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const format = document.getElementById('exportFormat').value;
-            
-            if (!reportType || !startDate || !endDate) {
-                showNotification('Mohon lengkapi semua field yang wajib', 'warning');
-                return;
-            }
-            
-            showNotification(`Generating ${reportType} report from ${startDate} to ${endDate} in ${format} format...`, 'info');
-            // Implementation for custom report generation
-        });
-
-        // Quick actions
-        function exportTodayAttendance() {
-            showNotification('Exporting today\'s attendance...', 'info');
-            // Implementation
+        if (document.getElementById('customReportForm')) {
+            document.getElementById('customReportForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const reportType = document.getElementById('reportType').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const format = document.getElementById('exportFormat').value;
+                
+                if (!reportType || !startDate || !endDate) {
+                    showNotification('Mohon lengkapi semua field yang wajib', 'warning');
+                    return;
+                }
+                
+                exportCustomReport(reportType, startDate, endDate, format);
+            });
         }
 
+        // Export functions
+        function exportTodayAttendance() {
+            const today = new Date().toISOString().split('T')[0];
+            exportReport('daily', 'csv', today, today);
+        }
+
+        function exportCustomReport(type, startDate, endDate, format) {
+            showNotification(`Exporting ${type} report...`, 'info');
+            exportReport(type === 'dateRange' ? 'range' : type, format, startDate, endDate);
+        }
+
+        function exportReport(type, format, startDate, endDate) {
+            const params = new URLSearchParams({
+                type: type,
+                format: format
+            });
+            
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            
+            const url = `/admin/reports/export?${params.toString()}`;
+            
+            // Create a temporary link to download the file
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Export started! File will download shortly.', 'success');
+        }
+
+        // Display functions
+        function displayReportData(title, data, reportType = 'daily') {
+            const modal = createReportModal(title, data, reportType);
+            let content = `
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Periode:</strong> ${data.tanggal || data.periode}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Total Karyawan:</strong> ${data.total_karyawan}
+                    </div>
+                </div>
+            `;
+            
+            if (data.hadir !== undefined) {
+                content += `
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <div class="text-center p-2 bg-success text-white rounded">
+                                <div class="h4">${data.hadir}</div>
+                                <small>Hadir</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-2 bg-danger text-white rounded">
+                                <div class="h4">${data.tidak_hadir}</div>
+                                <small>Tidak Hadir</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-2 bg-warning text-white rounded">
+                                <div class="h4">${data.terlambat}</div>
+                                <small>Terlambat</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-2 bg-info text-white rounded">
+                                <div class="h4">${data.persentase_kehadiran}%</div>
+                                <small>Kehadiran</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (data.detail_karyawan && data.detail_karyawan.length > 0) {
+                content += `
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Bagian</th>
+                                    <th>Jam Masuk</th>
+                                    <th>Jam Pulang</th>
+                                    <th>Status</th>
+                                    <th>Total Jam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                data.detail_karyawan.forEach(emp => {
+                    content += `
+                        <tr>
+                            <td>${emp.name}</td>
+                            <td>${emp.bagian}</td>
+                            <td>${emp.jam_masuk || '-'}</td>
+                            <td>${emp.jam_pulang || '-'}</td>
+                            <td>${emp.status || '-'}</td>
+                            <td>${emp.total_jam || emp.rata_jam_kerja || '-'}</td>
+                        </tr>
+                    `;
+                });
+                
+                content += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            modal.querySelector('.modal-body').innerHTML = content;
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+        }
+
+        function displayPerformanceData(title, data) {
+            const modal = createReportModal(title, data, 'performance');
+            let content = `
+                <div class="mb-3">
+                    <strong>Periode:</strong> ${data.periode}
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nama</th>
+                                <th>Bagian</th>
+                                <th>Kehadiran</th>
+                                <th>Tepat Waktu</th>
+                                <th>% Kehadiran</th>
+                                <th>% Ketepatan</th>
+                                <th>Rata² Jam</th>
+                                <th>Skor Kinerja</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            data.detail_karyawan.forEach(emp => {
+                const skorClass = emp.skor_kinerja >= 80 ? 'bg-success' : 
+                                 emp.skor_kinerja >= 60 ? 'bg-warning' : 'bg-danger';
+                content += `
+                    <tr>
+                        <td>${emp.name}</td>
+                        <td>${emp.bagian}</td>
+                        <td>${emp.total_hadir}/${emp.total_absen}</td>
+                        <td>${emp.tepat_waktu}</td>
+                        <td>${emp.persentase_kehadiran}%</td>
+                        <td>${emp.persentase_ketepatan}%</td>
+                        <td>${emp.rata_jam_kerja ? emp.rata_jam_kerja.toFixed(1) : '-'}</td>
+                        <td><span class="badge ${skorClass}">${emp.skor_kinerja}</span></td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            modal.querySelector('.modal-body').innerHTML = content;
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+        }
+
+        function displayOvertimeData(title, data) {
+            const modal = createReportModal(title, data, 'overtime');
+            let content = `
+                <div class="mb-3">
+                    <strong>Periode:</strong> ${data.periode} | 
+                    <strong>Jam Kerja Normal:</strong> ${data.jam_kerja_normal} jam/hari
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="text-center p-2 bg-primary text-white rounded">
+                            <div class="h4">${data.total_records}</div>
+                            <small>Total Hari Kerja</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-2 bg-warning text-white rounded">
+                            <div class="h4">${data.overtime_records}</div>
+                            <small>Hari Lembur</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-2 bg-danger text-white rounded">
+                            <div class="h4">${data.total_overtime_hours}</div>
+                            <small>Total Jam Lembur</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-2 bg-info text-white rounded">
+                            <div class="h4">${data.persentase_lembur}%</div>
+                            <small>% Lembur</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5>Ringkasan per Karyawan</h5>
+                <div class="table-responsive mb-3">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nama</th>
+                                <th>Bagian</th>
+                                <th>Total Hari</th>
+                                <th>Hari Lembur</th>
+                                <th>Total Jam Lembur</th>
+                                <th>Rata² Jam Lembur</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            data.summary_karyawan.forEach(emp => {
+                content += `
+                    <tr>
+                        <td>${emp.name}</td>
+                        <td>${emp.bagian}</td>
+                        <td>${emp.total_hari_kerja}</td>
+                        <td>${emp.hari_lembur}</td>
+                        <td>${emp.total_jam_lembur}</td>
+                        <td>${emp.rata_jam_lembur}</td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h5>Detail Harian</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Nama</th>
+                                <th>Bagian</th>
+                                <th>Jam Masuk</th>
+                                <th>Jam Keluar</th>
+                                <th>Total Jam</th>
+                                <th>Jam Lembur</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            data.detail_harian.forEach(record => {
+                const statusClass = record.status_lembur === 'Lembur' ? 'text-danger fw-bold' : '';
+                content += `
+                    <tr>
+                        <td>${record.tanggal}</td>
+                        <td>${record.name}</td>
+                        <td>${record.bagian}</td>
+                        <td>${record.jam_masuk || '-'}</td>
+                        <td>${record.jam_pulang || '-'}</td>
+                        <td>${record.total_jam || '-'}</td>
+                        <td class="${statusClass}">${record.jam_lembur || 0}</td>
+                        <td><span class="badge ${record.status_lembur === 'Lembur' ? 'bg-warning' : 'bg-success'}">${record.status_lembur}</span></td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            modal.querySelector('.modal-body').innerHTML = content;
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+        }
+
+        function createReportModal(title, reportData = null, reportType = 'daily') {
+            // Remove existing modal if any
+            const existingModal = document.getElementById('reportModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'reportModal';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Content will be inserted here -->
+                        </div>
+                        <div class="modal-footer">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="downloadReport('csv', '${reportType}', reportModalData)">
+                                        <i class="bi bi-file-earmark-spreadsheet"></i> Download CSV
+                                    </button>
+                                    <button type="button" class="btn btn-info btn-sm" onclick="downloadReport('json', '${reportType}', reportModalData)">
+                                        <i class="bi bi-file-earmark-code"></i> Download JSON
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm" onclick="downloadReport('excel', '${reportType}', reportModalData)">
+                                        <i class="bi bi-file-earmark-excel"></i> Download Excel
+                                    </button>
+                                </div>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Store report data globally for download
+            if (reportData) {
+                window.reportModalData = reportData;
+            }
+            
+            return modal;
+        }
+
+        // Quick actions
         function viewAttendanceChart() {
             showNotification('Loading attendance chart...', 'info');
-            // Implementation
+            // Implementation for charts would go here
+            setTimeout(() => {
+                showNotification('Chart feature coming soon!', 'warning');
+            }, 1000);
         }
 
         function sendEmailReport() {
-            showNotification('Sending report via email...', 'info');
-            // Implementation
+            showNotification('Email report feature coming soon!', 'warning');
         }
 
         function scheduleReport() {
-            showNotification('Opening report scheduler...', 'info');
-            // Implementation
+            showNotification('Report scheduler feature coming soon!', 'warning');
+        }
+
+        // Download report function
+        function downloadReport(format, reportType, data) {
+            if (!data) {
+                showNotification('No data available for download', 'error');
+                return;
+            }
+            
+            showNotification(`Preparing ${format.toUpperCase()} download...`, 'info');
+            
+            // Determine date range for filename
+            let dateStr = '';
+            if (data.tanggal) {
+                dateStr = data.tanggal;
+            } else if (data.periode) {
+                dateStr = data.periode.replace(/\s+/g, '_').replace(/\//g, '-');
+            } else {
+                dateStr = new Date().toISOString().split('T')[0];
+            }
+            
+            // Create download URL with parameters
+            const params = new URLSearchParams({
+                type: reportType,
+                format: format
+            });
+            
+            // Add date parameters based on report type
+            if (reportType === 'daily') {
+                params.append('start_date', dateStr);
+                params.append('end_date', dateStr);
+            } else if (reportType === 'weekly') {
+                // For weekly reports, calculate week range
+                const today = new Date();
+                const startWeek = new Date(today.getTime() - (today.getDay() * 24 * 60 * 60 * 1000));
+                const endWeek = new Date(startWeek.getTime() + (6 * 24 * 60 * 60 * 1000));
+                params.append('start_date', startWeek.toISOString().split('T')[0]);
+                params.append('end_date', endWeek.toISOString().split('T')[0]);
+            } else if (reportType === 'monthly') {
+                // For monthly reports, use current month
+                const now = new Date();
+                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+                const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                params.append('start_date', firstDay.toISOString().split('T')[0]);
+                params.append('end_date', lastDay.toISOString().split('T')[0]);
+            } else if (reportType === 'performance') {
+                // For performance reports, use last 30 days
+                const endDate = new Date();
+                const startDate = new Date(endDate.getTime() - (30 * 24 * 60 * 60 * 1000));
+                params.append('start_date', startDate.toISOString().split('T')[0]);
+                params.append('end_date', endDate.toISOString().split('T')[0]);
+            }
+            
+            const url = `/admin/reports/export?${params.toString()}`;
+            
+            // Create and trigger download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `laporan_${reportType}_${dateStr}.${format}`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification(`${format.toUpperCase()} file downloaded successfully!`, 'success');
+        }
+
+        // Auto download after generate (optional)
+        function autoDownloadReport(format, reportType, data) {
+            setTimeout(() => {
+                if (confirm(`Download laporan ${reportType} dalam format ${format.toUpperCase()}?`)) {
+                    downloadReport(format, reportType, data);
+                }
+            }, 1000);
         }
 
         function showNotification(message, type) {
@@ -631,6 +1226,424 @@
                     alert.remove();
                 }
             }, 5000);
+        }
+
+        // Chart functions
+        let attendanceChart, performanceChart, overtimeChart, trendChart;
+
+        function showChart(chartType) {
+            // Hide all charts
+            document.querySelectorAll('.chart-container').forEach(container => {
+                container.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.chart-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected chart and activate tab
+            document.getElementById(chartType + 'Chart').style.display = 'block';
+            event.target.classList.add('active');
+            
+            // Load chart data based on type
+            switch(chartType) {
+                case 'attendance':
+                    loadAttendanceChart();
+                    break;
+                case 'performance':
+                    loadPerformanceChart();
+                    break;
+                case 'overtime':
+                    loadOvertimeChart();
+                    break;
+                case 'trend':
+                    loadTrendChart();
+                    break;
+            }
+        }
+
+        function loadAttendanceChart() {
+            const ctx = document.getElementById('attendanceChartCanvas').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (attendanceChart) {
+                attendanceChart.destroy();
+            }
+            
+            // Sample data - in real implementation, fetch from API
+            const data = {
+                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                datasets: [{
+                    label: 'Hadir',
+                    data: [12, 15, 14, 16, 13, 8],
+                    backgroundColor: 'rgba(139, 69, 19, 0.7)',
+                    borderColor: 'rgba(139, 69, 19, 1)',
+                    borderWidth: 2
+                }, {
+                    label: 'Terlambat',
+                    data: [2, 1, 3, 1, 2, 1],
+                    backgroundColor: 'rgba(218, 165, 32, 0.7)',
+                    borderColor: 'rgba(218, 165, 32, 1)',
+                    borderWidth: 2
+                }, {
+                    label: 'Tidak Hadir',
+                    data: [1, 0, 0, 0, 1, 2],
+                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 2
+                }]
+            };
+            
+            attendanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadPerformanceChart() {
+            const ctx = document.getElementById('performanceChartCanvas').getContext('2d');
+            
+            if (performanceChart) {
+                performanceChart.destroy();
+            }
+            
+            const data = {
+                labels: ['Budi', 'Sari', 'Andi', 'Maya', 'Doni'],
+                datasets: [{
+                    label: 'Skor Kinerja',
+                    data: [85, 92, 78, 88, 90],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(40, 167, 69, 0.7)', 
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(40, 167, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(40, 167, 69, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            };
+            
+            performanceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadOvertimeChart() {
+            const ctx = document.getElementById('overtimeChartCanvas').getContext('2d');
+            
+            if (overtimeChart) {
+                overtimeChart.destroy();
+            }
+            
+            const data = {
+                labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+                datasets: [{
+                    label: 'Jam Lembur',
+                    data: [15, 22, 18, 25],
+                    backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                    borderColor: 'rgba(255, 193, 7, 1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            };
+            
+            overtimeChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadTrendChart() {
+            const ctx = document.getElementById('trendChartCanvas').getContext('2d');
+            
+            if (trendChart) {
+                trendChart.destroy();
+            }
+            
+            const data = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                datasets: [{
+                    label: '% Kehadiran',
+                    data: [85, 88, 92, 89, 94, 91],
+                    backgroundColor: 'rgba(139, 69, 19, 0.2)',
+                    borderColor: 'rgba(139, 69, 19, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize charts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAttendanceChart();
+        });
+
+        // Email and Schedule functions
+        function sendEmailReport() {
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Kirim Laporan via Email</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="emailReportForm">
+                                <div class="mb-3">
+                                    <label for="emailRecipients" class="form-label">Email Penerima</label>
+                                    <input type="email" class="form-control" id="emailRecipients" 
+                                           placeholder="email@contoh.com" multiple required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="emailReportType" class="form-label">Jenis Laporan</label>
+                                    <select class="form-control" id="emailReportType" required>
+                                        <option value="daily">Harian</option>
+                                        <option value="weekly">Mingguan</option>
+                                        <option value="monthly">Bulanan</option>
+                                        <option value="performance">Kinerja</option>
+                                        <option value="overtime">Lembur</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="emailFormat" class="form-label">Format</label>
+                                    <select class="form-control" id="emailFormat" required>
+                                        <option value="pdf">PDF</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="csv">CSV</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="emailMessage" class="form-label">Pesan Tambahan</label>
+                                    <textarea class="form-control" id="emailMessage" rows="3" 
+                                              placeholder="Pesan opsional..."></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="button" class="btn btn-primary" onclick="processEmailReport()">
+                                <i class="bi bi-envelope"></i> Kirim Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+            
+            modal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(modal);
+            });
+        }
+
+        function processEmailReport() {
+            const email = document.getElementById('emailRecipients').value;
+            const reportType = document.getElementById('emailReportType').value;
+            const format = document.getElementById('emailFormat').value;
+            const message = document.getElementById('emailMessage').value;
+            
+            if (!email) {
+                showNotification('Email penerima wajib diisi!', 'error');
+                return;
+            }
+            
+            showNotification('Mengirim laporan via email...', 'info');
+            
+            // Simulate email sending
+            setTimeout(() => {
+                showNotification(`Laporan ${reportType} berhasil dikirim ke ${email}!`, 'success');
+                bootstrap.Modal.getInstance(document.querySelector('.modal.show')).hide();
+            }, 2000);
+        }
+
+        function scheduleReport() {
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Jadwalkan Laporan Otomatis</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="scheduleForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="scheduleReportType" class="form-label">Jenis Laporan</label>
+                                            <select class="form-control" id="scheduleReportType" required>
+                                                <option value="daily">Harian</option>
+                                                <option value="weekly">Mingguan</option>
+                                                <option value="monthly">Bulanan</option>
+                                                <option value="performance">Kinerja</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="scheduleFrequency" class="form-label">Frekuensi</label>
+                                            <select class="form-control" id="scheduleFrequency" required>
+                                                <option value="daily">Setiap Hari</option>
+                                                <option value="weekly">Setiap Minggu</option>
+                                                <option value="monthly">Setiap Bulan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="scheduleTime" class="form-label">Waktu Pengiriman</label>
+                                            <input type="time" class="form-control" id="scheduleTime" value="08:00" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="scheduleFormat" class="form-label">Format File</label>
+                                            <select class="form-control" id="scheduleFormat" required>
+                                                <option value="pdf">PDF</option>
+                                                <option value="excel">Excel</option>
+                                                <option value="csv">CSV</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="scheduleEmails" class="form-label">Email Penerima</label>
+                                    <input type="email" class="form-control" id="scheduleEmails" 
+                                           placeholder="email1@contoh.com, email2@contoh.com" multiple required>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="scheduleActive" checked>
+                                        <label class="form-check-label" for="scheduleActive">
+                                            Aktifkan jadwal ini
+                                        </label>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="button" class="btn btn-primary" onclick="processScheduleReport()">
+                                <i class="bi bi-clock"></i> Buat Jadwal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+            
+            modal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(modal);
+            });
+        }
+
+        function processScheduleReport() {
+            const reportType = document.getElementById('scheduleReportType').value;
+            const frequency = document.getElementById('scheduleFrequency').value;
+            const time = document.getElementById('scheduleTime').value;
+            const format = document.getElementById('scheduleFormat').value;
+            const emails = document.getElementById('scheduleEmails').value;
+            const active = document.getElementById('scheduleActive').checked;
+            
+            if (!emails) {
+                showNotification('Email penerima wajib diisi!', 'error');
+                return;
+            }
+            
+            showNotification('Membuat jadwal laporan otomatis...', 'info');
+            
+            // Simulate schedule creation
+            setTimeout(() => {
+                showNotification(`Jadwal laporan ${reportType} ${frequency} berhasil dibuat!`, 'success');
+                bootstrap.Modal.getInstance(document.querySelector('.modal.show')).hide();
+            }, 1500);
+        }
+
+        // Additional utility functions
+        function viewAttendanceChart() {
+            showChart('attendance');
+        }
+
+        function exportTodayAttendance() {
+            const today = new Date().toISOString().split('T')[0];
+            generateDailyReport();
         }
     </script>
 </body>

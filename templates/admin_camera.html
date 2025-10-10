@@ -380,6 +380,30 @@
                                     </button>
                                 </div>
                             </div>
+                            
+                            <!-- Debug Controls -->
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-success w-100" id="requestPermission">
+                                        <i class="bi bi-shield-check"></i>
+                                        Request Permission
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-warning w-100" id="debugCamera">
+                                        <i class="bi bi-bug"></i>
+                                        Debug Kamera
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-info w-100" id="reloadCameras">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                        Reload Kamera
+                                    </button>
+                                </div>
+                            </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -566,6 +590,14 @@
             document.getElementById('testCamera').addEventListener('click', testDetection);
             document.getElementById('captureTest').addEventListener('click', captureTest);
 
+            // Debug controls
+            document.getElementById('requestPermission').addEventListener('click', requestCameraPermission);
+            document.getElementById('debugCamera').addEventListener('click', debugCamera);
+            document.getElementById('reloadCameras').addEventListener('click', () => {
+                showNotification('Memuat ulang daftar kamera...', 'info');
+                loadAvailableCameras();
+            });
+
             // Settings form
             document.getElementById('cameraSettingsForm').addEventListener('submit', saveCameraSettings);
             document.getElementById('saveAdvancedSettings').addEventListener('click', saveAdvancedSettings);
@@ -585,15 +617,44 @@
 
         async function loadAvailableCameras() {
             try {
-                const response = await fetch('/get_cameras');
-                const cameras = await response.json();
+                console.log('=== LOADING CAMERAS DEBUG ===');
+                console.log('Fetching cameras from /admin/api/cameras...');
+                
+                const response = await fetch('/admin/api/cameras');
+                console.log('Response status:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Camera data received:', data);
+                
+                const cameras = data.cameras || [];
                 availableCameras = cameras;
+                
+                console.log('Available cameras set to:', availableCameras);
                 
                 updateCameraSelect(cameras);
                 updateCameraList(cameras);
+                
+                if (data.active_count > 0) {
+                    showNotification(`Ditemukan ${data.active_count} kamera aktif dari ${data.total_detected} perangkat`, 'success');
+                } else if (data.total_detected > 0) {
+                    showNotification(`Ditemukan ${data.total_detected} perangkat kamera namun tidak ada yang aktif`, 'warning');
+                } else {
+                    showNotification('Tidak ada kamera yang terdeteksi. Periksa koneksi kamera Anda.', 'error');
+                }
+                
+                console.log('=== END LOADING CAMERAS DEBUG ===');
+                
             } catch (error) {
                 console.error('Error loading cameras:', error);
-                showNotification('Gagal memuat daftar kamera', 'error');
+                showNotification('Gagal memuat daftar kamera: ' + error.message, 'error');
+                
+                // Show empty state
+                updateCameraSelect([]);
+                updateCameraList([]);
             }
         }
 
@@ -603,8 +664,8 @@
             
             cameras.forEach((camera, index) => {
                 const option = document.createElement('option');
-                option.value = index;
-                option.textContent = camera.name || `Kamera ${index + 1}`;
+                option.value = camera.id || index;
+                option.textContent = `${camera.name} (${camera.status})`;
                 if (index === 0) option.selected = true;
                 select.appendChild(option);
             });
@@ -618,6 +679,7 @@
                     <div class="text-center py-5">
                         <i class="bi bi-camera-video-off display-1 text-muted"></i>
                         <div class="mt-2">Tidak ada kamera yang terdeteksi</div>
+                        <div class="mt-2"><small class="text-muted">Pastikan kamera terhubung dan driver terinstall</small></div>
                     </div>
                 `;
                 return;
@@ -629,19 +691,54 @@
                 cameraItem.className = 'camera-item';
                 if (index === 0) cameraItem.classList.add('active');
                 
+                // Status color based on camera status
+                let statusBadge = '';
+                let statusClass = '';
+                switch(camera.status) {
+                    case 'active':
+                        statusBadge = '<span class="badge bg-success">Aktif</span>';
+                        statusClass = 'border-success';
+                        break;
+                    case 'virtual':
+                        statusBadge = '<span class="badge bg-info">Virtual</span>';
+                        statusClass = 'border-info';
+                        break;
+                    case 'detected_but_failed':
+                        statusBadge = '<span class="badge bg-warning">Terdeteksi (Error)</span>';
+                        statusClass = 'border-warning';
+                        break;
+                    case 'not_available':
+                        statusBadge = '<span class="badge bg-secondary">Tidak Tersedia</span>';
+                        statusClass = 'border-secondary';
+                        break;
+                    case 'error':
+                        statusBadge = '<span class="badge bg-danger">Error</span>';
+                        statusClass = 'border-danger';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-light text-dark">Unknown</span>';
+                }
+                
+                cameraItem.classList.add(statusClass);
+                
                 cameraItem.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-1" style="color: var(--coffee-dark);">
                                 <i class="bi bi-camera"></i>
-                                ${camera.name || `Kamera ${index + 1}`}
+                                ${camera.name || `Kamera ${camera.id}`}
                             </h6>
-                            <small class="text-muted">ID: ${camera.deviceId}</small>
+                            <div class="mb-1">${statusBadge}</div>
+                            <small class="text-muted">
+                                Device: ${camera.device || 'Unknown'}
+                                ${camera.error ? `<br>Error: ${camera.error}` : ''}
+                            </small>
                         </div>
                         <div>
-                            <button class="btn btn-sm btn-primary" onclick="selectCamera(${index})">
+                            <button class="btn btn-sm btn-primary" onclick="selectCamera(${index})" 
+                                    ${camera.status === 'error' || camera.status === 'not_available' ? 'disabled' : ''}>
                                 <i class="bi bi-check-circle"></i>
-                                Pilih
+                                ${camera.status === 'virtual' ? 'Test Mode' : 'Pilih'}
                             </button>
                         </div>
                     </div>
@@ -665,50 +762,174 @@
 
         async function startCamera() {
             try {
-                const selectedCamera = document.getElementById('cameraSelect').value;
-                if (!selectedCamera) {
+                console.log('=== START CAMERA DEBUG ===');
+                console.log('Available cameras:', availableCameras);
+                
+                const selectedCameraIndex = document.getElementById('cameraSelect').value;
+                console.log('Selected camera index:', selectedCameraIndex);
+                
+                if (!selectedCameraIndex && selectedCameraIndex !== "0") {
                     showNotification('Silakan pilih kamera terlebih dahulu', 'warning');
                     return;
                 }
 
-                const constraints = {
+                const selectedCamera = availableCameras.find(cam => cam.id == selectedCameraIndex);
+                console.log('Selected camera object:', selectedCamera);
+                
+                if (!selectedCamera) {
+                    showNotification('Kamera yang dipilih tidak ditemukan', 'error');
+                    return;
+                }
+
+                // Check if browser supports camera access
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    showNotification('Browser tidak mendukung akses kamera. Gunakan HTTPS atau Chrome/Firefox terbaru.', 'error');
+                    return;
+                }
+
+                // Only allow active real cameras
+                if (selectedCamera.status !== 'active') {
+                    showNotification(`Kamera ${selectedCamera.name} tidak aktif atau tidak dapat diakses`, 'error');
+                    return;
+                }
+
+                // Check permissions first
+                console.log('Checking camera permissions...');
+                try {
+                    const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+                    console.log('Permission status:', permissionStatus.state);
+                    
+                    if (permissionStatus.state === 'denied') {
+                        showNotification('Izin kamera ditolak. Klik ikon kamera di address bar untuk memberikan izin.', 'error');
+                        showPermissionInstructions();
+                        return;
+                    }
+                } catch (permError) {
+                    console.log('Permission check failed (might be normal):', permError.message);
+                }
+
+                // Show loading
+                showNotification('Meminta akses kamera... Klik ALLOW jika ditanya!', 'info');
+
+                // Setup basic constraints first
+                let constraints = {
                     video: {
-                        deviceId: availableCameras[selectedCamera].deviceId,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        width: { ideal: 640, min: 320 },
+                        height: { ideal: 480, min: 240 },
+                        frameRate: { ideal: 30, min: 15 }
                     }
                 };
 
-                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-                const videoElement = document.getElementById('cameraPreview');
-                
-                videoElement.srcObject = currentStream;
-                videoElement.style.display = 'block';
-                document.getElementById('cameraPlaceholder').style.display = 'none';
+                console.log('Initial constraints:', constraints);
 
-                // Update controls
-                document.getElementById('startCamera').disabled = true;
-                document.getElementById('stopCamera').disabled = false;
-                
-                // Update status
-                const status = document.querySelector('.camera-status');
-                status.className = 'camera-status status-active';
-                status.innerHTML = '<i class="bi bi-record-circle"></i> Aktif';
+                // Try camera access
+                try {
+                    console.log('Requesting camera access...');
+                    currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    console.log('Camera access granted!', currentStream);
+                    
+                    const videoElement = document.getElementById('cameraPreview');
+                    
+                    // Setup video element
+                    videoElement.srcObject = currentStream;
+                    videoElement.autoplay = true;
+                    videoElement.muted = true;
+                    videoElement.playsInline = true;
+                    
+                    // Wait for video to load
+                    await new Promise((resolve) => {
+                        videoElement.onloadedmetadata = () => {
+                            console.log('Video metadata loaded');
+                            resolve();
+                        };
+                    });
 
-                showNotification('Kamera berhasil diaktifkan', 'success');
+                    // Show video
+                    videoElement.style.display = 'block';
+                    document.getElementById('cameraPlaceholder').style.display = 'none';
+
+                    // Update controls
+                    document.getElementById('startCamera').disabled = true;
+                    document.getElementById('stopCamera').disabled = false;
+                    
+                    // Update status
+                    const status = document.querySelector('.camera-status');
+                    status.className = 'camera-status status-active';
+                    status.innerHTML = '<i class="bi bi-record-circle"></i> Aktif';
+
+                    // Log camera info
+                    const track = currentStream.getVideoTracks()[0];
+                    const settings = track.getSettings();
+                    console.log('Camera settings:', settings);
+                    
+                    showNotification(`Kamera berhasil diaktifkan (${settings.width || 'unknown'}x${settings.height || 'unknown'})`, 'success');
+
+                } catch (cameraError) {
+                    console.error('Camera access error:', cameraError);
+                    throw cameraError;
+                }
+
             } catch (error) {
                 console.error('Error starting camera:', error);
-                showNotification('Gagal mengaktifkan kamera', 'error');
+                console.error('Error details:', {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack
+                });
+                
+                let errorMessage = 'Gagal mengaktifkan kamera: ';
+                let instructions = '';
+                
+                switch (error.name) {
+                    case 'NotFoundError':
+                        errorMessage += 'Kamera tidak ditemukan';
+                        instructions = 'Pastikan kamera terhubung dan driver terinstall.';
+                        break;
+                    case 'NotAllowedError':
+                        errorMessage += 'Akses kamera ditolak';
+                        instructions = 'Klik ikon kamera 📷 di address bar dan pilih "Allow", atau berikan izin di pengaturan browser.';
+                        showPermissionInstructions();
+                        break;
+                    case 'NotReadableError':
+                        errorMessage += 'Kamera sedang digunakan aplikasi lain';
+                        instructions = 'Tutup aplikasi lain yang menggunakan kamera (Zoom, Skype, dll).';
+                        break;
+                    case 'OverconstrainedError':
+                        errorMessage += 'Resolusi tidak didukung';
+                        instructions = 'Kamera tidak mendukung resolusi yang diminta.';
+                        break;
+                    case 'SecurityError':
+                        errorMessage += 'Koneksi tidak aman';
+                        instructions = 'Gunakan HTTPS atau localhost. Pastikan URL dimulai dengan https:// atau http://localhost';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                        instructions = 'Coba refresh halaman atau gunakan browser lain (Chrome/Firefox).';
+                }
+                
+                showNotification(errorMessage, 'error');
+                if (instructions) {
+                    setTimeout(() => {
+                        showNotification('💡 ' + instructions, 'info');
+                    }, 2000);
+                }
             }
+            
+            console.log('=== END CAMERA DEBUG ===');
         }
+
+        // Virtual camera function removed - focusing on real cameras only
+        // function showVirtualCamera() { ... }
 
         function stopCamera() {
             if (currentStream) {
+                // Stop all tracks from real camera
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
 
             const videoElement = document.getElementById('cameraPreview');
+            videoElement.srcObject = null;
             videoElement.style.display = 'none';
             document.getElementById('cameraPlaceholder').style.display = 'block';
 
@@ -828,6 +1049,130 @@
                 
                 updateRangeValues();
                 showNotification('Pengaturan direset ke default', 'info');
+            }
+        }
+
+        async function debugCamera() {
+            console.clear();
+            console.log('=== COMPREHENSIVE CAMERA DEBUG ===');
+            
+            // 1. Check browser support
+            console.log('1. Browser Support Check:');
+            console.log('navigator.mediaDevices:', !!navigator.mediaDevices);
+            console.log('getUserMedia:', !!navigator.mediaDevices?.getUserMedia);
+            console.log('enumerateDevices:', !!navigator.mediaDevices?.enumerateDevices);
+            console.log('User agent:', navigator.userAgent);
+            console.log('Protocol:', window.location.protocol);
+            
+            // 2. Check available devices
+            console.log('\n2. Available Media Devices:');
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                console.log('All devices:', devices);
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                console.log('Video devices:', videoDevices);
+            } catch (e) {
+                console.error('Error enumerating devices:', e);
+            }
+            
+            // 3. Check current state
+            console.log('\n3. Current Application State:');
+            console.log('availableCameras:', availableCameras);
+            console.log('currentStream:', currentStream);
+            console.log('Selected camera:', document.getElementById('cameraSelect').value);
+            
+            // 4. Test basic camera access
+            console.log('\n4. Testing Basic Camera Access:');
+            try {
+                const testStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                console.log('✅ Basic camera access successful:', testStream);
+                testStream.getTracks().forEach(track => track.stop());
+                console.log('✅ Test stream stopped');
+            } catch (e) {
+                console.error('❌ Basic camera access failed:', e);
+            }
+            
+            // 5. Test backend API
+            console.log('\n5. Testing Backend API:');
+            try {
+                const response = await fetch('/admin/api/cameras');
+                console.log('API Response status:', response.status);
+                const data = await response.json();
+                console.log('API Response data:', data);
+            } catch (e) {
+                console.error('API Error:', e);
+            }
+            
+            console.log('\n=== END CAMERA DEBUG ===');
+            showNotification('Debug selesai. Lihat console untuk detail lengkap.', 'info');
+        }
+
+        function showPermissionInstructions() {
+            const instructionsHtml = `
+                <div class="alert alert-info mt-3" style="border-left: 4px solid #007bff;">
+                    <h6><i class="bi bi-info-circle"></i> Cara Memberikan Izin Kamera:</h6>
+                    <hr>
+                    <strong>Metode 1 - Address Bar:</strong><br>
+                    1. Lihat ikon kamera 📷 di sebelah kiri address bar<br>
+                    2. Klik ikon tersebut dan pilih "Allow" atau "Izinkan"<br>
+                    3. Refresh halaman (F5)<br><br>
+                    
+                    <strong>Metode 2 - Browser Settings:</strong><br>
+                    1. Klik menu browser (⋮) → Settings<br>
+                    2. Pilih "Privacy and Security" → "Site Settings"<br>
+                    3. Pilih "Camera" → Tambahkan site ini ke "Allow"<br><br>
+                    
+                    <strong>Metode 3 - Refresh & Allow:</strong><br>
+                    1. Refresh halaman (F5)<br>
+                    2. Klik "Allow" saat browser menanyakan izin kamera
+                </div>
+            `;
+            
+            // Remove existing instructions
+            const existingInstructions = document.querySelector('.permission-instructions');
+            if (existingInstructions) {
+                existingInstructions.remove();
+            }
+            
+            // Add new instructions
+            const instructionsDiv = document.createElement('div');
+            instructionsDiv.className = 'permission-instructions';
+            instructionsDiv.innerHTML = instructionsHtml;
+            
+            const cameraContainer = document.querySelector('.camera-container');
+            cameraContainer.appendChild(instructionsDiv);
+            
+            // Auto remove after 15 seconds
+            setTimeout(() => {
+                if (document.contains(instructionsDiv)) {
+                    instructionsDiv.remove();
+                }
+            }, 15000);
+        }
+
+        async function requestCameraPermission() {
+            try {
+                showNotification('Meminta izin kamera... Klik ALLOW saat ditanya!', 'info');
+                
+                // Try to get camera access (this will trigger permission dialog)
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                console.log('✅ Permission granted!');
+                
+                // Stop the stream immediately (we just wanted permission)
+                stream.getTracks().forEach(track => track.stop());
+                console.log('✅ Test stream stopped');
+                
+                showNotification('✅ Izin kamera berhasil diberikan! Sekarang coba "Aktifkan Kamera"', 'success');
+                
+            } catch (error) {
+                console.error('Permission request failed:', error);
+                
+                if (error.name === 'NotAllowedError') {
+                    showNotification('❌ Izin kamera ditolak. Coba metode manual di bawah.', 'error');
+                    showPermissionInstructions();
+                } else {
+                    showNotification('❌ Error: ' + error.message, 'error');
+                }
             }
         }
 

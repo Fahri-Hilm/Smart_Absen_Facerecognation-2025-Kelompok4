@@ -694,10 +694,40 @@
                                 </button>
                             </div>
                             <div class="col-md-3">
-                                <button class="btn btn-danger w-100" onclick="emergencyReset()">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                    Emergency Reset
+                                <button class="btn btn-danger w-100" onclick="showResetModal()">
+                                    <i class="bi bi-database-x"></i>
+                                    Reset All Data
                                 </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Reset Data Section -->
+                        <div class="mt-4 p-3" style="background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.3); border-radius: 8px;">
+                            <h5 style="color: #dc3545; margin-bottom: 15px;">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Danger Zone - Reset Database
+                            </h5>
+                            <p class="text-muted mb-3">
+                                Reset semua data akan menghapus:
+                            </p>
+                            <ul class="text-muted mb-3">
+                                <li>Semua data karyawan</li>
+                                <li>Semua record absensi</li>
+                                <li>Semua log aktivitas</li>
+                                <li>Model face recognition</li>
+                                <li>Gambar wajah tersimpan</li>
+                            </ul>
+                            <div class="alert alert-warning mb-3">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Perhatian:</strong> Aksi ini tidak dapat dibatalkan! Pastikan Anda telah membuat backup data.
+                            </div>
+                            <div id="database-stats" class="mb-3">
+                                <small class="text-muted">Loading database statistics...</small>
+                            </div>
+                            <button class="btn btn-outline-danger" onclick="showResetModal()">
+                                <i class="bi bi-database-x"></i>
+                                Reset All Database Data
+                            </button>
                             </div>
                         </div>
                     </div>
@@ -742,6 +772,78 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" onclick="executeBackup()">Create Backup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Database Confirmation Modal -->
+    <div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="resetModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Konfirmasi Reset Database
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <h6><i class="bi bi-warning"></i> PERINGATAN: Aksi Tidak Dapat Dibatalkan!</h6>
+                        Reset database akan menghapus <strong>SEMUA DATA</strong> berikut:
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-center">
+                            <i class="bi bi-people-fill" style="font-size: 2rem; color: #dc3545;"></i>
+                            <div><strong><span id="stats-employees">0</span></strong></div>
+                            <small class="text-muted">Karyawan</small>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="bi bi-calendar-check" style="font-size: 2rem; color: #dc3545;"></i>
+                            <div><strong><span id="stats-attendance">0</span></strong></div>
+                            <small class="text-muted">Record Absensi</small>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="bi bi-journal-text" style="font-size: 2rem; color: #dc3545;"></i>
+                            <div><strong><span id="stats-logs">0</span></strong></div>
+                            <small class="text-muted">Log Aktivitas</small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> Yang Akan Dihapus:</h6>
+                        <ul class="mb-0">
+                            <li>Semua data karyawan dan informasi personal</li>
+                            <li>Semua record absensi masuk dan pulang</li>
+                            <li>Semua log aktivitas sistem</li>
+                            <li>Model face recognition (file .pkl)</li>
+                            <li>Semua gambar wajah yang tersimpan</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reset-confirmation" class="form-label">
+                            <strong>Untuk melanjutkan, ketik "RESET" di bawah ini:</strong>
+                        </label>
+                        <input type="text" class="form-control" id="reset-confirmation" placeholder="Ketik RESET untuk konfirmasi">
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-exclamation"></i>
+                        <strong>Pastikan Anda telah membuat backup data sebelum melanjutkan!</strong>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i>
+                        Batal
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmReset()">
+                        <i class="bi bi-database-x"></i>
+                        Ya, Reset Semua Data
+                    </button>
                 </div>
             </div>
         </div>
@@ -844,6 +946,87 @@
             }
         }
 
+        // New reset database functions
+        function showResetModal() {
+            // Update database stats first
+            loadDatabaseStats();
+            
+            // Show confirmation modal
+            const modal = new bootstrap.Modal(document.getElementById('resetModal'));
+            modal.show();
+        }
+
+        function loadDatabaseStats() {
+            fetch('/admin/database/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('stats-employees').textContent = data.employees;
+                        document.getElementById('stats-attendance').textContent = data.attendance;
+                        document.getElementById('stats-logs').textContent = data.activity_logs;
+                        
+                        // Update quick stats in danger zone
+                        const statsDiv = document.getElementById('database-stats');
+                        statsDiv.innerHTML = `
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <strong style="color: var(--coffee-dark);">${data.employees}</strong>
+                                    <br><small class="text-muted">Karyawan</small>
+                                </div>
+                                <div class="col-4">
+                                    <strong style="color: var(--coffee-dark);">${data.attendance}</strong>
+                                    <br><small class="text-muted">Absensi</small>
+                                </div>
+                                <div class="col-4">
+                                    <strong style="color: var(--coffee-dark);">${data.activity_logs}</strong>
+                                    <br><small class="text-muted">Log</small>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading database stats:', error);
+                });
+        }
+
+        function confirmReset() {
+            const confirmation = document.getElementById('reset-confirmation').value;
+            if (confirmation !== 'RESET') {
+                showNotification('Konfirmasi tidak valid. Ketik "RESET" untuk melanjutkan.', 'error');
+                return;
+            }
+
+            showNotification('Memulai reset database...', 'warning');
+            
+            // Hide modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('resetModal'));
+            modal.hide();
+
+            // Perform reset
+            fetch('/admin/database/reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Database berhasil direset!', 'success');
+                    // Refresh page after 2 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showNotification('Gagal reset database. Silakan coba lagi.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Terjadi kesalahan saat reset database.', 'error');
+            });
+        }
+
         function showNotification(message, type) {
             const alertType = type === 'error' ? 'danger' : type;
             const alert = document.createElement('div');
@@ -866,7 +1049,13 @@
         setInterval(() => {
             // Update database statistics
             console.log('Refreshing database status...');
+            loadDatabaseStats();
         }, 30000);
+
+        // Load database stats on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDatabaseStats();
+        });
     </script>
 </body>
 </html>

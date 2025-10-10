@@ -170,6 +170,36 @@
         .qr-container {
             animation: pulse 3s infinite;
         }
+
+        /* Manual Input Styles */
+        .manual-input-container {
+            background: rgba(244, 164, 96, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px dashed var(--accent-color);
+            margin: 20px 0;
+        }
+
+        .manual-input {
+            text-align: center;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+        }
+
+        .manual-input:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 15px rgba(139, 69, 19, 0.3) !important;
+        }
+
+        .manual-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+        }
+
+        .input-group {
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.1);
+            border-radius: 15px;
+        }
     </style>
 </head>
 <body>
@@ -198,6 +228,16 @@
                     
                     <div class="unit-code">
                         Kode Unit: <span id="unitCode">{{ unit_code }}</span>
+                        <br>
+                        <button 
+                            type="button" 
+                            onclick="copyUnitCode()" 
+                            class="btn btn-sm mt-2"
+                            style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.5); color: white; border-radius: 10px; font-size: 12px; padding: 5px 15px;"
+                            title="Copy kode ke input manual"
+                        >
+                            <i class="fas fa-copy"></i> Copy ke Input Manual
+                        </button>
                     </div>
                     
                     <div class="countdown-timer" id="countdown">
@@ -214,7 +254,45 @@
                     <li>QR Code akan mengarahkan ke halaman sistem absensi</li>
                     <li>Kode unit berubah setiap 10 menit untuk keamanan</li>
                     <li>Pastikan scan sebelum waktu berlaku habis</li>
+                    <li><strong>Alternatif:</strong> Masukkan kode unit secara manual di bawah jika kamera rusak</li>
                 </ul>
+            </div>
+
+            <!-- Manual Unit Code Input -->
+            <div class="manual-input-container">
+                <hr style="margin: 30px 0; border-color: var(--accent-color);">
+                <h5 style="color: var(--primary-color); margin-bottom: 20px;">
+                    <i class="fas fa-keyboard"></i> Input Manual Kode Unit
+                </h5>
+                <p style="color: var(--text-color); font-size: 14px; margin-bottom: 20px;">
+                    Jika kamera HP tidak berfungsi, masukkan kode unit yang tertera di atas
+                </p>
+                
+                <form id="manualForm" action="/verify" method="get" style="margin-bottom: 20px;">
+                    <div class="input-group" style="max-width: 300px; margin: 0 auto;">
+                        <input 
+                            type="text" 
+                            name="unit" 
+                            id="manualUnitCode"
+                            class="form-control manual-input" 
+                            placeholder="Masukkan kode unit..."
+                            style="border: 2px solid var(--accent-color); border-radius: 15px 0 0 15px; padding: 12px 15px; font-size: 16px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;"
+                            maxlength="8"
+                            required
+                        >
+                        <button 
+                            type="submit" 
+                            class="btn manual-submit-btn"
+                            style="background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); border: none; color: white; border-radius: 0 15px 15px 0; padding: 12px 20px; font-weight: bold;"
+                        >
+                            <i class="fas fa-sign-in-alt"></i> Masuk
+                        </button>
+                    </div>
+                </form>
+                
+                <p style="color: var(--secondary-color); font-size: 12px; font-style: italic;">
+                    Contoh: Jika kode unit di atas "AB12CD34", ketik "AB12CD34" lalu klik Masuk
+                </p>
             </div>
 
             <!-- Manual Refresh Button -->
@@ -270,6 +348,13 @@
                         document.getElementById('unitCode').textContent = data.unit_code;
                         countdownSeconds = data.remaining_seconds;
                         
+                        // Clear manual input when QR refreshes
+                        const manualInput = document.getElementById('manualUnitCode');
+                        if (manualInput) {
+                            manualInput.value = '';
+                            manualInput.placeholder = 'Masukkan kode unit baru...';
+                        }
+                        
                         // Restart countdown
                         clearInterval(countdownInterval);
                         startCountdown();
@@ -297,7 +382,46 @@
         // Start countdown on page load
         document.addEventListener('DOMContentLoaded', function() {
             startCountdown();
+            
+            // Add validation to manual input
+            const manualInput = document.getElementById('manualUnitCode');
+            const manualForm = document.getElementById('manualForm');
+            
+            // Format input as user types
+            manualInput.addEventListener('input', function(e) {
+                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            });
+            
+            // Validate form submission
+            manualForm.addEventListener('submit', function(e) {
+                const unitCode = manualInput.value.trim();
+                const currentCode = document.getElementById('unitCode').textContent.trim();
+                
+                if (unitCode.length !== 8) {
+                    e.preventDefault();
+                    alert('Kode unit harus 8 karakter (contoh: AB12CD34)');
+                    manualInput.focus();
+                    return false;
+                }
+                
+                if (unitCode !== currentCode) {
+                    const confirmSubmit = confirm(`Kode yang dimasukkan (${unitCode}) tidak sama dengan kode yang ditampilkan (${currentCode}). Yakin ingin melanjutkan?`);
+                    if (!confirmSubmit) {
+                        e.preventDefault();
+                        manualInput.focus();
+                        return false;
+                    }
+                }
+            });
         });
+
+        // Function to copy current unit code to manual input
+        function copyUnitCode() {
+            const currentCode = document.getElementById('unitCode').textContent.trim();
+            const manualInput = document.getElementById('manualUnitCode');
+            manualInput.value = currentCode;
+            manualInput.focus();
+        }
 
         // Auto refresh every 9 minutes 30 seconds (before expiration)
         setInterval(() => {

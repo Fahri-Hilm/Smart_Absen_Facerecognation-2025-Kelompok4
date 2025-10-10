@@ -412,6 +412,14 @@
                                 <i class="bi bi-box-arrow-right"></i>
                                 Absen Pulang
                             </button>
+                            
+                            <!-- Mobile Attendance Link -->
+                            <div class="text-center mt-3">
+                                <a href="/mobile" class="btn btn-outline-secondary" style="border-radius: 15px; padding: 0.8rem 1.5rem;">
+                                    <i class="bi bi-phone"></i>
+                                    Absensi dengan Kamera HP
+                                </a>
+                            </div>
                         </div>
 
                         <!-- Status Messages -->
@@ -624,10 +632,10 @@
                 return;
             }
             
-            // Show loading
-            showStatus('📹 Memproses absensi dengan kamera...', 'info');
+            // Show loading message for GUI mode
+            showStatus('🎯 Membuka window kamera... Posisikan wajah di depan kamera!', 'info');
             
-            // Process attendance directly (removed timeout simulation)
+            // Process attendance with GUI camera
             fetch('/mark_attendance', {
                 method: 'POST',
                 headers: {
