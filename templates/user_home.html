@@ -538,9 +538,31 @@
             setInterval(updateCurrentShift, 60000);
         });
 
+        // Auto-detect if running on localhost and use appropriate endpoints
+        function getApiEndpoint(endpoint) {
+            const isLocalhost = window.location.hostname === 'localhost' || 
+                               window.location.hostname === '127.0.0.1' ||
+                               window.location.pathname.includes('/localhost');
+            
+            if (isLocalhost && !endpoint.startsWith('/localhost/')) {
+                // Use localhost-specific endpoints
+                switch(endpoint) {
+                    case '/get_cameras':
+                        return '/localhost/get_cameras';
+                    case '/get_attendance_data':
+                        return '/localhost/get_attendance_data';
+                    case '/mark_attendance':
+                        return '/localhost/mark_attendance';
+                    default:
+                        return endpoint;
+                }
+            }
+            return endpoint;
+        }
+
         // Load available cameras
         function loadCameras() {
-            fetch('/get_cameras')
+            fetch(getApiEndpoint('/get_cameras'))
                 .then(response => response.json())
                 .then(cameras => {
                     const select = document.getElementById('cameraSelect');
@@ -563,7 +585,7 @@
 
         // Update attendance data
         function updateAttendanceData() {
-            fetch('/get_attendance_data')
+            fetch(getApiEndpoint('/get_attendance_data'))
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -635,8 +657,8 @@
             // Show loading message for GUI mode
             showStatus('🎯 Membuka window kamera... Posisikan wajah di depan kamera!', 'info');
             
-            // Process attendance with GUI camera
-            fetch('/mark_attendance', {
+            // Process attendance with GUI camera - use appropriate endpoint
+            fetch(getApiEndpoint('/mark_attendance'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

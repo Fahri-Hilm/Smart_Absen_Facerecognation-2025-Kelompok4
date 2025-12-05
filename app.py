@@ -5,8 +5,11 @@ import time
 import hashlib
 import secrets
 import base64
+import re
+import json
 from io import BytesIO
 from flask import Flask, request, render_template, jsonify, session, redirect, url_for, flash, make_response
+from werkzeug.utils import secure_filename
 from datetime import date, datetime, timedelta
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
@@ -16,8 +19,7 @@ import shutil
 import qrcode
 from functools import wraps
 
-# Ngrok and system imports
-from pyngrok import ngrok
+# System imports
 import threading
 import signal
 import sys
@@ -27,6 +29,7 @@ import atexit
 from database import get_db_manager
 from models import Employee, Attendance, ActivityLog
 from config import get_app_config
+from qr_sync import qr_sync_manager, start_cleanup_thread
 import logging
 
 # Setup logging
@@ -43,9 +46,6 @@ app.secret_key = app_config['secret_key']
 QR_VALIDITY_MINUTES = 10  # QR code berlaku 10 menit
 current_unit_code = None
 qr_code_generated_time = None
-
-# Ngrok tunnel management
-ngrok_tunnel = None
 
 def generate_unit_code():
     """Generate kode unit yang unik berdasarkan waktu"""
@@ -193,14 +193,23 @@ def identify_face(facearray):
         
         model = joblib.load('static/face_recognition_model.pkl')
         
-        # Ensure input is the correct shape (flatten if needed)
+        # CRITICAL: Ensure input matches training format exactly
+        # Training data should be 50x50 grayscale = 2500 features
         if len(facearray.shape) > 1:
             facearray = facearray.flatten()
         
-        # Reshape to match expected input
+        logger.info(f"Input face array shape: {facearray.shape} (should be (2500,))")
+        
+        # Check if input has correct number of features
+        if facearray.shape[0] != 2500:
+            logger.error(f"Feature mismatch: got {facearray.shape[0]}, expected 2500")
+            return ['Unknown']
+        
+        # Reshape to match expected input (1 sample, 2500 features)
         facearray = facearray.reshape(1, -1)
         
         prediction = model.predict(facearray)
+        logger.info(f"Face recognition prediction: {prediction[0]}")
         return prediction
     except Exception as e:
         logger.error(f"Face recognition error: {e}")
@@ -228,12 +237,16 @@ def train_model():
                     if img is None:
                         continue
                     
-                    # Convert to grayscale for consistency
+                    # CRITICAL: Convert to grayscale for consistency (ensures 2500 features)
                     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                    resized_face = cv2.resize(gray, (50, 50))
-                    faces.append(resized_face.flatten())  # Flatten to 1D
+                    # CRITICAL: Resize to exact dimensions (50x50 = 2500 features)
+                    resized_face = cv2.resize(gray, (50, 50), interpolation=cv2.INTER_CUBIC)
+                    # CRITICAL: Flatten to 1D array (no normalization to keep consistency)
+                    face_flattened = resized_face.flatten()
+                    
+                    faces.append(face_flattened)
                     labels.append(user)
-                    logger.info(f"Added training image: {user}/{imgname}")
+                    logger.info(f"Added training image: {user}/{imgname} with shape {face_flattened.shape}")
                 except Exception as e:
                     logger.error(f"Error processing image {img_path}: {e}")
                     continue
@@ -243,10 +256,20 @@ def train_model():
             return False
             
         logger.info(f"Training model with {len(faces)} face samples")
+        
+        # Convert to numpy array and check shape
+        faces_array = np.array(faces)
+        logger.info(f"Training data shape: {faces_array.shape} (should be (n_samples, 2500))")
+        
+        # Verify all samples have correct features
+        if faces_array.shape[1] != 2500:
+            logger.error(f"Training data feature mismatch: got {faces_array.shape[1]}, expected 2500")
+            return False
+        
         knn = KNeighborsClassifier(n_neighbors=min(5, len(set(labels))))
-        knn.fit(np.array(faces), labels)
+        knn.fit(faces_array, labels)
         joblib.dump(knn, 'static/face_recognition_model.pkl')
-        logger.info("Face recognition model trained successfully")
+        logger.info(f"Face recognition model trained successfully with {faces_array.shape[1]} features per sample")
         return True
         
     except Exception as e:
@@ -500,8 +523,100 @@ def qr_auth():
         logger.error(f"Error generating QR auth page: {e}")
         return f"Error: {str(e)}", 500
 
-@app.route('/generate_qr')
-def generate_qr_endpoint():
+@app.route('/api/qr_sync_status')
+def qr_sync_status():
+    """API untuk cek status QR sync real-time - untuk auto-redirect laptop saat HP scan QR"""
+    try:
+        latest_auth = qr_sync_manager.get_latest_auth()
+        current_unit = get_current_unit_code()  # QR code yang sedang ditampilkan di laptop
+        
+        if latest_auth:
+            # Check if the scanned QR matches current displayed QR
+            scanned_unit = latest_auth['unit_code']
+            session_verified_unit = session.get('verified_unit_code')
+            
+            # Ada pending sync jika:
+            # 1. Unit code yang di-scan sama dengan yang ditampilkan di laptop
+            # 2. Session laptop belum ter-verify dengan unit code tersebut
+            if scanned_unit == current_unit and session_verified_unit != scanned_unit:
+                # New authentication detected from mobile!
+                logger.info(f"🔓 Pending QR sync detected: {scanned_unit} from {latest_auth['device_info']}")
+                return jsonify({
+                    'success': True,
+                    'has_pending_sync': True,
+                    'session_id': scanned_unit,
+                    'unit_code': scanned_unit,
+                    'timestamp': latest_auth['timestamp'],
+                    'device_info': latest_auth['device_info'],
+                    'message': 'QR scan berhasil dari perangkat mobile!'
+                })
+            else:
+                return jsonify({
+                    'success': True,
+                    'has_pending_sync': False,
+                    'status': 'current',
+                    'unit_code': session_verified_unit
+                })
+        else:
+            return jsonify({
+                'success': True,
+                'has_pending_sync': False,
+                'status': 'no_auth',
+                'message': 'Menunggu scan QR dari HP...'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error checking QR sync status: {e}")
+        return jsonify({
+            'success': False,
+            'has_pending_sync': False,
+            'status': 'error',
+            'message': str(e)
+        })
+
+@app.route('/api/accept_qr_sync', methods=['POST'])
+def accept_qr_sync():
+    """Accept QR sync from mobile and update laptop session - auto redirect laptop ke halaman absen"""
+    try:
+        # Support both JSON and form data
+        if request.is_json:
+            data = request.get_json()
+            unit_code = data.get('session_id') or data.get('unit_code')
+        else:
+            unit_code = request.form.get('unit_code') or request.form.get('session_id')
+        
+        logger.info(f"🔐 Accept QR sync request for unit: {unit_code}")
+        
+        if unit_code and qr_sync_manager.is_authenticated(unit_code):
+            # Update current session - laptop sekarang ter-verify
+            session['qr_verified'] = True
+            session['qr_verified_time'] = datetime.now().isoformat()
+            session['verified_unit_code'] = unit_code
+            
+            logger.info(f"✅ QR sync accepted! Laptop session verified with unit: {unit_code}")
+            
+            # Redirect ke halaman absensi masuk (bukan home)
+            return jsonify({
+                'success': True,
+                'status': 'success',
+                'message': 'QR sync berhasil! Mengarahkan ke halaman absensi...',
+                'redirect_url': url_for('absen_masuk')
+            })
+        else:
+            logger.warning(f"❌ QR sync rejected - invalid or expired unit: {unit_code}")
+            return jsonify({
+                'success': False,
+                'status': 'error',
+                'message': 'QR code tidak valid atau sudah expired'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error accepting QR sync: {e}")
+        return jsonify({
+            'success': False,
+            'status': 'error',
+            'message': str(e)
+        })
     """Endpoint untuk refresh QR code via AJAX"""
     try:
         # Force regenerate QR code
@@ -533,7 +648,7 @@ def generate_qr_endpoint():
 
 @app.route('/verify')
 def verify_qr():
-    """Verifikasi QR code dan redirect ke halaman utama"""
+    """Verifikasi QR code dan redirect ke halaman utama dengan real-time sync"""
     provided_unit = request.args.get('unit', '')
     
     if not provided_unit:
@@ -546,28 +661,42 @@ def verify_qr():
         session['qr_verified_time'] = datetime.now().isoformat()
         session['verified_unit_code'] = provided_unit
         
-        logger.info(f"QR verification successful with unit code: {provided_unit}")
-        
-        # Check if this is a mobile device
+        # Register QR verification in sync system
         user_agent = request.headers.get('User-Agent', '').lower()
         is_mobile = any(mobile in user_agent for mobile in ['android', 'iphone', 'ipad', 'mobile', 'webos', 'blackberry'])
+        device_info = 'mobile' if is_mobile else 'desktop'
+        
+        # Notify sync system about successful authentication
+        qr_sync_manager.verify_qr_auth(provided_unit, device_info)
+        
+        logger.info(f"QR verification successful with unit code: {provided_unit} from {device_info}")
         
         if is_mobile:
-            flash('Verifikasi berhasil! Silakan lakukan absensi dengan kamera.', 'success')
-            logger.info(f"Mobile device detected, redirecting to mobile attendance")
-            return redirect(url_for('mobile_attendance'))
+            # HP hanya sebagai kunci - tampilkan halaman sukses, tidak redirect ke absen
+            # Laptop akan otomatis ter-redirect via polling di halaman QR
+            logger.info(f"Mobile device used as key - showing success page only")
+            return render_template('qr_scan_success.html', unit_code=provided_unit)
         else:
-            flash('Verifikasi berhasil! Selamat datang di sistem absensi.', 'success')
-            return redirect(url_for('home'))
+            # Desktop/Laptop - redirect langsung ke halaman absensi baru
+            logger.info(f"Desktop device - redirecting to web_attendance page")
+            flash('✅ Verifikasi berhasil! Silakan lakukan absensi.', 'success')
+            return redirect(url_for('web_attendance'))
     else:
         logger.warning(f"Invalid QR code attempt with unit: {provided_unit}")
         flash('Kode unit tidak valid atau sudah kedaluwarsa. Silakan scan QR code terbaru.', 'error')
         return redirect(url_for('qr_auth'))
 
 def qr_verification_required(f):
-    """Decorator untuk memastikan user sudah melalui QR verification"""
+    """Decorator untuk memastikan user sudah melalui QR verification - dengan bypass untuk localhost"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # BYPASS QR verification untuk localhost/admin access
+        if request.endpoint in ['localhost_home', 'admin_dashboard', 'admin_login'] or \
+           request.path.startswith('/admin') or \
+           (request.referrer and 'localhost' in request.referrer and '/localhost' in request.referrer):
+            logger.info(f"QR verification bypassed for localhost access: {f.__name__}")
+            return f(*args, **kwargs)
+            
         logger.info(f"QR verification check for {f.__name__}: qr_verified={session.get('qr_verified', False)}")
         
         if not session.get('qr_verified'):
@@ -606,6 +735,18 @@ def home():
         date_range_week=date_range_week, tanggal_hari_ini=tanggal_hari_ini,
         selected_camera=selected_camera_id)
 
+@app.route('/report')
+def ui_ux_report():
+    """Serve UI/UX report HTML - untuk Figma plugin import"""
+    try:
+        report_path = 'mockups_preview/LAPORAN_UI_UX_INTERAKTIF.html'
+        with open(report_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
+    except Exception as e:
+        logger.error(f"Error serving report: {e}")
+        return f"Error: {str(e)}", 500
+
 @app.route('/localhost')
 def localhost_home():
     """Halaman utama untuk testing localhost - bypass QR verification"""
@@ -615,6 +756,155 @@ def localhost_home():
         totalreg=totalreg(), datetoday2=datetoday2,
         date_range_week=date_range_week, tanggal_hari_ini=tanggal_hari_ini,
         selected_camera=selected_camera_id)
+
+@app.route('/localhost/mark_attendance', methods=['POST'])
+def localhost_mark_attendance():
+    """Route untuk absensi localhost tanpa QR verification"""
+    try:
+        logger.info("=== LOCALHOST MARK ATTENDANCE REQUEST ===")
+        
+        mode = request.form.get('mode', 'masuk')
+        camera_id = request.form.get('camera_id', '0')
+        
+        logger.info(f"Localhost attendance request: mode={mode}, camera_id={camera_id}")
+        
+        # Check camera availability first
+        if camera_id == '':
+            return jsonify({
+                'status': 'error',
+                'message': 'Pilih kamera terlebih dahulu!'
+            })
+        
+        # Import camera lock system
+        from camera_lock import CameraLock, is_camera_busy
+        
+        # Check if camera is busy
+        if is_camera_busy():
+            return jsonify({
+                'status': 'error',
+                'message': '📷 Kamera sedang digunakan oleh perangkat lain. Silakan tunggu sebentar dan coba lagi.'
+            })
+        
+        # Acquire camera lock
+        try:
+            with CameraLock() as camera_lock:
+                logger.info(f"Localhost camera lock acquired for {mode} mode")
+                
+                # SIMPLE APPROACH: Always do complete cleanup before ANY camera operation
+                logger.info(f"Performing complete camera cleanup before {mode} mode")
+                
+                # Step 1: Destroy all OpenCV windows (most important)
+                try:
+                    cv2.destroyAllWindows()
+                    cv2.waitKey(10)
+                    time.sleep(0.3)
+                except:
+                    pass
+                
+                # Step 2: Force release camera 0 specifically
+                for attempt in range(3):
+                    try:
+                        temp_cap = cv2.VideoCapture(int(camera_id))
+                        if temp_cap.isOpened():
+                            temp_cap.release()
+                        del temp_cap
+                        time.sleep(0.2)
+                    except:
+                        pass
+                
+                # Step 3: Extra delay for pulang mode
+                if mode == 'pulang':
+                    logger.info("Extra delay for pulang mode")
+                    time.sleep(1.0)
+                
+                # Step 4: Try camera operation with lock protection
+                try:
+                    result = run_attendance_with_camera(mode, int(camera_id))
+                    return jsonify(result)
+                except Exception as camera_error:
+                    logger.error(f"Localhost camera error: {camera_error}")
+                    # Fallback - simulasi absensi tanpa kamera untuk testing
+                    return jsonify({
+                        'status': 'warning',
+                        'message': f'Kamera tidak tersedia. Mode simulasi: Absensi {mode} berhasil (demo mode)'
+                    })
+                    
+        except RuntimeError as lock_error:
+            logger.error(f"Localhost camera lock error: {lock_error}")
+            return jsonify({
+                'status': 'error',
+                'message': '📷 Tidak dapat mengakses kamera. Perangkat lain sedang menggunakan kamera. Silakan tutup aplikasi kamera lain dan coba lagi.'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error in localhost_mark_attendance: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Terjadi kesalahan koneksi: {str(e)}. Silakan refresh halaman dan coba lagi.'
+        })
+
+@app.route('/localhost/get_attendance_data')
+def localhost_get_attendance_data():
+    """AJAX endpoint untuk mendapatkan data absensi terbaru - localhost"""
+    try:
+        names, bagian, tanggal, times, l = extract_attendance()
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'names': names,
+                'bagian': bagian,
+                'tanggal': tanggal,
+                'times': times,
+                'total': l,
+                'totalreg': totalreg()
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error getting localhost attendance data: {e}")
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/localhost/get_cameras')
+def localhost_get_cameras():
+    """API untuk mendapatkan daftar kamera yang tersedia - localhost"""
+    try:
+        import os
+        
+        # Deteksi kamera yang tersedia
+        cameras = []
+        
+        # Cek kamera default terlebih dahulu
+        try:
+            cap = cv2.VideoCapture(0)
+            if cap.isOpened():
+                ret, frame = cap.read()
+                if ret and frame is not None:
+                    cameras.append({
+                        'id': 0,
+                        'name': 'Webcam Default',
+                        'status': 'active'
+                    })
+                cap.release()
+        except Exception:
+            pass
+        
+        # Jika tidak ada kamera aktif, berikan mode virtual
+        if not cameras:
+            cameras = [
+                {
+                    'id': 999,
+                    'name': 'Mode Virtual (Testing)',
+                    'status': 'virtual'
+                }
+            ]
+            
+        return jsonify(cameras)
+    except Exception as e:
+        logger.error(f"Error getting localhost cameras: {e}")
+        return jsonify([{
+            'id': 999,
+            'name': 'Mode Fallback',
+            'status': 'fallback'
+        }])
 
 # ======================== ADMIN ROUTES ========================
 
@@ -646,13 +936,14 @@ def admin_logout():
 @app.route('/admin')
 @admin_required
 def admin_dashboard():
-    """Dashboard admin dengan semua fitur management"""
+    """Dashboard admin dengan semua fitur management - AdminLTE style"""
     names, bagian, tanggal, times, l = extract_attendance()
     
     # Hitung absensi hari ini
     today_str = current_date.strftime("%d-%m-%Y")
     hadir_hari_ini = sum(1 for t in tanggal if t == today_str)
     
+    # Gunakan template AdminLTE style
     return render_template('admin_dashboard.html',
         names=names, rolls=bagian, tanggal=tanggal, times=times, l=l,
         totalreg=totalreg(), datetoday2=datetoday2,
@@ -760,6 +1051,235 @@ def admin_capture_face_gui():
     except Exception as e:
         logger.error(f"Error in capture_face_gui: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/admin/add_employee_complete', methods=['POST'])
+@admin_required  
+def admin_add_employee_complete():
+    """Tambah karyawan DATA SAJA (tanpa foto) - Step 1 of 2-step workflow"""
+    try:
+        from datetime import datetime
+        
+        # Get form data
+        full_name = request.form.get('fullName', '').strip()
+        nik = request.form.get('nik', '').strip()
+        gender = request.form.get('gender', '').strip()
+        date_of_birth = request.form.get('dateOfBirth', '').strip()
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        address = request.form.get('address', '').strip()
+        position = request.form.get('position', '').strip()
+        bagian = request.form.get('bagian', '').strip()
+        hire_date = request.form.get('hireDate', '').strip()
+        status = request.form.get('status', 'aktif').strip()
+        notes = request.form.get('notes', '').strip()
+        
+        # Validasi input
+        if not all([full_name, nik, gender, date_of_birth, email, phone, address, position, bagian, hire_date]):
+            return jsonify({
+                'status': 'error',
+                'error': 'Semua field wajib diisi!'
+            }), 400
+        
+        # Validasi NIK
+        if not re.match(r'^\d{16}$', nik):
+            return jsonify({
+                'status': 'error',
+                'error': 'NIK harus 16 digit'
+            }), 400
+        
+        # Validasi email
+        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+            return jsonify({
+                'status': 'error',
+                'error': 'Email tidak valid'
+            }), 400
+        
+        # Validasi phone
+        if not re.match(r'^0\d{9,}$', phone):
+            return jsonify({
+                'status': 'error',
+                'error': 'Nomor telepon harus dimulai 0 dan minimal 10 digit'
+            }), 400
+        
+        # Tambah ke database
+        try:
+            success = Employee.add_employee(
+                name=full_name,
+                bagian=bagian,
+                email=email,
+                phone=phone,
+                gender=gender,
+                address=address,
+                position=position,
+                status=status,
+                hire_date=hire_date,
+                nik=nik
+            )
+            
+            if not success:
+                return jsonify({
+                    'status': 'error',
+                    'error': 'Gagal menambahkan karyawan. Mungkin NIK atau email sudah terdaftar.'
+                }), 400
+        except Exception as db_error:
+            logger.error(f"Database error: {db_error}")
+            return jsonify({
+                'status': 'error',
+                'error': f'Database error: {str(db_error)}'
+            }), 500
+        
+        # Get employee ID from database
+        employee = Employee.get_employee_by_name_bagian(full_name, bagian)
+        if not employee:
+            return jsonify({
+                'status': 'error',
+                'error': 'Gagal mengambil ID karyawan'
+            }), 500
+        
+        logger.info(f"Karyawan {full_name} ({nik}) berhasil ditambahkan. Siap untuk capture wajah.")
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Data karyawan {full_name} berhasil disimpan! Lanjut ke capture wajah.',
+            'employee_id': employee['id'],
+            'name': full_name,
+            'dept': bagian
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Error in add_employee_complete: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': f'Error: {str(e)}'
+        }), 500
+
+# ==================== CAPTURE WAJAH PAGE & API ====================
+
+@app.route('/capture_wajah', methods=['GET'])
+@admin_required
+def capture_wajah_page():
+    """Halaman capture wajah untuk training photos (40+ photos)"""
+    try:
+        employee_id = request.args.get('employee_id')
+        employee_name = request.args.get('name', '')
+        employee_dept = request.args.get('dept', '')
+        
+        if not employee_id:
+            flash('Employee ID tidak valid', 'error')
+            return redirect('/admin/employees')
+        
+        return render_template('capture_wajah.html', 
+                             employee_id=employee_id,
+                             employee_name=employee_name,
+                             employee_dept=employee_dept)
+    except Exception as e:
+        logger.error(f"Error loading capture_wajah page: {e}")
+        flash('Gagal memuat halaman capture wajah', 'error')
+        return redirect('/admin/employees')
+
+@app.route('/api/save_training_photos', methods=['POST'])
+@admin_required
+def save_training_photos():
+    """API untuk menyimpan training photos dari capture page"""
+    try:
+        data = request.get_json()
+        employee_id = data.get('employee_id')
+        photos = data.get('photos', [])  # Array of base64 images
+        
+        if not employee_id or not photos:
+            return jsonify({
+                'status': 'error',
+                'error': 'employee_id dan photos harus ada'
+            }), 400
+        
+        if len(photos) < 40:
+            return jsonify({
+                'status': 'error',
+                'error': f'Minimal 40 foto diperlukan (saat ini: {len(photos)})'
+            }), 400
+        
+        # Get employee data
+        employees = Employee.get_all_employees()
+        if not employees:
+            return jsonify({
+                'status': 'error',
+                'error': 'Tidak bisa mengambil data karyawan'
+            }), 500
+        
+        employee = None
+        for emp in employees:
+            if emp['id'] == int(employee_id):
+                employee = emp
+                break
+        
+        if not employee:
+            return jsonify({
+                'status': 'error',
+                'error': 'Karyawan tidak ditemukan'
+            }), 404
+        
+        # Get NIK from employee
+        nik = employee.get('nik', 'unknown')
+        full_name = employee.get('name', 'Unknown')
+        
+        # Save training photos
+        try:
+            faces_dir = f'static/faces/{nik}'
+            os.makedirs(faces_dir, exist_ok=True)
+            
+            # Save base64 photos
+            for idx, photo_base64 in enumerate(photos[:100], 1):
+                try:
+                    # Handle base64 with or without data URL prefix
+                    if photo_base64.startswith('data:image'):
+                        photo_base64 = photo_base64.split(',')[1]
+                    
+                    img_data = base64.b64decode(photo_base64)
+                    photo_filename = f"face_{idx}.jpg"
+                    
+                    with open(os.path.join(faces_dir, photo_filename), 'wb') as f:
+                        f.write(img_data)
+                except Exception as e:
+                    logger.warning(f"Error saving training photo {idx}: {e}")
+            
+            logger.info(f"Saved {min(len(photos), 100)} training photos for {full_name} ({nik})")
+            
+            # Train model with new photos
+            try:
+                train_model()
+                logger.info(f"Face model re-trained after adding photos for {nik}")
+            except Exception as train_err:
+                logger.warning(f"Error training model: {train_err}")
+            
+            # Log success to activity log
+            try:
+                from models import ActivityLog
+                ActivityLog.add_log(
+                    employee_id=employee['id'],
+                    activity_type='add_employee',
+                    description=f'Karyawan ditambahkan dengan {len(photos)} foto training'
+                )
+            except Exception as log_err:
+                logger.warning(f"Error logging activity: {log_err}")
+            
+            return jsonify({
+                'status': 'success',
+                'message': f'🎉 {full_name} telah berhasil ditambahkan ke sistem dengan {len(photos)} foto training! Data sudah tersimpan di database dan siap digunakan untuk absensi.'
+            }), 201
+            
+        except Exception as photo_error:
+            logger.error(f"Error saving training photos: {photo_error}")
+            return jsonify({
+                'status': 'error',
+                'error': f'Error menyimpan foto: {str(photo_error)}'
+            }), 500
+        
+    except Exception as e:
+        logger.error(f"Error in save_training_photos: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': f'Error: {str(e)}'
+        }), 500
 
 @app.route('/admin/add_employee_with_face', methods=['POST'])
 @admin_required  
@@ -904,6 +1424,18 @@ def admin_api_stats():
         })
 
 # ======================== ADDITIONAL ADMIN ROUTES ========================
+
+@app.route('/admin/add_employee_form')
+@admin_required
+def admin_add_employee_form():
+    """Display comprehensive employee registration form"""
+    try:
+        bagian_list = ['Barista', 'Kasir', 'Kitchen', 'Supervisor', 'Manager']
+        return render_template('add_employee_form.html', bagian_list=bagian_list)
+    except Exception as e:
+        logger.error(f"Error loading employee form: {e}")
+        flash('Gagal memuat form karyawan!', 'error')
+        return redirect('/admin/dashboard')
 
 @app.route('/admin/employees')
 @admin_required
@@ -1826,11 +2358,22 @@ def test_camera():
 
 @app.route('/absen_masuk')
 def absen_masuk():
-    return run_attendance('masuk')
+    """Redirect ke web-based attendance (tidak pakai GUI OpenCV)"""
+    session['attendance_mode'] = 'masuk'
+    return redirect(url_for('web_attendance'))
 
 @app.route('/absen_pulang')
 def absen_pulang():
-    return run_attendance('pulang')
+    """Redirect ke web-based attendance (tidak pakai GUI OpenCV)"""
+    session['attendance_mode'] = 'pulang'
+    return redirect(url_for('web_attendance'))
+
+@app.route('/web_attendance')
+@qr_verification_required
+def web_attendance():
+    """Halaman absensi berbasis web camera (untuk laptop dan mobile)"""
+    mode = session.get('attendance_mode', 'masuk')
+    return render_template('web_attendance.html', mode=mode)
 
 @app.route('/absen_ajax', methods=['POST'])
 def absen_ajax():
@@ -1850,7 +2393,7 @@ def absen_ajax():
 @app.route('/mark_attendance', methods=['POST'])
 @qr_verification_required
 def mark_attendance():
-    """Route untuk mark attendance yang dipanggil dari frontend"""
+    """Route untuk mark attendance yang dipanggil dari frontend - dengan camera lock"""
     try:
         logger.info("=== MARK ATTENDANCE REQUEST RECEIVED ===")
         
@@ -1861,69 +2404,79 @@ def mark_attendance():
         logger.info(f"QR verification status: {session.get('qr_verified', False)}")
         logger.info(f"QR verification time: {session.get('qr_verified_time', 'None')}")
         
-        # Simulasi check kamera dulu
+        # Check camera availability first
         if camera_id == '':
             return jsonify({
                 'status': 'error',
                 'message': 'Pilih kamera terlebih dahulu!'
             })
         
-        # SIMPLE APPROACH: Always do complete cleanup before ANY camera operation
-        logger.info(f"Performing complete camera cleanup before {mode} mode")
+        # Import camera lock system
+        from camera_lock import CameraLock, is_camera_busy
         
-        # Step 1: Destroy all OpenCV windows (most important)
-        try:
-            cv2.destroyAllWindows()
-            cv2.waitKey(10)
-            time.sleep(0.3)
-        except:
-            pass
-        
-        # Step 2: Force release camera 0 specifically
-        for attempt in range(3):
-            try:
-                temp_cap = cv2.VideoCapture(int(camera_id))
-                if temp_cap.isOpened():
-                    temp_cap.release()
-                del temp_cap
-                time.sleep(0.2)
-            except:
-                pass
-        
-        # Step 3: Extra delay for pulang mode
-        if mode == 'pulang':
-            logger.info("Extra delay for pulang mode")
-            time.sleep(1.0)
-        
-        # Step 4: Try camera operation
-        try:
-            result = run_attendance_with_camera(mode, int(camera_id))
-            return jsonify(result)
-        except Exception as camera_error:
-            logger.error(f"Camera error: {camera_error}")
-            # Fallback - simulasi absensi tanpa kamera untuk testing
+        # Check if camera is busy
+        if is_camera_busy():
             return jsonify({
-                'status': 'warning',
-                'message': f'Kamera tidak tersedia. Mode simulasi: Absensi {mode} berhasil (demo mode)'
+                'status': 'error',
+                'message': '📷 Kamera sedang digunakan oleh perangkat lain. Silakan tunggu sebentar dan coba lagi.'
             })
         
-        # Coba jalankan face recognition dengan GUI
+        # Acquire camera lock
         try:
-            result = run_attendance_with_camera(mode, int(camera_id))
-            return jsonify(result)
-        except Exception as camera_error:
-            logger.error(f"Camera error: {camera_error}")
-            # Fallback - simulasi absensi tanpa kamera untuk testing
+            with CameraLock() as camera_lock:
+                logger.info(f"Camera lock acquired for {mode} mode")
+                
+                # SIMPLE APPROACH: Always do complete cleanup before ANY camera operation
+                logger.info(f"Performing complete camera cleanup before {mode} mode")
+                
+                # Step 1: Destroy all OpenCV windows (most important)
+                try:
+                    cv2.destroyAllWindows()
+                    cv2.waitKey(10)
+                    time.sleep(0.3)
+                except:
+                    pass
+                
+                # Step 2: Force release camera 0 specifically
+                for attempt in range(3):
+                    try:
+                        temp_cap = cv2.VideoCapture(int(camera_id))
+                        if temp_cap.isOpened():
+                            temp_cap.release()
+                        del temp_cap
+                        time.sleep(0.2)
+                    except:
+                        pass
+                
+                # Step 3: Extra delay for pulang mode
+                if mode == 'pulang':
+                    logger.info("Extra delay for pulang mode")
+                    time.sleep(1.0)
+                
+                # Step 4: Try camera operation with lock protection
+                try:
+                    result = run_attendance_with_camera(mode, int(camera_id))
+                    return jsonify(result)
+                except Exception as camera_error:
+                    logger.error(f"Camera error: {camera_error}")
+                    # Fallback - simulasi absensi tanpa kamera untuk testing
+                    return jsonify({
+                        'status': 'warning',
+                        'message': f'Kamera tidak tersedia. Mode simulasi: Absensi {mode} berhasil (demo mode)'
+                    })
+                    
+        except RuntimeError as lock_error:
+            logger.error(f"Camera lock error: {lock_error}")
             return jsonify({
-                'status': 'warning',
-                'message': f'Kamera tidak tersedia. Mode simulasi: Absensi {mode} berhasil (demo mode)'
+                'status': 'error',
+                'message': '📷 Tidak dapat mengakses kamera. Perangkat lain sedang menggunakan kamera. Silakan tutup aplikasi kamera lain dan coba lagi.'
             })
             
     except Exception as e:
         logger.error(f"Error in mark_attendance: {e}")
         return jsonify({
             'status': 'error',
-            'message': f'Terjadi kesalahan: {str(e)}'
+            'message': f'Terjadi kesalahan koneksi: {str(e)}. Silakan refresh halaman dan coba lagi.'
         })
 
 @app.route('/mark_attendance_ajax', methods=['POST'])
@@ -1965,7 +2518,7 @@ def mark_attendance_ajax_endpoint():
 @app.route('/mark_attendance_mobile', methods=['POST'])
 @qr_verification_required
 def mark_attendance_mobile():
-    """Route untuk absensi mobile menggunakan kamera browser"""
+    """Route untuk absensi mobile menggunakan kamera browser - dengan camera lock"""
     try:
         mode = request.form.get('mode', 'masuk')
         image_data = request.form.get('image_data')
@@ -1979,83 +2532,124 @@ def mark_attendance_mobile():
                 'message': 'Data gambar tidak ditemukan!'
             })
         
-        # Process base64 image data
-        try:
-            # Remove data:image/jpeg;base64, prefix if present
-            if ',' in image_data:
-                image_data = image_data.split(',')[1]
-            
-            # Decode base64 image
-            image_bytes = base64.b64decode(image_data)
-            nparr = np.frombuffer(image_bytes, np.uint8)
-            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            
-            if frame is None:
-                return jsonify({
-                    'status': 'error',
-                    'message': 'Gagal memproses gambar dari kamera!'
-                })
-            
-            # Check if face recognition model exists
-            if 'face_recognition_model.pkl' not in os.listdir('static'):
-                return jsonify({
-                    'status': 'error',
-                    'message': 'Model pengenalan wajah belum dilatih. Hubungi administrator.'
-                })
-            
-            # Extract faces from the frame
-            faces = extract_faces(frame)
-            
-            if len(faces) == 0:
-                return jsonify({
-                    'status': 'error',
-                    'message': 'Wajah tidak terdeteksi. Pastikan pencahayaan cukup dan wajah terlihat jelas.'
-                })
-            
-            # Process the first detected face
-            (x, y, w, h) = faces[0]
-            face = cv2.resize(frame[y:y+h, x:x+w], (50, 50))
-            
-            # Identify the face
-            identified_users = identify_face(face.reshape(1, -1))
-            user = identified_users[0]
-            
-            if user == 'Unknown':
-                return jsonify({
-                    'status': 'error',
-                    'message': 'Wajah tidak dikenali. Pastikan Anda sudah terdaftar dalam sistem.'
-                })
-            
-            # Update attendance
-            result = update_attendance(user, mode)
-            
-            if result.get('success', False):
-                return jsonify({
-                    'status': 'success',
-                    'message': f'Absensi {mode} berhasil untuk {user}!',
-                    'user': user,
-                    'mode': mode,
-                    'time': datetime.now().strftime('%H:%M:%S')
-                })
-            else:
-                return jsonify({
-                    'status': 'warning',
-                    'message': result.get('message', f'Absensi {mode} sudah tercatat hari ini untuk {user}'),
-                    'user': user
-                })
-                
-        except Exception as img_error:
-            logger.error(f"Image processing error: {img_error}")
+        # Import camera lock system
+        from camera_lock import CameraLock, is_camera_busy
+        
+        # Check if camera is busy (desktop using camera)
+        if is_camera_busy():
             return jsonify({
                 'status': 'error',
-                'message': f'Gagal memproses gambar: {str(img_error)}'
+                'message': '📷 Kamera sedang digunakan oleh laptop/desktop. Silakan tunggu sebentar dan coba lagi.'
+            })
+        
+        # Acquire camera lock for mobile processing
+        try:
+            with CameraLock() as camera_lock:
+                logger.info(f"Mobile camera lock acquired for {mode} mode")
+                
+                # Process base64 image data
+                try:
+                    # Remove data:image/jpeg;base64, prefix if present
+                    if ',' in image_data:
+                        image_data = image_data.split(',')[1]
+                    
+                    # Decode base64 image
+                    image_bytes = base64.b64decode(image_data)
+                    nparr = np.frombuffer(image_bytes, np.uint8)
+                    frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    
+                    if frame is None:
+                        return jsonify({
+                            'status': 'error',
+                            'message': 'Gagal memproses gambar dari kamera mobile!'
+                        })
+                    
+                    # Check if face recognition model exists
+                    if 'face_recognition_model.pkl' not in os.listdir('static'):
+                        return jsonify({
+                            'status': 'error',
+                            'message': 'Model pengenalan wajah belum dilatih. Hubungi administrator.'
+                        })
+                    
+                    # Extract faces from the frame
+                    faces = extract_faces(frame)
+                    
+                    if len(faces) == 0:
+                        return jsonify({
+                            'status': 'error',
+                            'message': 'Wajah tidak terdeteksi. Pastikan pencahayaan cukup dan wajah terlihat jelas.'
+                        })
+                    
+                    # Process the first detected face with MOBILE PREPROCESSING
+                    (x, y, w, h) = faces[0]
+                    face_region = frame[y:y+h, x:x+w]
+                    
+                    # CRITICAL: Mobile preprocessing to match training format
+                    # Convert to grayscale (same as training)
+                    if len(face_region.shape) > 2:
+                        gray_face = cv2.cvtColor(face_region, cv2.COLOR_BGR2GRAY)
+                    else:
+                        gray_face = face_region.copy()
+                    
+                    # Apply mobile enhancements
+                    gray_face = cv2.equalizeHist(gray_face)  # Improve contrast
+                    gray_face = cv2.bilateralFilter(gray_face, 9, 75, 75)  # Noise reduction
+                    
+                    # Resize to exact training format (50x50 grayscale)
+                    face_resized = cv2.resize(gray_face, (50, 50), interpolation=cv2.INTER_CUBIC)
+                    
+                    # Flatten to 1D array (2500 features) to match training
+                    face_flattened = face_resized.flatten()
+                    
+                    logger.info(f"Mobile face processed: shape={face_flattened.shape} (should be (2500,))")
+                    
+                    # Identify the face
+                    identified_users = identify_face(face_flattened)
+                    user = identified_users[0]
+                    
+                    if user == 'Unknown':
+                        return jsonify({
+                            'status': 'error',
+                            'message': 'Wajah tidak dikenali. Pastikan Anda sudah terdaftar dalam sistem dan pencahayaan cukup baik.'
+                        })
+                    
+                    # Update attendance
+                    result = update_attendance(user, mode)
+                    
+                    if result.get('success', False):
+                        return jsonify({
+                            'status': 'success',
+                            'message': f'✅ Absensi {mode} berhasil untuk {user}!',
+                            'user': user,
+                            'mode': mode,
+                            'time': datetime.now().strftime('%H:%M:%S')
+                        })
+                    else:
+                        return jsonify({
+                            'status': 'warning',
+                            'message': result.get('message', f'Absensi {mode} sudah tercatat hari ini untuk {user}'),
+                            'user': user
+                        })
+                        
+                except Exception as img_error:
+                    logger.error(f"Mobile image processing error: {img_error}")
+                    return jsonify({
+                        'status': 'error',
+                        'message': f'Gagal memproses gambar mobile: {str(img_error)}'
+                    })
+                    
+        except RuntimeError as lock_error:
+            logger.error(f"Mobile camera lock error: {lock_error}")
+            return jsonify({
+                'status': 'error',
+                'message': '📷 Tidak dapat mengakses kamera mobile. Desktop sedang menggunakan kamera. Silakan tunggu sebentar dan coba lagi.'
             })
             
     except Exception as e:
         logger.error(f"Error in mark_attendance_mobile: {e}")
         return jsonify({
             'status': 'error',
-            'message': f'Terjadi kesalahan: {str(e)}'
+            'message': f'Terjadi kesalahan koneksi mobile: {str(e)}. Silakan refresh halaman dan coba lagi.'
         })
 
 @app.route('/mobile')
@@ -2342,7 +2936,7 @@ def run_attendance_with_camera(mode, camera_id):
         import os
         
         # Get the path to the isolated camera script
-        script_path = os.path.join(os.path.dirname(__file__), 'camera_isolated.py')
+        script_path = os.path.join(os.path.dirname(__file__), 'camera_isolated_enhanced.py')
         
         # Run camera in isolated subprocess
         try:
@@ -2912,81 +3506,36 @@ def server_error(error):
     return render_template('offline.html'), 500
 
 # ===========================
-# NGROK TUNNEL MANAGEMENT
+# CLOUDFLARE TUNNEL MANAGEMENT  
 # ===========================
 
-def start_ngrok_tunnel(port):
-    """Start ngrok tunnel dan return public URL dengan bypass warning"""
-    global ngrok_tunnel
-    try:
-        # Kill existing tunnels
-        ngrok.kill()
-        
-        # Start new tunnel dengan konfigurasi yang benar untuk ngrok v3
-        ngrok_tunnel = ngrok.connect(port, "http")
-        public_url = str(ngrok_tunnel.public_url)
-        
-        # Ngrok v3 otomatis memberikan HTTPS URL
-        if not public_url.startswith("https://"):
-            https_url = public_url.replace("http://", "https://", 1)
-        else:
-            https_url = public_url
-        
-        # Add ngrok bypass parameter untuk free accounts
-        if "ngrok-free.dev" in https_url:
-            bypass_url = https_url + "?ngrok-skip-browser-warning=true"
-        else:
-            bypass_url = https_url
-        
-        print("\n" + "="*60)
-        print("🌐 KAFEBASABASI ATTENDANCE SYSTEM")
-        print("="*60)
-        print(f"📱 NGROK PUBLIC URL: {bypass_url}")
-        print(f"📱 MOBILE ATTENDANCE: {bypass_url}/mobile")
-        print(f"🏠 LOCAL URL: http://localhost:{port}")
-        print(f"🔗 QR Auth (Public): {bypass_url}/auth")
-        print(f"🔗 QR Auth (Local): http://localhost:{port}/auth")
-        print(f"👨‍💼 Admin (Public): {bypass_url}/admin/login") 
-        print(f"👨‍💼 Admin (Local): http://localhost:{port}/admin/login")
-        print(f"📊 Ngrok Dashboard: http://localhost:4040")
-        print("="*60)
-        print("💡 Gunakan HTTPS URL untuk akses kamera mobile!")
-        print("💡 Karyawan bisa scan QR dari HP menggunakan URL public")
-        print("💡 Admin bisa akses lokal atau public")
-        print("💡 URL sudah include bypass warning ngrok")
-        print("💡 Tekan Ctrl+C untuk shutdown")
-        print("="*60 + "\n")
-        
-        return bypass_url  # Return URL with bypass parameter
-        
-    except Exception as e:
-        print(f"❌ Error starting ngrok: {e}")
-        print("💡 Pastikan ngrok sudah terinstall dan authtoken sudah diset")
-        print("💡 Aplikasi akan tetap berjalan di mode local only")
-        return None
-
-def cleanup_ngrok():
-    """Cleanup ngrok saat aplikasi ditutup"""
-    global ngrok_tunnel
-    try:
-        if ngrok_tunnel and ngrok_tunnel.public_url:
-            ngrok.disconnect(ngrok_tunnel.public_url)
-        ngrok.kill()
-        print("✅ Ngrok tunnels closed")
-    except Exception as e:
-        print(f"⚠️ Ngrok cleanup error: {e}")
-        # Force kill ngrok process
-        try:
-            ngrok.kill()
-        except:
-            pass
+def print_cloudflare_instructions(port):
+    """Print instructions for using Cloudflare Tunnel"""
+    print("\n" + "="*60)
+    print("🌐 KAFEBASABASI - CLOUDFLARE TUNNEL SETUP")
+    print("="*60)
+    print("� Untuk akses public dengan Cloudflare Tunnel:")
+    print("")
+    print("   1. Buka terminal baru:")
+    print(f"      cloudflared tunnel --url http://localhost:{port}")
+    print("")
+    print("   2. Atau gunakan script otomatis:")
+    print("      ./scripts/start_cloudflare.sh")
+    print("")
+    print("   3. Copy URL yang muncul (format: https://xxx.trycloudflare.com)")
+    print("")
+    print("� Keunggulan Cloudflare Tunnel:")
+    print("   ✅ Gratis selamanya (tidak ada batasan waktu)")
+    print("   ✅ Lebih stabil dan reliable")
+    print("   ✅ Performance lebih cepat dengan global CDN")
+    print("   ✅ Security lebih baik dengan DDoS protection")
+    print("")
+    print("📚 Dokumentasi lengkap: docs/CLOUDFLARE_SETUP.md")
+    print("="*60)
 
 def signal_handler(sig, frame):
     """Handle Ctrl+C gracefully"""
     print('\n🛑 Shutting down Kafebasabasi system...')
-    
-    # Cleanup ngrok
-    cleanup_ngrok()
     
     # Close database connection
     try:
@@ -3001,7 +3550,6 @@ def signal_handler(sig, frame):
 if __name__ == '__main__':
     # Setup signal handler for graceful shutdown
     signal.signal(signal.SIGINT, signal_handler)
-    atexit.register(cleanup_ngrok)
     
     try:
         # Initialize database
@@ -3012,11 +3560,7 @@ if __name__ == '__main__':
             port = app_config['port']
             host = app_config['host']
             
-            # Check if ngrok should be started (environment variable atau default True)
-            use_ngrok = os.environ.get('USE_NGROK', 'true').lower() == 'true'
-            force_local_only = os.environ.get('LOCAL_ONLY', 'false').lower() == 'true'
-            
-            # Always show local access info first
+            # Show local access info
             print("\n" + "="*60)
             print("🏠 KAFEBASABASI ATTENDANCE SYSTEM")
             print("="*60)
@@ -3024,54 +3568,22 @@ if __name__ == '__main__':
             print(f"🔗 QR Auth (Local): http://localhost:{port}/auth")
             print(f"👨‍💼 Admin (Local): http://localhost:{port}/admin/login")
             print(f"📷 Camera Test: http://localhost:{port}/camera-test")
+            print("="*60)
+            print("💡 Untuk akses public, gunakan Cloudflare Tunnel")
             
-            # Start ngrok tunnel in background if enabled and not forced local only
-            public_url = None
-            if use_ngrok and not force_local_only:
-                print("🚀 Starting ngrok tunnel...")
-                try:
-                    public_url = start_ngrok_tunnel(port)
-                    if public_url:
-                        print("📱 NGROK PUBLIC URL: " + public_url)
-                        print("📱 Mobile Attendance: " + public_url + "/mobile")
-                        print("� QR Auth (Public): " + public_url + "/auth")  
-                        print("👨‍💼 Admin (Public): " + public_url + "/admin/login")
-                        print("📊 Ngrok Dashboard: http://localhost:4040")
-                        print("="*60)
-                        print("💡 Gunakan HTTPS URL untuk akses kamera mobile!")
-                        print("💡 Karyawan bisa scan QR dari HP menggunakan URL public")
-                        print("� Admin bisa akses lokal atau public")
-                        print("� Tekan Ctrl+C untuk shutdown")
-                except Exception as e:
-                    print(f"⚠️ Ngrok failed to start: {e}")
-                    print("� Continuing with local access only...")
-                    public_url = None
-            else:
-                if force_local_only:
-                    print("💡 Running in LOCAL ONLY mode (LOCAL_ONLY=true)")
-                else:
-                    print("💡 Ngrok disabled (USE_NGROK=false)")
-            
-            if not public_url:
-                print("="*60)
-                print("💡 Untuk akses public: USE_NGROK=true python3 app.py")
-                print("💡 Untuk lokal saja: LOCAL_ONLY=true python3 app.py")
-                print("💡 Dual mode: python3 app.py (default)")
-            
-            print("="*60 + "\n")
+            # Show Cloudflare Tunnel instructions
+            print_cloudflare_instructions(port)
             
             logger.info("Starting Kafebasabasi Attendance System v2.0")
             logger.info(f"Local server: http://{host}:{port}")
+            logger.info("For public access, use Cloudflare Tunnel: cloudflared tunnel --url http://localhost:" + str(port))
             
-            if public_url:
-                logger.info(f"Public access: {public_url}")
-            
-            # Run Flask app dengan reloader disabled saat pakai ngrok
+            # Run Flask app
             app.run(
-                debug=app_config['debug'] and not use_ngrok,  # Disable debug jika pakai ngrok
+                debug=app_config['debug'],
                 host=host, 
                 port=port,
-                use_reloader=False  # Disable reloader untuk stabilitas
+                use_reloader=False
             )
         else:
             logger.error("Failed to initialize database. Please run init_database.py first.")
@@ -3082,5 +3594,4 @@ if __name__ == '__main__':
         logger.error(f"Application error: {e}")
     finally:
         # Final cleanup
-        cleanup_ngrok()
         db_manager.close_connection()

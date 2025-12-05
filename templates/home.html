@@ -1202,11 +1202,13 @@
       spinner.classList.remove('d-none');
       
       // Show info notification
-      showNotification('info', 'Memproses Absensi', 
-        `Posisikan wajah di depan kamera untuk absensi ${mode}. Kamera akan terbuka sebentar...`);
+      showNotification('info', 'Membuka Kamera', 
+        `Anda akan diarahkan ke halaman absensi ${mode} dengan kamera web...`);
       
-      // Redirect to attendance route (camera will open)
-      window.location.href = mode === 'masuk' ? '/absen_masuk' : '/absen_pulang';
+      // Redirect to web-based attendance page (not GUI OpenCV)
+      setTimeout(() => {
+        window.location.href = mode === 'masuk' ? '/absen_masuk' : '/absen_pulang';
+      }, 500);
     }
     
     // Notification functions

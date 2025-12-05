@@ -1,4 +1,4 @@
-# .gitignore untuk Sistem Absensi Face Recognition
+# Smart Absen Face Recognition - Kelompok 4
 
 # Python
 __pycache__/
@@ -22,26 +22,6 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
 
 # Virtual environments
 .env
@@ -80,17 +60,9 @@ logs/
 *.tmp
 *.temp
 
-# Face recognition model (optional - comment out if you want to include it)
-# static/face_recognition_model.pkl
-
-# Attendance files (optional - comment out if you want to include them)
-# Attendance/*.csv
-
-# Environment variables
-.env.local
-.env.development
-.env.test
-.env.production
+# Attendance CSV (generated at runtime)
+Attendance/*.csv
+data/Attendance/*.csv
 
 # Flask
 instance/

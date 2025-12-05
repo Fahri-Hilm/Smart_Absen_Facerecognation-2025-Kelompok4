@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Tambah Karyawan - Kafebasabasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3C2415;
+            --secondary: #8B4513;
+            --accent: #DAA520;
+            --light-bg: #FDF6E3;
+            --success: #28a745;
+            --danger: #DC3545;
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light-bg) 0%, #F5E6D3 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .container-form {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(60, 36, 21, 0.15);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+        }
+
+        .form-header h2 {
+            margin: 0 0 0.2rem 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .form-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.75rem;
+        }
+
+        .form-body {
+            padding: 0.8rem;
+        }
+
+        .form-section {
+            margin-bottom: 0.8rem;
+        }
+
+        .section-title {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-title i {
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.75rem;
+        }
+
+        .form-label .required {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .form-control {
+            border: 2px solid #E9ECEF;
+            border-radius: 4px;
+            padding: 0.35rem 0.5rem;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger);
+            background-image: none;
+        }
+
+        .form-control.is-invalid:focus {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 40px;
+        }
+
+        .invalid-feedback {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.4rem;
+        }
+
+        @media (max-width: 1200px) {
+            .form-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .form-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-check {
+            margin-bottom: 0.5rem;
+        }
+
+        .form-check-input {
+            width: 1.25em;
+            height: 1.25em;
+            border: 2px solid #E9ECEF;
+            border-radius: 4px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .form-check-label {
+            margin-left: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .help-text {
+            color: #6C757D;
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            font-style: italic;
+        }
+
+        /* Photo Capture Styles - IMPROVED */
+        .photo-tabs {
+            border-bottom: 2px solid var(--accent);
+            margin-bottom: 0;
+        }
+
+        .photo-tab-btn {
+            color: #6C757D;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .photo-tab-btn i {
+            font-size: 1rem;
+        }
+
+        .photo-tab-btn:hover {
+            border-bottom-color: var(--accent);
+            color: var(--primary);
+        }
+
+        .photo-tab-btn.active {
+            border-bottom-color: var(--accent);
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .photo-tab-content {
+            padding: 0;
+        }
+
+        /* Workflow Info Box */
+        .workflow-info {
+            border-left: 4px solid var(--accent) !important;
+            background: #F8F9FA !important;
+        }
+
+        .workflow-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #3C2415;
+        }
+
+        /* Photo Capture Grid Layout */
+        .photo-capture-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        .capture-box,
+        .preview-box {
+            background: white;
+            border: 1px solid #E9ECEF;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .capture-header,
+        .preview-header {
+            padding: 0.6rem 0.8rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: white;
+        }
+
+        .capture-header {
+            background: var(--primary);
+        }
+
+        .preview-header {
+            background: var(--accent);
+        }
+
+        .capture-section {
+            padding: 0.6rem;
+            background: white;
+        }
+
+        .preview-section {
+            padding: 0.6rem;
+            background: white;
+        }
+
+        .webcam-container {
+            position: relative;
+            background: #000;
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 3/4;
+            margin-bottom: 0.6rem;
+        }
+
+        .webcam-container video {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-container {
+            background: #f0f0f0;
+            border: 2px dashed #E9ECEF;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            min-height: 180px;
+            margin-bottom: 0.6rem;
+        }
+
+        .training-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 0.4rem;
+            border: 1px solid #E9ECEF;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .training-preview-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+            aspect-ratio: 1;
+            background: #f0f0f0;
+            border: 1px solid #E9ECEF;
+        }
+
+        .training-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .training-preview-item .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(220, 53, 69, 0.9);
+            border: none;
+            color: white;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            font-size: 10px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .training-preview-item:hover .remove-btn {
+            display: flex;
+        }
+
+        .training-preview-item .remove-btn:hover {
+            background: #DC3545;
+            transform: scale(1.1);
+        }
+
+        /* Progress Bar */
+        .training-progress {
+            margin-bottom: 0.8rem;
+        }
+
+        .progress {
+            height: 24px;
+            background: #E9ECEF;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #DEE2E6;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--accent) 0%, #C89C1A 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive for Tablet */
+        @media (max-width: 900px) {
+            .photo-capture-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tab-content {
+            padding: 0.8rem 0;
+        }
+
+        .webcam-container video {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-container {
+            background: #fff;
+            border: 2px solid #E9ECEF;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 6px;
+            object-fit: contain;
+        }
+
+        .training-progress {
+            margin: 1rem 0;
+        }
+
+        .progress {
+            height: 25px;
+            background: #E9ECEF;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--accent) 0%, #C89C1A 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: width 0.3s ease;
+        }
+
+        .training-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #E9ECEF;
+        }
+
+        .training-preview-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 6px;
+            aspect-ratio: 1;
+            background: #f0f0f0;
+        }
+
+        .training-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .training-preview-item .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(220, 53, 69, 0.9);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .training-preview-item:hover .remove-btn {
+            display: flex;
+        }
+
+        .training-preview-item .remove-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: scale(1.1);
+        }
+
+        .btn-info {
+            background: #17A2B8;
+            border: none;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #FFC107;
+            color: var(--primary);
+            border: none;
+        }
+
+        .btn-warning:hover {
+            background: #E0A800;
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #E9ECEF;
+        }
+
+        .btn {
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #C89C1A 100%);
+            color: var(--primary);
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(218, 165, 32, 0.4);
+        }
+
+        .btn-secondary {
+            background: #E9ECEF;
+            color: var(--primary);
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #DEE2E6;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-danger {
+            background-color: #F8D7DA;
+            color: #721C24;
+        }
+
+        .alert-success {
+            background-color: #D4EDDA;
+            color: #155724;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #E9ECEF;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .progress-step {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            flex: 1;
+        }
+
+        .progress-step-number {
+            width: 40px;
+            height: 40px;
+            background: #E9ECEF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: 600;
+            color: #6C757D;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active .progress-step-number {
+            background: var(--accent);
+            color: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .progress-step-label {
+            font-size: 0.85rem;
+            color: #6C757D;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .form-body {
+                padding: 1.5rem;
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .progress-indicator {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .progress-indicator::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-form">
+        <div class="form-card">
+            <!-- Header -->
+            <div class="form-header">
+                <h2>
+                    <i class="bi bi-person-plus"></i>
+                    Tambah Karyawan Baru
+                </h2>
+                <p>Lengkapi semua data karyawan dengan akurat</p>
+            </div>
+
+            <!-- Form Body -->
+            <div class="form-body">
+                <div id="alertMessage"></div>
+
+                <form id="employeeForm" method="POST" enctype="multipart/form-data" novalidate>
+                    <!-- SECTION 1: Data Pribadi -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-person-card"></i>
+                            Data Pribadi
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Nama Lengkap
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="fullName" name="fullName" 
+                                    placeholder="Contoh: Budi Santoso" required>
+                                <div class="invalid-feedback">Nama lengkap harus diisi</div>
+                                <div class="help-text">Nama sesuai dengan identitas resmi</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    NIK (Nomor Identitas)
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nik" name="nik" 
+                                    placeholder="Contoh: 3273051234567890" maxlength="16" required>
+                                <div class="invalid-feedback">NIK harus 16 digit</div>
+                                <div class="help-text">Nomor dari KTP/Identitas</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Jenis Kelamin
+                                    <span class="required">*</span>
+                                </label>
+                                <select class="form-control" id="gender" name="gender" required>
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                                <div class="invalid-feedback">Jenis kelamin harus dipilih</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Tanggal Lahir
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" required>
+                                <div class="invalid-feedback">Tanggal lahir harus diisi</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: Kontak -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-telephone"></i>
+                            Informasi Kontak
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Email
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                    placeholder="Contoh: budi@example.com" required>
+                                <div class="invalid-feedback">Email harus valid</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Nomor Telepon
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                    placeholder="Contoh: 081234567890" required>
+                                <div class="invalid-feedback">Nomor telepon harus valid</div>
+                                <div class="help-text">Mulai dengan 0, minimal 10 digit</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Alamat Lengkap
+                                <span class="required">*</span>
+                            </label>
+                            <textarea class="form-control" id="address" name="address" 
+                                placeholder="Jalan, nomor, kelurahan, kecamatan, kota, provinsi, kode pos" required></textarea>
+                            <div class="invalid-feedback">Alamat harus diisi</div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: Data Pekerjaan -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-briefcase"></i>
+                            Data Pekerjaan
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Posisi/Jabatan
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="position" name="position" 
+                                    placeholder="Contoh: Barista, Kasir, Manager" required>
+                                <div class="invalid-feedback">Posisi harus diisi</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Divisi/Bagian
+                                    <span class="required">*</span>
+                                </label>
+                                <select class="form-control" id="bagian" name="bagian" required>
+                                    <option value="">-- Pilih Divisi --</option>
+                                    <option value="Operasional">Operasional</option>
+                                    <option value="Dapur">Dapur</option>
+                                    <option value="Keuangan">Keuangan</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Teknis">Teknis</option>
+                                    <option value="Manajemen">Manajemen</option>
+                                </select>
+                                <div class="invalid-feedback">Divisi harus dipilih</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Tanggal Bergabung
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="hireDate" name="hireDate" required>
+                                <div class="invalid-feedback">Tanggal bergabung harus diisi</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Status Karyawan
+                                    <span class="required">*</span>
+                                </label>
+                                <select class="form-control" id="status" name="status" required>
+                                    <option value="">-- Pilih Status --</option>
+                                    <option value="aktif" selected>Aktif</option>
+                                    <option value="tidak_aktif">Tidak Aktif</option>
+                                    <option value="cuti">Cuti</option>
+                                </select>
+                                <div class="invalid-feedback">Status harus dipilih</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Note: Foto & Training Wajah akan diproses di halaman terpisah (capture_wajah.html) -->
+
+
+                    <!-- SECTION 4: Catatan Tambahan -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-sticky"></i>
+                            Catatan Tambahan (Opsional)
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Catatan</label>
+                            <textarea class="form-control" id="notes" name="notes" 
+                                placeholder="Informasi tambahan tentang karyawan (jika ada)"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Buttons Section -->
+                    <div class="button-group" style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="reset" class="btn btn-secondary" style="flex: 1;">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Reset Form
+                        </button>
+                        <button type="submit" class="btn btn-primary" style="flex: 2;">
+                            <i class="bi bi-check-circle"></i>
+                            Simpan & Lanjut ke Capture Wajah
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form validation
+        const form = document.getElementById('employeeForm');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Browser validation
+            if (!form.checkValidity()) {
+                e.stopPropagation();
+                form.classList.add('was-validated');
+                return;
+            }
+
+            // Custom validation
+            const nik = document.getElementById('nik').value;
+            const phone = document.getElementById('phone').value;
+
+            // NIK validation (16 digit)
+            if (!/^\d{16}$/.test(nik)) {
+                showAlert('NIK harus 16 digit', 'danger');
+                return;
+            }
+
+            // Phone validation
+            if (!/^0\d{9,}$/.test(phone)) {
+                showAlert('Nomor telepon harus dimulai dengan 0 dan minimal 10 digit', 'danger');
+                return;
+            }
+
+            // Prepare form data
+            const formData = new FormData(form);
+
+            try {
+                showAlert('Mengunggah data... Mohon tunggu', 'info');
+                
+                const response = await fetch('/admin/add_employee_complete', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    showAlert(`✅ Karyawan ${result.name} berhasil ditambahkan! Lanjut ke capture wajah...`, 'success');
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    
+                    // Redirect ke capture page setelah 1.5 detik
+                    setTimeout(() => {
+                        window.location.href = `/capture_wajah?employee_id=${result.employee_id}&name=${result.name}&dept=${result.dept}`;
+                    }, 1500);
+                } else {
+                    showAlert(result.message || 'Gagal menambahkan karyawan', 'danger');
+                }
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'danger');
+                console.error('Error:', error);
+            }
+        });
+
+        // Reset validation class when input changes
+        Array.from(form.elements).forEach(element => {
+            element.addEventListener('input', () => {
+                element.classList.remove('is-invalid');
+            });
+        });
+
+        // Alert function
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.getElementById('alertMessage');
+            const bgColor = {
+                'success': '#D4EDDA',
+                'danger': '#F8D7DA',
+                'info': '#D1ECF1'
+            };
+            const textColor = {
+                'success': '#155724',
+                'danger': '#721C24',
+                'info': '#0C5460'
+            };
+            const icon = {
+                'success': 'check-circle',
+                'danger': 'exclamation-circle',
+                'info': 'info-circle'
+            };
+
+            alertDiv.innerHTML = `
+                <div class="alert alert-${type}">
+                    <i class="bi bi-${icon[type]}"></i>
+                    ${message}
+                </div>
+            `;
+
+            if (type === 'success') {
+                alertDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Set max date untuk hire date (hari ini)
+        document.getElementById('hireDate').max = new Date().toISOString().split('T')[0];
+        
+        // Set max date untuk date of birth (minimal 18 tahun)
+        const maxDob = new Date();
+        maxDob.setFullYear(maxDob.getFullYear() - 18);
+        document.getElementById('dateOfBirth').max = maxDob.toISOString().split('T')[0];
+
+        // ==================== FORM SUBMISSION ====================
+        // Handle form submission
+        document.getElementById('employeeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            // Get form data
+            const formData = new FormData(form);
+            
+            // Disable submit button during process
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyimpan data...';
+            
+            try {
+                // Submit to backend
+                const response = await fetch('/admin/add_employee_complete', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    showAlert('❌ ' + (result.error || 'Gagal menyimpan data'), 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    return;
+                }
+
+                // Success - show loading message
+                showAlert(`✅ Data ${result.name} tersimpan! Membuka halaman capture wajah...`, 'success');
+                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Selesai! Mengarahkan...';
+                
+                setTimeout(() => {
+                    const employee_id = result.employee_id;
+                    const name = result.name || '';
+                    const dept = result.dept || '';
+                    window.location.href = `/capture_wajah?employee_id=${employee_id}&name=${encodeURIComponent(name)}&dept=${encodeURIComponent(dept)}`;
+                }, 1500);
+
+            } catch (err) {
+                showAlert('❌ Error: ' + err.message, 'danger');
+                console.error('Submit error:', err);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>

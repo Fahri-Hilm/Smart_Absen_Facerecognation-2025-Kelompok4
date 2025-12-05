@@ -65,12 +65,20 @@ class DatabaseManager:
         """Membuat tabel-tabel yang diperlukan"""
         try:
             with self.connection.cursor() as cursor:
-                # Tabel karyawan
+                # Tabel karyawan dengan column lengkap
                 create_employees_table = """
                 CREATE TABLE IF NOT EXISTS employees (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(100) NOT NULL,
                     bagian VARCHAR(50) NOT NULL,
+                    nik VARCHAR(16) UNIQUE,
+                    email VARCHAR(100) UNIQUE,
+                    phone VARCHAR(20),
+                    gender VARCHAR(20),
+                    address TEXT,
+                    position VARCHAR(100),
+                    status VARCHAR(20) DEFAULT 'aktif',
+                    hire_date DATE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     UNIQUE KEY unique_employee (name, bagian)

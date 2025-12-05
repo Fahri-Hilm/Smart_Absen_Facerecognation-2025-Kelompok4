@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture Wajah Training - FaceAttend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3C2415;
+            --primary-light: #8B4513;
+            --accent: #DAA520;
+            --light-bg: #FDF6E3;
+            --cream: #F5DEB3;
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light-bg) 0%, var(--cream) 100%);
+            min-height: 100vh;
+            padding: 1rem 0;
+        }
+
+        .container-capture {
+            max-width: 1400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(60, 36, 21, 0.1);
+            padding: 2rem;
+            margin: 2rem auto;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .page-header i {
+            font-size: 2.5rem;
+            color: var(--accent);
+        }
+
+        .page-header h1 {
+            margin: 0;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .page-header p {
+            margin: 0.5rem 0 0;
+            color: #6C757D;
+            font-size: 0.9rem;
+        }
+
+        /* Employee Info Card */
+        .employee-info-card {
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .employee-info-card strong {
+            color: var(--primary);
+        }
+
+        /* Instructions */
+        .instruction-panel {
+            background: linear-gradient(135deg, #E7F3FF 0%, #F0F8FF 100%);
+            border: 1px solid #B3D9FF;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .instruction-panel h5 {
+            color: #0066CC;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .instruction-panel ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .instruction-panel li {
+            margin-bottom: 0.5rem;
+            color: #0066CC;
+        }
+
+        /* Mode Selector */
+        .mode-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #F8F9FA;
+            border-radius: 8px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid #CCCCCC;
+            background: #F5F5F5;
+            color: #333333;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            border-color: var(--accent);
+            background: #FFF3E0;
+            color: #FF8C00;
+        }
+
+        .mode-btn.active.manual {
+            border-color: #0066CC;
+            background: #E7F3FF;
+            color: #0066CC;
+        }
+
+        /* Main Capture Area */
+        .capture-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1100px) {
+            .capture-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* Webcam Section */
+        .webcam-section {
+            background: white;
+            border: 2px solid #E9ECEF;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .webcam-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+        }
+
+        .webcam-content {
+            padding: 1.5rem;
+        }
+
+        .webcam-feed {
+            aspect-ratio: 3/4;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .webcam-feed video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Control Buttons */
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .btn-capture {
+            padding: 0.8rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-manual {
+            background: #0066CC;
+            color: white;
+        }
+
+        .btn-manual:hover {
+            background: #0052A3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-auto {
+            background: #FF8C00;
+            color: white;
+        }
+
+        .btn-auto:hover {
+            background: #E07B00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+        }
+
+        /* Preview Section */
+        .preview-section {
+            background: white;
+            border: 2px solid #E9ECEF;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            background: linear-gradient(135deg, var(--accent) 0%, #FFD54F 100%);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+        }
+
+        .preview-content {
+            padding: 1.5rem;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .preview-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f0f0f0;
+            aspect-ratio: 1;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item-number {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .preview-item-delete {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            background: #FF4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .preview-item-delete:hover {
+            opacity: 1;
+            background: #FF0000;
+        }
+
+        .preview-empty {
+            grid-column: 1/-1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+            color: #6C757D;
+            font-size: 0.9rem;
+        }
+
+        .preview-empty i {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            background: #F8F9FA;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #E9ECEF;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .progress-header strong {
+            color: var(--primary);
+        }
+
+        .progress-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            height: 28px;
+            background: #E9ECEF;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #FFD54F);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: width 0.3s ease;
+        }
+
+        .progress-status {
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+            color: #6C757D;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .btn-action {
+            padding: 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-save:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-save:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            background: #6C757D;
+            color: white;
+        }
+
+        .btn-reset:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-back {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Status Messages */
+        .alert-custom {
+            border-radius: 8px;
+            border: none;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-info-custom {
+            background: #E7F3FF;
+            color: #0066CC;
+            border-left: 4px solid #0066CC;
+        }
+
+        .alert-success-custom {
+            background: #D4EDDA;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-warning-custom {
+            background: #FFF3CD;
+            color: #856404;
+            border-left: 4px solid #FF8C00;
+        }
+
+        .alert-danger-custom {
+            background: #F8D7DA;
+            color: #721C24;
+            border-left: 4px solid #DC3545;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-capture {
+                padding: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+            }
+
+            .preview-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-capture">
+        <!-- Header -->
+        <div class="page-header">
+            <i class="bi bi-camera-video-fill"></i>
+            <div>
+                <h1>📸 Capture Wajah Training</h1>
+                <p>Ambil 40+ foto untuk training face recognition</p>
+            </div>
+        </div>
+
+        <!-- Employee Info -->
+        <div class="employee-info-card" id="employeeInfo">
+            <strong>👤 Karyawan:</strong> <span id="employeeName">-</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <strong>🏢 Departemen:</strong> <span id="employeeDept">-</span>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <!-- Instructions -->
+        <div class="instruction-panel">
+            <h5><i class="bi bi-info-circle"></i> Panduan Capture Training</h5>
+            <ul>
+                <li><strong>Ambil 40+ foto</strong> dari berbagai sudut (atas, bawah, kanan, kiri)</li>
+                <li><strong>Variasi pencahayaan:</strong> Terang, normal, dan agak gelap</li>
+                <li><strong>Ekspresi wajah:</strong> Netral, senyum, serius</li>
+                <li><strong>Mode Manual:</strong> Klik tombol untuk setiap foto (lebih presisi)</li>
+                <li><strong>Mode Auto:</strong> Sistem otomatis ambil 40 foto dalam 5 detik (lebih cepat)</li>
+            </ul>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <button class="mode-btn manual active" id="manualModeBtn">
+                <i class="bi bi-hand-index"></i> Manual (1x Klik)
+            </button>
+            <button class="mode-btn" id="autoModeBtn">
+                <i class="bi bi-lightning-fill"></i> Auto (5 Detik)
+            </button>
+        </div>
+
+        <!-- Main Capture Area -->
+        <div class="capture-container">
+            <!-- Webcam Section -->
+            <div class="webcam-section">
+                <div class="webcam-header">
+                    <i class="bi bi-camera-video"></i>
+                    Webcam Live
+                </div>
+                <div class="webcam-content">
+                    <div class="webcam-feed">
+                        <video id="trainingWebcam" autoplay playsinline></video>
+                    </div>
+
+                    <!-- Manual Mode Controls -->
+                    <div id="manualControls" class="control-buttons">
+                        <button class="btn-capture btn-manual" id="captureManualBtn">
+                            <i class="bi bi-camera-fill"></i> Ambil Foto Sekarang
+                        </button>
+                        <small style="text-align: center; color: #6C757D; margin-top: 0.5rem;">
+                            💡 Klik untuk setiap foto dari sudut berbeda
+                        </small>
+                    </div>
+
+                    <!-- Auto Mode Controls (Hidden) -->
+                    <div id="autoControls" class="control-buttons" style="display: none;">
+                        <button class="btn-capture btn-auto" id="startAutoBtn">
+                            <i class="bi bi-play-fill"></i> Mulai Auto Capture (40 Foto)
+                        </button>
+                        <small style="text-align: center; color: #6C757D; margin-top: 0.5rem;">
+                            💡 Putar kepala perlahan selama capture
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <div class="preview-header">
+                    <i class="bi bi-images"></i>
+                    Preview Grid
+                </div>
+                <div class="preview-content">
+                    <!-- Progress Bar -->
+                    <div class="progress-section">
+                        <div class="progress-header">
+                            <strong>📊 Progress</strong>
+                            <div class="progress-badge">
+                                <span id="photoCount">0</span>/40
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="progressBar" style="width: 0%;">0%</div>
+                        </div>
+                        <div class="progress-status" id="progressStatus">
+                            📌 Siap untuk capture
+                        </div>
+                    </div>
+
+                    <!-- Preview Grid -->
+                    <div class="preview-grid" id="previewGrid">
+                        <div class="preview-empty">
+                            <i class="bi bi-image"></i>
+                            <span>Foto belum diambil</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn-action btn-save" id="saveBtn" disabled>
+                            <i class="bi bi-check2-circle"></i> ✅ Simpan Training (40+)
+                        </button>
+                        <button class="btn-action btn-reset" id="resetBtn" style="display: none;">
+                            <i class="bi bi-arrow-clockwise"></i> Reset Semua
+                        </button>
+                        <button class="btn-action btn-back" id="backBtn">
+                            <i class="bi bi-arrow-left"></i> Kembali
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // State Management
+        let captureState = {
+            mode: 'manual',
+            photos: [],
+            isCapturing: false,
+            stream: null,
+            employeeId: null,
+            employeeName: '',
+            employeeDept: ''
+        };
+
+        // Helper Functions
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert-custom alert-${type}-custom`;
+            alertDiv.innerHTML = message;
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 4000);
+        }
+
+        function updateProgress() {
+            const count = captureState.photos.length;
+            const percentage = Math.min((count / 40) * 100, 100);
+            
+            // Update counter
+            document.getElementById('photoCount').textContent = count;
+            
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = `${percentage.toFixed(0)}%`;
+            
+            // Update status
+            const statusEl = document.getElementById('progressStatus');
+            if (count >= 40) {
+                statusEl.innerHTML = '✅ Siap untuk disimpan! (40+ foto tersimpan)';
+                statusEl.style.color = '#28a745';
+                document.getElementById('saveBtn').disabled = false;
+            } else if (count > 0) {
+                statusEl.innerHTML = `🔄 ${count}/40 foto... (${captureState.mode === 'auto' ? 'Auto' : 'Manual'} Capture)`;
+                statusEl.style.color = '#FF8C00';
+                document.getElementById('saveBtn').disabled = true;
+            } else {
+                statusEl.innerHTML = '📌 Siap untuk capture';
+                statusEl.style.color = '#6C757D';
+                document.getElementById('saveBtn').disabled = true;
+            }
+
+            // Show/hide reset button
+            if (count > 0) {
+                document.getElementById('resetBtn').style.display = 'block';
+            } else {
+                document.getElementById('resetBtn').style.display = 'none';
+            }
+        }
+
+        function updatePreviewGrid() {
+            const grid = document.getElementById('previewGrid');
+            if (captureState.photos.length === 0) {
+                grid.innerHTML = `
+                    <div class="preview-empty">
+                        <i class="bi bi-image"></i>
+                        <span>Foto belum diambil</span>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = captureState.photos.map((photo, index) => `
+                <div class="preview-item">
+                    <img src="${photo}" alt="Foto ${index + 1}">
+                    <button class="preview-item-delete" onclick="deletePhoto(${index})">
+                        <i class="bi bi-x"></i>
+                    </button>
+                    <div class="preview-item-number">${index + 1}</div>
+                </div>
+            `).join('');
+        }
+
+        function deletePhoto(index) {
+            captureState.photos.splice(index, 1);
+            updatePreviewGrid();
+            updateProgress();
+        }
+
+        // Initialize Webcam
+        async function initWebcam() {
+            try {
+                const video = document.getElementById('trainingWebcam');
+                if (video.srcObject) return;
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+                    audio: false
+                });
+                captureState.stream = stream;
+                video.srcObject = stream;
+            } catch (err) {
+                showAlert('❌ Tidak bisa akses webcam: ' + err.message, 'danger');
+                console.error(err);
+            }
+        }
+
+        // Mode Selection
+        document.getElementById('manualModeBtn').addEventListener('click', function() {
+            captureState.mode = 'manual';
+            this.classList.add('active', 'manual');
+            document.getElementById('autoModeBtn').classList.remove('active');
+            document.getElementById('manualControls').style.display = 'flex';
+            document.getElementById('autoControls').style.display = 'none';
+            showAlert('📌 Mode Manual - Klik tombol untuk setiap foto', 'info');
+        });
+
+        document.getElementById('autoModeBtn').addEventListener('click', function() {
+            captureState.mode = 'auto';
+            this.classList.add('active');
+            document.getElementById('manualModeBtn').classList.remove('active');
+            document.getElementById('autoControls').style.display = 'flex';
+            document.getElementById('manualControls').style.display = 'none';
+            showAlert('⚡ Mode Auto - Siap auto-capture 40 foto dalam 5 detik', 'info');
+        });
+
+        // Manual Capture
+        document.getElementById('captureManualBtn').addEventListener('click', async function() {
+            if (captureState.photos.length >= 40) {
+                showAlert('⚠️ Sudah 40 foto! Gunakan training atau reset untuk menambah', 'warning');
+                return;
+            }
+
+            if (captureState.isCapturing) return;
+            
+            captureState.isCapturing = true;
+            const btn = this;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Mengambil...';
+            btn.disabled = true;
+
+            const video = document.getElementById('trainingWebcam');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            captureState.photos.push(canvas.toDataURL('image/jpeg'));
+            updatePreviewGrid();
+            updateProgress();
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="bi bi-camera-fill"></i> Ambil Foto Sekarang';
+                btn.disabled = false;
+                captureState.isCapturing = false;
+            }, 200);
+        });
+
+        // Auto Capture
+        document.getElementById('startAutoBtn').addEventListener('click', async function() {
+            if (captureState.photos.length > 0) {
+                if (!confirm('Hapus ' + captureState.photos.length + ' foto existing dan mulai auto-capture baru?')) {
+                    return;
+                }
+                captureState.photos = [];
+            }
+
+            if (captureState.isCapturing) return;
+            
+            captureState.isCapturing = true;
+            const btn = this;
+            btn.disabled = true;
+            btn.style.background = '#FF8C00';
+            btn.textContent = '⏳ Auto Capturing (0/40)...';
+
+            const video = document.getElementById('trainingWebcam');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+
+            for (let i = 0; i < 40; i++) {
+                ctx.drawImage(video, 0, 0);
+                captureState.photos.push(canvas.toDataURL('image/jpeg'));
+                updatePreviewGrid();
+                updateProgress();
+                btn.textContent = `⏳ Auto Capturing (${i + 1}/40)...`;
+                await new Promise(resolve => setTimeout(resolve, 125));
+            }
+
+            btn.style.background = '#28a745';
+            btn.textContent = '✅ Selesai! (40 Foto Tersimpan)';
+            showAlert('✅ 40 foto training berhasil diambil otomatis!', 'success');
+            
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.style.background = '#FF8C00';
+                btn.textContent = '<i class="bi bi-play-fill"></i> Mulai Auto Capture (40 Foto)';
+                captureState.isCapturing = false;
+            }, 2000);
+        });
+
+        // Save Training Photos
+        document.getElementById('saveBtn').addEventListener('click', async function() {
+            if (captureState.photos.length < 40) {
+                showAlert(`❌ Minimal 40 foto diperlukan (saat ini: ${captureState.photos.length}/40)`, 'danger');
+                return;
+            }
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyimpan...';
+
+            try {
+                // Save training photos
+                const response = await fetch('/api/save_training_photos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        employee_id: captureState.employeeId,
+                        photos: captureState.photos
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Notifikasi sukses yang lebih prominent
+                    showAlert(`✅ ${captureState.photos.length} foto training berhasil disimpan!\n${result.message || 'Karyawan siap untuk sistem absensi!'}`, 'success');
+                    
+                    // Tampilkan success message yang lebih detail
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'alert alert-success alert-dismissible fade show';
+                    successMsg.innerHTML = `
+                        <strong>🎉 Berhasil Ditambahkan!</strong>
+                        <br>Karyawan telah berhasil ditambahkan dengan ${captureState.photos.length} foto training.
+                        <br>Data sudah tersimpan di database dan siap digunakan untuk sistem absensi.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.insertBefore(successMsg, document.body.firstChild);
+                    successMsg.style.position = 'fixed';
+                    successMsg.style.top = '20px';
+                    successMsg.style.right = '20px';
+                    successMsg.style.width = '400px';
+                    successMsg.style.zIndex = '9999';
+                    
+                    // Redirect ke employee list setelah 3 detik
+                    setTimeout(() => {
+                        window.location.href = '/admin/employees';
+                    }, 3000);
+                } else {
+                    const errMsg = result.error || 'Gagal menyimpan foto training';
+                    showAlert(`❌ ${errMsg}`, 'danger');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check2-circle"></i> ✅ Simpan Training (40+)';
+                }
+            } catch (err) {
+                showAlert('❌ Error: ' + err.message, 'danger');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check2-circle"></i> ✅ Simpan Training (40+)';
+            }
+        });
+
+        // Reset
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            if (!confirm('Hapus semua ' + captureState.photos.length + ' foto training?')) return;
+            
+            captureState.photos = [];
+            updatePreviewGrid();
+            updateProgress();
+            showAlert('🗑️ Semua foto training telah dihapus', 'info');
+        });
+
+        // Back Button
+        document.getElementById('backBtn').addEventListener('click', function() {
+            if (captureState.photos.length > 0) {
+                if (!confirm('Kembali tanpa menyimpan? Data akan hilang!')) return;
+            }
+            window.location.href = '/admin/employees';
+        });
+
+        // Get Employee Info from URL
+        window.addEventListener('load', async function() {
+            const params = new URLSearchParams(window.location.search);
+            captureState.employeeId = params.get('employee_id');
+            captureState.employeeName = params.get('name') || '-';
+            captureState.employeeDept = params.get('dept') || '-';
+
+            document.getElementById('employeeName').textContent = captureState.employeeName;
+            document.getElementById('employeeDept').textContent = captureState.employeeDept;
+
+            await initWebcam();
+            updateProgress();
+        });
+
+        // Cleanup
+        window.addEventListener('beforeunload', function() {
+            if (captureState.stream) {
+                captureState.stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>

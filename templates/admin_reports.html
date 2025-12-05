@@ -819,6 +819,78 @@
         }
 
         // Display functions
+        function displaySummaryReport(summaryData) {
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'summaryReportModal';
+            modal.tabIndex = '-1';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">📊 Summary Report</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5>Daily Attendance</h5>
+                                            ${summaryData.daily ? `
+                                                <div class="h3 text-primary">${summaryData.daily.hadir || 0}</div>
+                                                <small>Hadir dari ${summaryData.daily.total_karyawan || 0}</small>
+                                                <div class="mt-2">
+                                                    <small class="text-muted">Kehadiran: ${summaryData.daily.persentase_kehadiran || 0}%</small>
+                                                </div>
+                                            ` : '<p class="text-muted">No data</p>'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5>Weekly Attendance</h5>
+                                            ${summaryData.weekly ? `
+                                                <div class="h3 text-info">${summaryData.weekly.rata_kehadiran || 0}</div>
+                                                <small>% Rata-rata Kehadiran</small>
+                                                <div class="mt-2">
+                                                    <small class="text-muted">Total: ${summaryData.weekly.total_karyawan || 0} karyawan</small>
+                                                </div>
+                                            ` : '<p class="text-muted">No data</p>'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5>Top Performance</h5>
+                                            ${summaryData.performance && summaryData.performance.detail_karyawan && summaryData.performance.detail_karyawan[0] ? `
+                                                <div class="h5 text-success">${summaryData.performance.detail_karyawan[0].name}</div>
+                                                <small>Skor: ${summaryData.performance.detail_karyawan[0].skor_kinerja || 0}</small>
+                                            ` : '<p class="text-muted">No data</p>'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+            
+            // Cleanup modal setelah ditutup
+            modal.addEventListener('hidden.bs.modal', function() {
+                modal.remove();
+            });
+        }
+
         function displayReportData(title, data, reportType = 'daily') {
             const modal = createReportModal(title, data, reportType);
             let content = `

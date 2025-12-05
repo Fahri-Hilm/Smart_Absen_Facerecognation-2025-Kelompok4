@@ -38,7 +38,7 @@
         .sidebar {
             position: fixed;
             top: 0;
-            left: 0;
+            right: 0;
             width: 280px;
             height: 100vh;
             background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
@@ -46,7 +46,7 @@
             padding-top: 0;
             z-index: 1000;
             overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            box-shadow: -2px 0 10px rgba(0,0,0,0.2);
         }
 
         .sidebar-header {
@@ -91,7 +91,7 @@
             text-decoration: none;
             transition: all 0.3s ease;
             cursor: pointer;
-            border-right: 4px solid transparent;
+            border-left: 4px solid transparent;
             font-size: 0.95rem;
             font-weight: 500;
         }
@@ -104,13 +104,13 @@
         .nav-link:hover {
             background-color: rgba(255,255,255,0.1);
             color: var(--accent);
-            border-right-color: var(--accent);
+            border-left-color: var(--accent);
         }
 
         .nav-link.active {
             background-color: rgba(218, 165, 32, 0.2);
             color: var(--accent);
-            border-right-color: var(--accent);
+            border-left-color: var(--accent);
         }
 
         .sidebar-footer {
@@ -140,48 +140,17 @@
         }
 
         /* ===== MAIN CONTENT ===== */
-        .main-content,
         .main-wrapper {
-            margin-left: 280px;
-            padding: 1.5rem;
+            margin-right: 280px;
+            padding: 2rem;
             min-height: 100vh;
-            background-color: #F8F9FA;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            position: relative;
         }
 
         .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .toggle-sidebar {
-            display: none;
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-sidebar:hover {
-            background: #C89C1A;
-            transform: translateY(-2px);
-        }
-
-        .page-header {
             background: white;
-            padding: 1rem 1.5rem;
+            padding: 1.5rem 2rem;
             border-radius: 12px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
@@ -189,7 +158,7 @@
         }
 
         .page-header h1 {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--primary);
             margin: 0;
@@ -198,11 +167,11 @@
         .page-header p {
             color: var(--text-muted);
             margin: 0;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .time-display {
-            font-size: 1rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: var(--accent);
         }
@@ -210,55 +179,55 @@
         /* ===== STATS CARDS ===== */
         .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
             background: white;
-            border-radius: 10px;
-            padding: 1.2rem;
+            border-radius: 12px;
+            padding: 2rem;
             box-shadow: var(--shadow);
-            border-top: 3px solid var(--accent);
+            border-top: 4px solid var(--accent);
             transition: all 0.3s ease;
         }
 
         .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(60, 36, 21, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(60, 36, 21, 0.15);
         }
 
         .stat-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            width: 50px;
-            height: 50px;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, var(--light-bg), rgba(218, 165, 32, 0.1));
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--primary);
         }
 
         .stat-number {
-            font-size: 1.6rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--primary);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
         }
 
         .stat-label {
             color: var(--text-muted);
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 500;
         }
 
         .stat-change {
-            font-size: 0.8rem;
-            margin-top: 0.4rem;
-            padding: 0.3rem 0;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0;
         }
 
         .stat-change.positive {
@@ -272,23 +241,23 @@
         /* ===== CHARTS ===== */
         .charts-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
 
         .chart-card {
             background: white;
-            border-radius: 10px;
-            padding: 1.2rem;
+            border-radius: 12px;
+            padding: 2rem;
             box-shadow: var(--shadow);
         }
 
         .chart-card h3 {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -296,37 +265,22 @@
 
         .chart-card canvas {
             max-height: 300px;
-            width: 100%;
-        }
-
-        @media (max-width: 1200px) {
-            .charts-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .charts-container {
-                grid-template-columns: 1fr;
-            }
         }
 
         /* ===== TABLE ===== */
         .table-container {
             background: white;
-            border-radius: 10px;
-            padding: 1.2rem;
+            border-radius: 12px;
+            padding: 2rem;
             box-shadow: var(--shadow);
             overflow-x: auto;
-            overflow-y: visible;
-            max-height: none;
         }
 
         .table-container h3 {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -334,7 +288,6 @@
 
         .table {
             margin-bottom: 0;
-            font-size: 0.9rem;
         }
 
         .table thead th {
@@ -342,15 +295,13 @@
             color: var(--primary);
             font-weight: 600;
             border: 1px solid var(--border-color);
-            padding: 0.7rem;
-            font-size: 0.85rem;
+            padding: 1rem;
         }
 
         .table tbody td {
             border: 1px solid var(--border-color);
-            padding: 0.7rem;
+            padding: 1rem;
             vertical-align: middle;
-            font-size: 0.85rem;
         }
 
         .badge {
@@ -372,19 +323,12 @@
 
         /* ===== CONTENT SECTIONS ===== */
         .content-section {
-            display: none !important;
-            width: 100%;
-            height: auto;
-            position: relative;
-            z-index: 1;
+            display: none;
         }
 
         .content-section.active {
-            display: block !important;
+            display: block;
             animation: fadeIn 0.3s ease;
-            overflow: visible;
-            width: 100%;
-            height: auto;
         }
 
         @keyframes fadeIn {
@@ -398,23 +342,6 @@
             }
         }
 
-        /* Dashboard specific layout */
-        #dashboard-section.active {
-            display: grid !important;
-            grid-template-rows: auto auto auto;
-            gap: 1.5rem;
-            width: 100%;
-            height: auto;
-        }
-
-        /* Fix charts container for better visibility */
-        .charts-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
             .sidebar {
@@ -422,7 +349,7 @@
             }
 
             .main-wrapper {
-                margin-left: 250px;
+                margin-right: 250px;
             }
 
             .charts-container {
@@ -444,7 +371,7 @@
             }
 
             .main-wrapper {
-                margin-left: 0;
+                margin-right: 0;
                 padding: 1rem;
             }
 
@@ -543,6 +470,18 @@
                 <a class="nav-link" href="#" onclick="switchSection('reports')">
                     <i class="bi bi-graph-up"></i>
                     Laporan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="switchSection('camera')">
+                    <i class="bi bi-camera"></i>
+                    Kamera
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="switchSection('database')">
+                    <i class="bi bi-database"></i>
+                    Database
                 </a>
             </li>
             <li class="nav-item">
@@ -666,31 +605,49 @@
 
         <!-- EMPLOYEES SECTION -->
         <div class="content-section" id="employees-section">
-            <div class="table-container" style="overflow: visible; max-height: none; padding: 0;">
-                <iframe id="employees-iframe" src="/admin/employees" style="width: 100%; height: 1200px; border: none; border-radius: 8px; display: block;"></iframe>
+            <div class="table-container">
+                <h3><i class="bi bi-people"></i> Daftar Karyawan</h3>
+                <iframe src="/admin/employees" style="width: 100%; height: 600px; border: none; border-radius: 8px;"></iframe>
             </div>
         </div>
 
         <!-- ATTENDANCE SECTION -->
         <div class="content-section" id="attendance-section">
-            <div class="table-container" style="overflow: visible; max-height: none; padding: 0;">
-                <iframe id="attendance-iframe" src="/admin/attendance" style="width: 100%; height: 1200px; border: none; border-radius: 8px; display: block;"></iframe>
+            <div class="table-container">
+                <h3><i class="bi bi-calendar-check"></i> Riwayat Absensi</h3>
+                <iframe src="/admin/attendance" style="width: 100%; height: 600px; border: none; border-radius: 8px;"></iframe>
             </div>
         </div>
 
         <!-- REPORTS SECTION -->
         <div class="content-section" id="reports-section">
-            <div class="table-container" style="overflow: visible; max-height: none; padding: 0;">
-                <iframe id="reports-iframe" src="/admin/reports" style="width: 100%; height: 1200px; border: none; border-radius: 8px; display: block;"></iframe>
+            <div class="table-container">
+                <h3><i class="bi bi-graph-up"></i> Laporan</h3>
+                <iframe src="/admin/reports" style="width: 100%; height: 600px; border: none; border-radius: 8px;"></iframe>
             </div>
         </div>
 
+        <!-- CAMERA SECTION -->
+        <div class="content-section" id="camera-section">
+            <div class="table-container">
+                <h3><i class="bi bi-camera"></i> Pengaturan Kamera</h3>
+                <iframe src="/admin/camera" style="width: 100%; height: 600px; border: none; border-radius: 8px;"></iframe>
+            </div>
+        </div>
+
+        <!-- DATABASE SECTION -->
+        <div class="content-section" id="database-section">
+            <div class="table-container">
+                <h3><i class="bi bi-database"></i> Database Management</h3>
+                <iframe src="/admin/database" style="width: 100%; height: 600px; border: none; border-radius: 8px;"></iframe>
+            </div>
         </div>
 
         <!-- SETTINGS SECTION -->
         <div class="content-section" id="settings-section">
-            <div class="table-container" style="overflow: visible; max-height: none; padding: 0;">
-                <iframe id="settings-iframe" src="/admin/settings" style="width: 100%; height: 1200px; border: none; border-radius: 8px; display: block;"></iframe>
+            <div class="table-container">
+                <h3><i class="bi bi-gear"></i> Pengaturan Sistem</h3>
+                <iframe src="/admin/settings" style="width: 100%; height: 600px; border: none; border-radius: 8px;"></iframe>
             </div>
         </div>
     </div>
@@ -710,33 +667,13 @@
 
         // Switch sections
         function switchSection(sectionName) {
-            // Prevent default link behavior
-            if (event) {
-                event.preventDefault();
-            }
-            
-            console.log('Switching to section:', sectionName);
-            
-            // Hide all sections with !important
-            const allSections = document.querySelectorAll('.content-section');
-            allSections.forEach(el => {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(el => {
                 el.classList.remove('active');
-                el.style.display = 'none';
             });
 
             // Show selected section
-            const targetSection = document.getElementById(sectionName + '-section');
-            if (targetSection) {
-                console.log('Found target section:', sectionName + '-section');
-                targetSection.classList.add('active');
-                if (sectionName === 'dashboard') {
-                    targetSection.style.display = 'grid';
-                } else {
-                    targetSection.style.display = 'block';
-                }
-            } else {
-                console.error('Target section not found:', sectionName + '-section');
-            }
+            document.getElementById(sectionName + '-section').classList.add('active');
 
             // Update page header
             const titles = {
@@ -744,74 +681,29 @@
                 employees: 'Kelola Karyawan',
                 attendance: 'Riwayat Absensi',
                 reports: 'Laporan & Analisis',
+                camera: 'Pengaturan Kamera',
+                database: 'Database Management',
                 settings: 'Pengaturan Sistem'
             };
 
-            const titleEl = document.getElementById('pageTitle');
-            if (titleEl) {
-                titleEl.textContent = titles[sectionName] || sectionName;
-            }
+            document.getElementById('pageTitle').textContent = titles[sectionName];
 
             // Update active nav link
             document.querySelectorAll('.nav-link').forEach(el => {
                 el.classList.remove('active');
             });
-            
-            // Set active on the clicked link
-            if (event && event.target) {
-                const clickedLink = event.target.closest('.nav-link');
-                if (clickedLink) {
-                    clickedLink.classList.add('active');
-                }
-            }
+            event.target.closest('.nav-link').classList.add('active');
 
             // Close sidebar on mobile
             if (window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar) {
-                    sidebar.classList.remove('active');
-                }
+                document.getElementById('sidebar').classList.remove('active');
             }
-            
-            // Scroll to top
-            window.scrollTo(0, 0);
         }
 
         // Toggle sidebar on mobile
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
         }
-
-        // Auto-resize iframes to fit content
-        function resizeIframes() {
-            const iframes = document.querySelectorAll('iframe');
-            iframes.forEach(iframe => {
-                try {
-                    const content = iframe.contentDocument || iframe.contentWindow.document;
-                    if (content) {
-                        const height = content.documentElement.scrollHeight;
-                        if (height) {
-                            iframe.style.height = (height + 100) + 'px';
-                        }
-                    }
-                } catch (e) {
-                    // Cross-origin or not loaded yet
-                    console.log('Cannot resize iframe:', e);
-                }
-            });
-        }
-
-        // Resize iframes when they load
-        document.querySelectorAll('iframe').forEach(iframe => {
-            iframe.addEventListener('load', resizeIframes);
-        });
-
-        // Also try to resize when section switches
-        const originalSwitchSection = switchSection;
-        switchSection = function(sectionName) {
-            originalSwitchSection(sectionName);
-            setTimeout(resizeIframes, 500);
-        };
 
         // Logout
         function logout() {

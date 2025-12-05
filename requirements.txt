@@ -22,8 +22,9 @@ pandas==2.0.3
 qrcode==7.4.2
 Pillow==10.0.1
 
-# Ngrok Integration
-pyngrok==7.0.0
+# Note: For public access, install Cloudflare Tunnel separately:
+# sudo apt install cloudflared
+# Or download from: https://github.com/cloudflare/cloudflared/releases
 
 # Logging (built-in Python, no need to install)
 # datetime (built-in Python, no need to install)

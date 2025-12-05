@@ -13,12 +13,16 @@ class Employee:
     """Model untuk data karyawan"""
     
     @staticmethod
-    def add_employee(name, bagian):
-        """Menambah karyawan baru"""
+    def add_employee(name, bagian, email=None, phone=None, gender=None, address=None, 
+                     position=None, status='aktif', hire_date=None, nik=None):
+        """Menambah karyawan baru dengan field lengkap"""
         try:
             db = get_db_manager()
-            query = "INSERT INTO employees (name, bagian) VALUES (%s, %s)"
-            result = db.execute_query(query, (name, bagian))
+            query = """INSERT INTO employees 
+                      (name, bagian, email, phone, gender, address, position, status, hire_date, nik) 
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            result = db.execute_query(query, (name, bagian, email, phone, gender, address, 
+                                             position, status, hire_date, nik))
             if result:
                 logger.info(f"Karyawan {name} ({bagian}) berhasil ditambahkan")
                 return True
