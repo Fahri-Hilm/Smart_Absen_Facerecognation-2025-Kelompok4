@@ -1,0 +1,23 @@
+rules:
+  - name: "Face Recognition Security"
+    description: "Ensure face recognition code follows security best practices"
+    pattern: "face_recognition|insightface|embedding"
+    
+  - name: "Database Security"
+    description: "Check for SQL injection vulnerabilities and proper parameterization"
+    pattern: "execute|query|cursor"
+    
+  - name: "Flask Security"
+    description: "Verify Flask routes have proper authentication and validation"
+    pattern: "@app.route|@login_required"
+
+custom_context:
+  - "This is a face recognition attendance system using InsightFace"
+  - "Security is critical for handling biometric data"
+  - "Follow GDPR and data privacy regulations"
+
+ignore_patterns:
+  - "static/faces/*"
+  - "*.pkl"
+  - "*.xml"
+  - "node_modules/*"
