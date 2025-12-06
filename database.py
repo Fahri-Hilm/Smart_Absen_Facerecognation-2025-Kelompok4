@@ -132,14 +132,27 @@ class DatabaseManager:
             logger.info("Koneksi database ditutup")
     
     def get_connection(self):
-        """Mendapatkan koneksi database"""
-        if not self.connection or not self.connection.open:
-            if not self.connect():
-                return None
-        return self.connection
+        """Mendapatkan koneksi database baru untuk setiap request"""
+        try:
+            # Selalu buat koneksi baru untuk menghindari masalah thread
+            connection = pymysql.connect(
+                host=self.config['host'],
+                port=self.config['port'],
+                user=self.config['user'],
+                password=self.config['password'],
+                database=self.config['database'],
+                charset=self.config['charset'],
+                cursorclass=pymysql.cursors.DictCursor,
+                autocommit=self.config['autocommit']
+            )
+            return connection
+        except Exception as e:
+            logger.error(f"Gagal membuat koneksi: {e}")
+            return None
     
     def execute_query(self, query, params=None):
         """Eksekusi query dengan parameter"""
+        connection = None
         try:
             connection = self.get_connection()
             if not connection:
@@ -148,12 +161,25 @@ class DatabaseManager:
             with connection.cursor() as cursor:
                 cursor.execute(query, params or ())
                 if query.strip().upper().startswith('SELECT'):
-                    return cursor.fetchall()
+                    result = cursor.fetchall()
                 else:
-                    return cursor.rowcount
+                    connection.commit()
+                    result = cursor.rowcount
+                return result
         except Exception as e:
             logger.error(f"Gagal eksekusi query: {e}")
+            if connection:
+                try:
+                    connection.rollback()
+                except:
+                    pass
             return None
+        finally:
+            if connection:
+                try:
+                    connection.close()
+                except:
+                    pass
     
     def initialize_database(self):
         """Inisialisasi lengkap database"""

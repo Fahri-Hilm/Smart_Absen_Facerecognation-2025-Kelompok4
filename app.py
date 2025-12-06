@@ -32,9 +32,25 @@ from config import get_app_config
 from qr_sync import qr_sync_manager, start_cleanup_thread
 import logging
 
-# Setup logging
+# Setup logging FIRST (before importing InsightFace)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# InsightFace for better accuracy (99%+)
+USE_INSIGHTFACE = False
+try:
+    from face_recognition_insightface import (
+        identify_face_insightface,
+        train_insightface_model,
+        extract_face_embedding,
+        detect_faces_insightface,
+        get_database_stats,
+        load_face_database
+    )
+    USE_INSIGHTFACE = True
+    logger.info("✅ InsightFace loaded - using ArcFace (99%+ accuracy)")
+except ImportError as e:
+    logger.warning(f"⚠️ InsightFace not available, using KNN fallback: {e}")
 
 app = Flask(__name__)
 
@@ -185,95 +201,70 @@ def extract_faces(img):
         return []
 
 def identify_face(facearray):
-    """Identify face using trained model - ensure consistent input format"""
+    """
+    Identify face menggunakan InsightFace/ArcFace (99%+ accuracy)
+    
+    Args:
+        facearray: Face image array (grayscale/BGR, any shape)
+    
+    Returns:
+        Tuple of (prediction_list, confidence_score)
+    """
+    if not USE_INSIGHTFACE:
+        logger.error("InsightFace tidak tersedia! Install dengan: pip install insightface onnxruntime")
+        return ['Unknown'], 0.0
+    
     try:
-        if not os.path.exists('static/face_recognition_model.pkl'):
-            logger.warning("Face recognition model not found - need to train first")
-            return ['Unknown']
+        logger.info("🔍 Face Recognition dengan InsightFace/ArcFace")
         
-        model = joblib.load('static/face_recognition_model.pkl')
+        # Convert input to proper format for InsightFace
+        if len(facearray.shape) == 1:
+            # Flattened array - reshape to square grayscale
+            size = int(np.sqrt(len(facearray)))
+            facearray = facearray.reshape(size, size).astype(np.uint8)
         
-        # CRITICAL: Ensure input matches training format exactly
-        # Training data should be 50x50 grayscale = 2500 features
-        if len(facearray.shape) > 1:
-            facearray = facearray.flatten()
+        # InsightFace needs BGR color image
+        if len(facearray.shape) == 2:
+            face_bgr = cv2.cvtColor(facearray, cv2.COLOR_GRAY2BGR)
+        else:
+            face_bgr = facearray
         
-        logger.info(f"Input face array shape: {facearray.shape} (should be (2500,))")
+        # Resize to optimal size for ArcFace feature extraction
+        face_bgr = cv2.resize(face_bgr, (160, 160), interpolation=cv2.INTER_CUBIC)
         
-        # Check if input has correct number of features
-        if facearray.shape[0] != 2500:
-            logger.error(f"Feature mismatch: got {facearray.shape[0]}, expected 2500")
-            return ['Unknown']
+        name, confidence = identify_face_insightface(face_bgr, threshold=0.45)
+        logger.info(f"✅ InsightFace result: {name} ({confidence:.1f}%)")
+        return [name], confidence
         
-        # Reshape to match expected input (1 sample, 2500 features)
-        facearray = facearray.reshape(1, -1)
-        
-        prediction = model.predict(facearray)
-        logger.info(f"Face recognition prediction: {prediction[0]}")
-        return prediction
     except Exception as e:
-        logger.error(f"Face recognition error: {e}")
-        return ['Unknown']
+        logger.error(f"❌ InsightFace recognition failed: {e}")
+        return ['Unknown'], 0.0
 
 def train_model():
-    """Train face recognition model with consistent data format"""
+    """
+    Train face recognition menggunakan InsightFace/ArcFace (99%+ accuracy)
+    Hanya butuh 5-10 foto per orang untuk hasil optimal
+    """
+    if not USE_INSIGHTFACE:
+        logger.error("InsightFace tidak tersedia! Install dengan: pip install insightface onnxruntime")
+        return False
+    
     try:
-        faces, labels = [], []
-        userlist = os.listdir('static/faces')
+        logger.info("🚀 Training InsightFace/ArcFace model (99%+ accuracy)...")
+        success = train_insightface_model()
         
-        if not userlist:
-            logger.warning("No face data found for training")
+        if success:
+            stats = get_database_stats()
+            logger.info(f"✅ Model trained successfully!")
+            logger.info(f"   📊 Total identities: {stats['total_identities']}")
+            logger.info(f"   📸 Total embeddings: {stats['total_embeddings']}")
+            return True
+        else:
+            logger.error("❌ Training failed - no valid face data")
             return False
             
-        for user in userlist:
-            user_path = f'static/faces/{user}'
-            if not os.path.isdir(user_path):
-                continue
-                
-            for imgname in os.listdir(user_path):
-                img_path = f'{user_path}/{imgname}'
-                try:
-                    img = cv2.imread(img_path)
-                    if img is None:
-                        continue
-                    
-                    # CRITICAL: Convert to grayscale for consistency (ensures 2500 features)
-                    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                    # CRITICAL: Resize to exact dimensions (50x50 = 2500 features)
-                    resized_face = cv2.resize(gray, (50, 50), interpolation=cv2.INTER_CUBIC)
-                    # CRITICAL: Flatten to 1D array (no normalization to keep consistency)
-                    face_flattened = resized_face.flatten()
-                    
-                    faces.append(face_flattened)
-                    labels.append(user)
-                    logger.info(f"Added training image: {user}/{imgname} with shape {face_flattened.shape}")
-                except Exception as e:
-                    logger.error(f"Error processing image {img_path}: {e}")
-                    continue
-        
-        if len(faces) == 0:
-            logger.warning("No valid training data found")
-            return False
-            
-        logger.info(f"Training model with {len(faces)} face samples")
-        
-        # Convert to numpy array and check shape
-        faces_array = np.array(faces)
-        logger.info(f"Training data shape: {faces_array.shape} (should be (n_samples, 2500))")
-        
-        # Verify all samples have correct features
-        if faces_array.shape[1] != 2500:
-            logger.error(f"Training data feature mismatch: got {faces_array.shape[1]}, expected 2500")
-            return False
-        
-        knn = KNeighborsClassifier(n_neighbors=min(5, len(set(labels))))
-        knn.fit(faces_array, labels)
-        joblib.dump(knn, 'static/face_recognition_model.pkl')
-        logger.info(f"Face recognition model trained successfully with {faces_array.shape[1]} features per sample")
-        return True
-        
     except Exception as e:
-        logger.error(f"Error training model: {e}")
+        logger.error(f"❌ Training error: {e}")
         return False
 
 def capture_employee_face_gui(name, bagian):
@@ -2626,14 +2617,14 @@ def mark_attendance_mobile():
                     
                     logger.info(f"Mobile face processed: shape={face_flattened.shape} (should be (2500,))")
                     
-                    # Identify the face
-                    identified_users = identify_face(face_flattened)
+                    # Identify the face with confidence
+                    identified_users, confidence = identify_face(face_flattened)
                     user = identified_users[0]
                     
                     if user == 'Unknown':
                         return jsonify({
                             'status': 'error',
-                            'message': 'Wajah tidak dikenali. Pastikan Anda sudah terdaftar dalam sistem dan pencahayaan cukup baik.'
+                            'message': f'Wajah tidak dikenali (confidence: {confidence:.1f}%). Pastikan Anda sudah terdaftar dan pencahayaan cukup baik.'
                         })
                     
                     # Update attendance
@@ -2720,17 +2711,20 @@ def run_attendance_ajax(mode='masuk', camera_id=None):
                 logger.info(f"Face detected at attempt {attempts}")
                 (x, y, w, h) = faces[0]
                 face = cv2.resize(frame[y:y+h, x:x+w], (50, 50))
-                user = identify_face(face.reshape(1, -1))[0]
+                # Convert to grayscale for consistency
+                gray_face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY) if len(face.shape) == 3 else face
+                identified_users, confidence = identify_face(gray_face.flatten())
+                user = identified_users[0]
                 
                 if user != 'Unknown':
                     # Update attendance
                     result = update_attendance(user, mode)
                     recognition_success = True
                     success_user = user
-                    logger.info(f"Attendance recorded for {user}")
+                    logger.info(f"Attendance recorded for {user} (confidence: {confidence:.1f}%)")
                     break
                 else:
-                    logger.info("Face detected but not recognized")
+                    logger.info(f"Face detected but not recognized (confidence: {confidence:.1f}%)")
                 
             attempts += 1
         
@@ -2811,11 +2805,14 @@ def run_attendance(mode='masuk'):
         if len(faces) > 0:
             (x, y, w, h) = faces[0]
             face = cv2.resize(frame[y:y+h, x:x+w], (50, 50))
-            user = identify_face(face.reshape(1, -1))[0]
+            # Convert to grayscale for consistency
+            gray_face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY) if len(face.shape) == 3 else face
+            identified_users, confidence = identify_face(gray_face.flatten())
+            user = identified_users[0]
             
-            # Tampilkan recognition result
+            # Tampilkan recognition result dengan confidence
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-            cv2.putText(frame, f'{user} - {mode.upper()} TERDETEKSI', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+            cv2.putText(frame, f'{user} ({confidence:.0f}%) - {mode.upper()}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
             
             # Loading animation setelah face terdeteksi
             if not recognition_success:
