@@ -1,0 +1,167 @@
+<mxfile host="app.diagrams.net" modified="2025-12-07T02:33:00.000Z" agent="Smart Absen" version="22.0.0">
+  <diagram name="System Architecture" id="system-arch">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="Smart Absen - System Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="470" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Client Layer -->
+        <mxCell id="client-layer" value="CLIENT LAYER" style="swimlane;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="100" y="80" width="970" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="laptop" value="Laptop Browser&#xa;(QR Display + Face Scan)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="client-layer">
+          <mxGeometry x="50" y="40" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mobile" value="Mobile Browser&#xa;(QR Scanner)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="client-layer">
+          <mxGeometry x="300" y="40" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin" value="Admin Dashboard&#xa;(Management)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="client-layer">
+          <mxGeometry x="550" y="40" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Application Layer -->
+        <mxCell id="app-layer" value="APPLICATION LAYER (Flask)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="100" y="240" width="970" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="qr-module" value="QR Auth Module&#xa;(qr_sync.py)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="app-layer">
+          <mxGeometry x="50" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="face-module" value="Face Recognition&#xa;(OpenCV + InsightFace)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="app-layer">
+          <mxGeometry x="220" y="40" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="camera-lock" value="Camera Lock&#xa;(camera_lock.py)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="app-layer">
+          <mxGeometry x="410" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="routes" value="Route Handlers&#xa;(app.py)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="app-layer">
+          <mxGeometry x="580" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="models" value="Data Models&#xa;(models.py)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="app-layer">
+          <mxGeometry x="750" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="core-flow" value="Core Flow: QR Auth → Face Scan → Attendance Save" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=2" vertex="1" parent="app-layer">
+          <mxGeometry x="50" y="120" width="840" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Data Layer -->
+        <mxCell id="data-layer" value="DATA LAYER" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="100" y="480" width="970" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mysql" value="MySQL Database&#xa;(database.py)&#xa;Karyawan, Absensi, QR Tokens" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="data-layer">
+          <mxGeometry x="100" y="40" width="220" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="csv" value="CSV Logs&#xa;(Attendance/)&#xa;Backup & Export" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="data-layer">
+          <mxGeometry x="380" y="40" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="ml-models" value="ML Models&#xa;(assets/)&#xa;Haar Cascade, KNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="data-layer">
+          <mxGeometry x="620" y="40" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Connections -->
+        <mxCell id="conn1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1" source="laptop" target="qr-module">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1" source="mobile" target="face-module">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="conn3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1" source="routes" target="mysql">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+  
+  <diagram name="Attendance Flow" id="attendance-flow">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <mxCell id="flow-title" value="Attendance Flow Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="370" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="start" value="START" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="520" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="step1" value="1. Open /auth&#xa;(Laptop)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="500" y="180" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="step2" value="2. Generate QR&#xa;+ Access Code" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="500" y="280" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="step3" value="3. Scan QR&#xa;(Mobile)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="500" y="380" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="step4" value="4. Verify Token&#xa;in Database" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="500" y="480" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="step5" value="5. Redirect to&#xa;/web_attendance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="500" y="580" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="step6" value="6. Capture Face&#xa;from Webcam" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="500" y="680" width="160" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="end" value="DONE" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="520" y="780" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Flow arrows -->
+        <mxCell id="arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;endArrow=classic;endFill=1;" edge="1" parent="1" source="start" target="step1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;endArrow=classic;endFill=1;" edge="1" parent="1" source="step1" target="step2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;endArrow=classic;endFill=1;" edge="1" parent="1" source="step2" target="step3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;endArrow=classic;endFill=1;" edge="1" parent="1" source="step3" target="step4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;endArrow=classic;endFill=1;" edge="1" parent="1" source="step4" target="step5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;endArrow=classic;endFill=1;" edge="1" parent="1" source="step5" target="step6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arrow7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;endArrow=classic;endFill=1;" edge="1" parent="1" source="step6" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

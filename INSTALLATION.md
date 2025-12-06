@@ -178,7 +178,8 @@ pip install -r requirements.txt
 | Flask | ≥2.0.0 | Web framework |
 | PyMySQL | ≥1.0.0 | MySQL driver |
 | opencv-python | ≥4.5.0 | Face detection |
-| scikit-learn | ≥1.0.0 | KNN classifier |
+| insightface | ≥0.7.0 | Face recognition (ArcFace - 99%+ accuracy) |
+| onnxruntime | ≥1.10.0 | InsightFace runtime |
 | numpy | ≥1.20.0 | Array operations |
 | Pillow | ≥8.0.0 | Image processing |
 | qrcode | ≥7.0 | QR generation |
@@ -186,7 +187,7 @@ pip install -r requirements.txt
 ### ✅ Verifikasi Step 3
 
 ```bash
-pip list | grep -E "(Flask|PyMySQL|opencv|scikit)"
+pip list | grep -E "(Flask|PyMySQL|opencv|insightface|onnx)"
 ```
 
 Output yang diharapkan:
@@ -194,7 +195,8 @@ Output yang diharapkan:
 Flask                    2.x.x
 PyMySQL                  1.x.x
 opencv-python            4.x.x
-scikit-learn             1.x.x
+insightface              0.x.x
+onnxruntime              1.x.x
 ```
 
 ---

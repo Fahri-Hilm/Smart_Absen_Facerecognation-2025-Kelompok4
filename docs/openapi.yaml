@@ -1,0 +1,512 @@
+openapi: 3.0.3
+info:
+  title: Smart Absen API
+  description: |
+    REST API untuk sistem absensi berbasis Face Recognition & QR Code Authentication.
+    
+    ## Features
+    - QR Code Authentication
+    - Face Recognition
+    - Attendance Management
+    - Employee Management
+    - Admin Dashboard
+    
+    ## Authentication
+    Session-based authentication menggunakan Flask sessions.
+  version: 1.0.0
+  contact:
+    name: Kelompok 4 - Software Project
+    url: https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5001
+    description: Development server
+  - url: https://your-tunnel.trycloudflare.com
+    description: Production (Cloudflare Tunnel)
+
+tags:
+  - name: Authentication
+    description: QR code authentication endpoints
+  - name: Attendance
+    description: Attendance recording endpoints
+  - name: Employees
+    description: Employee management
+  - name: Admin
+    description: Admin dashboard endpoints
+
+paths:
+  /auth:
+    get:
+      tags:
+        - Authentication
+      summary: QR Authentication Page
+      description: Menampilkan halaman dengan QR code untuk autentikasi cross-device
+      responses:
+        '200':
+          description: HTML page dengan QR code
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /generate_qr:
+    post:
+      tags:
+        - Authentication
+      summary: Generate QR Code
+      description: Generate QR code baru dengan token unik
+      responses:
+        '200':
+          description: QR code berhasil di-generate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "a1b2c3d4e5f6..."
+                  qr_image:
+                    type: string
+                    description: Base64 encoded QR image
+                  access_code:
+                    type: string
+                    example: "1234"
+                  expires_at:
+                    type: string
+                    format: date-time
+
+  /verify_qr:
+    post:
+      tags:
+        - Authentication
+      summary: Verify QR Code
+      description: Verifikasi QR code yang di-scan dari mobile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: Token dari QR scan
+                  example: "a1b2c3d4e5f6..."
+      responses:
+        '200':
+          description: QR valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "QR verified successfully"
+        '400':
+          description: QR invalid atau expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /check_verification/{token}:
+    get:
+      tags:
+        - Authentication
+      summary: Check Verification Status
+      description: Polling endpoint untuk cek apakah QR sudah di-verify
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+          description: QR token
+      responses:
+        '200':
+          description: Status verification
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verified:
+                    type: boolean
+                  redirect_url:
+                    type: string
+                    example: "/web_attendance"
+
+  /web_attendance:
+    get:
+      tags:
+        - Attendance
+      summary: Face Recognition Page
+      description: Halaman untuk face scan dan absensi
+      responses:
+        '200':
+          description: HTML page dengan webcam interface
+          content:
+            text/html:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized - QR belum di-verify
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /process_attendance:
+    post:
+      tags:
+        - Attendance
+      summary: Process Attendance
+      description: Proses face recognition dan simpan absensi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - image
+                - mode
+              properties:
+                image:
+                  type: string
+                  description: Base64 encoded image dari webcam
+                mode:
+                  type: string
+                  enum: [masuk, pulang]
+                  description: Mode absensi
+      responses:
+        '200':
+          description: Absensi berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  nama:
+                    type: string
+                    example: "John Doe"
+                  waktu:
+                    type: string
+                    format: time
+                    example: "08:30:00"
+                  status:
+                    type: string
+                    example: "Hadir"
+        '400':
+          description: Face tidak terdeteksi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Face tidak dikenali
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/dashboard:
+    get:
+      tags:
+        - Admin
+      summary: Admin Dashboard
+      description: Halaman dashboard admin dengan statistik
+      responses:
+        '200':
+          description: Dashboard page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /admin/employees:
+    get:
+      tags:
+        - Employees
+      summary: List Employees
+      description: Daftar semua karyawan
+      responses:
+        '200':
+          description: List karyawan
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+    
+    post:
+      tags:
+        - Employees
+      summary: Add Employee
+      description: Tambah karyawan baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+                - jabatan
+              properties:
+                nama:
+                  type: string
+                  example: "John Doe"
+                jabatan:
+                  type: string
+                  example: "Software Engineer"
+      responses:
+        '201':
+          description: Karyawan berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /admin/employees/{id}:
+    get:
+      tags:
+        - Employees
+      summary: Get Employee
+      description: Detail karyawan berdasarkan ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detail karyawan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        '404':
+          description: Karyawan tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      tags:
+        - Employees
+      summary: Update Employee
+      description: Update data karyawan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama:
+                  type: string
+                jabatan:
+                  type: string
+      responses:
+        '200':
+          description: Karyawan berhasil diupdate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+    
+    delete:
+      tags:
+        - Employees
+      summary: Delete Employee
+      description: Hapus karyawan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Karyawan berhasil dihapus
+        '404':
+          description: Karyawan tidak ditemukan
+
+  /admin/attendance:
+    get:
+      tags:
+        - Admin
+      summary: List Attendance
+      description: Daftar absensi dengan filter
+      parameters:
+        - name: tanggal
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter by tanggal
+        - name: karyawan_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by karyawan
+      responses:
+        '200':
+          description: List absensi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Attendance'
+
+  /admin/reports/daily:
+    get:
+      tags:
+        - Admin
+      summary: Daily Report
+      description: Laporan absensi harian
+      parameters:
+        - name: tanggal
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Daily report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tanggal:
+                    type: string
+                    format: date
+                  total_karyawan:
+                    type: integer
+                  hadir:
+                    type: integer
+                  terlambat:
+                    type: integer
+                  tidak_hadir:
+                    type: integer
+
+  /admin/reports/export:
+    get:
+      tags:
+        - Admin
+      summary: Export Report
+      description: Export laporan ke CSV
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+components:
+  schemas:
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: "John Doe"
+        jabatan:
+          type: string
+          example: "Software Engineer"
+        created_at:
+          type: string
+          format: date-time
+    
+    Attendance:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        karyawan_id:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: "John Doe"
+        tanggal:
+          type: string
+          format: date
+          example: "2025-12-07"
+        jam_masuk:
+          type: string
+          format: time
+          example: "08:30:00"
+        jam_pulang:
+          type: string
+          format: time
+          example: "17:00:00"
+        status:
+          type: string
+          enum: [Hadir, Terlambat, Izin, Sakit]
+          example: "Hadir"
+    
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Error message"
+        code:
+          type: string
+          example: "INVALID_TOKEN"
+
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+
+security:
+  - sessionAuth: []
