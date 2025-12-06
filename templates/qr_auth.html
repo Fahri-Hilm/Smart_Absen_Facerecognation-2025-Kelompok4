@@ -724,6 +724,7 @@
         let syncCheckCount = 0;
         const MAX_SYNC_CHECKS = 720; // 1 hour at 5-second intervals
         let qrSyncInterval = null;
+        let processedSessions = new Set(); // Track processed sessions to prevent re-processing
 
         function startQRSyncMonitoring() {
             syncCheckCount = 0;
@@ -750,7 +751,15 @@
                     console.log(`📊 QR Sync Check ${syncCheckCount}:`, data);
                     
                     if (data.success && data.has_pending_sync) {
+                        // Check if this session was already processed
+                        const sessionKey = `${data.session_id}_${data.timestamp}`;
+                        if (processedSessions.has(sessionKey)) {
+                            console.log('⏭️ Skipping already processed session:', sessionKey);
+                            return;
+                        }
+                        
                         console.log('🎯 Pending QR sync detected from mobile device!');
+                        processedSessions.add(sessionKey);
                         handlePendingQRSync(data);
                     }
                 })
@@ -769,6 +778,10 @@
 
         function acceptQRSync(sessionId, timestamp) {
             console.log('✅ Accepting QR sync for session:', sessionId, 'timestamp:', timestamp);
+            
+            // Mark this session as used in localStorage to persist across page reloads
+            const sessionKey = `${sessionId}_${timestamp}`;
+            localStorage.setItem('last_used_session', sessionKey);
             
             fetch('/api/accept_qr_sync', {
                 method: 'POST',
@@ -794,6 +807,13 @@
 
         // Start monitoring on load
         document.addEventListener('DOMContentLoaded', () => {
+            // Load previously processed sessions from localStorage
+            const lastUsedSession = localStorage.getItem('last_used_session');
+            if (lastUsedSession) {
+                processedSessions.add(lastUsedSession);
+                console.log('📝 Loaded last used session:', lastUsedSession);
+            }
+            
             setTimeout(startQRSyncMonitoring, 1000);
         });
     </script>

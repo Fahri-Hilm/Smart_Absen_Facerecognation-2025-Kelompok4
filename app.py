@@ -58,6 +58,14 @@ app = Flask(__name__)
 app_config = get_app_config()
 app.secret_key = app_config['secret_key']
 
+# Setup Swagger UI for API documentation
+try:
+    from swagger_config import setup_swagger
+    setup_swagger(app)
+    logger.info("📚 Swagger UI enabled at /api/docs")
+except ImportError:
+    logger.warning("⚠️ Swagger UI not available. Install: pip install flask-swagger-ui")
+
 # QR Code Authentication System
 QR_VALIDITY_MINUTES = 10  # QR code berlaku 10 menit
 current_unit_code = None
@@ -600,18 +608,21 @@ def qr_sync_status():
         current_unit = get_current_unit_code()  # QR code yang sedang ditampilkan di laptop
         latest_auth = qr_sync_manager.get_latest_auth(current_unit)
         
-        # Check if attendance was just completed (session cleared)
-        attendance_completed = session.get('attendance_completed', False)
-        if attendance_completed:
-            # Clear the flag and don't trigger sync
-            session.pop('attendance_completed', None)
-            logger.info("🛑 Attendance just completed, skipping sync check")
-            return jsonify({
-                'success': True,
-                'has_pending_sync': False,
-                'status': 'attendance_completed',
-                'message': 'Absensi selesai, menunggu scan QR baru...'
-            })
+        # Check if attendance was just completed (within last 30 seconds)
+        attendance_completed_time = session.get('attendance_completed_time')
+        if attendance_completed_time:
+            time_since_completion = (datetime.now() - datetime.fromisoformat(attendance_completed_time)).total_seconds()
+            if time_since_completion < 30:  # Grace period 30 detik
+                logger.info(f"🛑 Attendance completed {time_since_completion:.1f}s ago, skipping sync check")
+                return jsonify({
+                    'success': True,
+                    'has_pending_sync': False,
+                    'status': 'attendance_completed',
+                    'message': 'Absensi selesai, menunggu scan QR baru...'
+                })
+            else:
+                # Clear old flag after grace period
+                session.pop('attendance_completed_time', None)
         
         if latest_auth:
             # Check if the scanned QR matches current displayed QR
@@ -677,8 +688,8 @@ def clear_qr_session():
         verified_unit = session.pop('verified_unit_code', None)
         session.pop('last_sync_time', None)
         
-        # Set flag bahwa attendance baru selesai
-        session['attendance_completed'] = True
+        # Set timestamp saat attendance selesai (untuk grace period)
+        session['attendance_completed_time'] = datetime.now().isoformat()
         
         # Clear dari qr_sync_manager juga
         if verified_unit:
