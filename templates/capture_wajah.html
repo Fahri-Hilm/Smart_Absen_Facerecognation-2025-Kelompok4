@@ -6,6 +6,11 @@
     <title>Capture Wajah Training - FaceAttend</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Shared Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <!-- Theme JS -->
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <style>
         :root {
             --primary: #3C2415;
@@ -178,12 +183,100 @@
             border-radius: 8px;
             overflow: hidden;
             margin-bottom: 1.5rem;
+            position: relative;
         }
 
         .webcam-feed video {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        /* Face Detection Overlay */
+        .face-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .face-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 250px;
+            border: 3px dashed rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .face-guide.detected {
+            border-color: #28a745;
+            border-style: solid;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.5), 0 0 0 2000px rgba(0, 0, 0, 0.3);
+        }
+
+        .face-guide.no-face {
+            border-color: #dc3545;
+            border-style: dashed;
+            animation: pulse-red 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(220, 53, 69, 0.3), 0 0 0 2000px rgba(0, 0, 0, 0.35); }
+        }
+
+        .face-status-badge {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .face-status-badge.detected {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .face-status-badge.no-face {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+        }
+
+        .face-status-badge.loading {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+        }
+
+        .capture-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .capture-flash.active {
+            animation: flash 0.2s ease-out;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
         }
 
         /* Control Buttons */
@@ -563,6 +656,15 @@
                 <div class="webcam-content">
                     <div class="webcam-feed">
                         <video id="trainingWebcam" autoplay playsinline></video>
+                        <!-- Face Detection Overlay -->
+                        <div class="face-overlay">
+                            <div class="face-guide" id="faceGuide"></div>
+                            <div class="face-status-badge loading" id="faceStatusBadge">
+                                <i class="bi bi-hourglass-split"></i> Mendeteksi...
+                            </div>
+                        </div>
+                        <!-- Flash Effect -->
+                        <div class="capture-flash" id="captureFlash"></div>
                     </div>
 
                     <!-- Manual Mode Controls -->
@@ -748,6 +850,99 @@
             updateProgress();
         }
 
+        // Face Detection State
+        let faceDetectionInterval = null;
+        let isFaceDetected = false;
+
+        // Update Face Detection Status
+        function updateFaceStatus(detected) {
+            const guide = document.getElementById('faceGuide');
+            const badge = document.getElementById('faceStatusBadge');
+            
+            isFaceDetected = detected;
+            
+            if (detected) {
+                guide.classList.remove('no-face');
+                guide.classList.add('detected');
+                badge.classList.remove('no-face', 'loading');
+                badge.classList.add('detected');
+                badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Wajah Terdeteksi!';
+            } else {
+                guide.classList.remove('detected');
+                guide.classList.add('no-face');
+                badge.classList.remove('detected', 'loading');
+                badge.classList.add('no-face');
+                badge.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Posisikan Wajah di Tengah';
+            }
+        }
+
+        // Flash Effect on Capture
+        function triggerFlash() {
+            const flash = document.getElementById('captureFlash');
+            flash.classList.add('active');
+            setTimeout(() => flash.classList.remove('active'), 200);
+        }
+
+        // Simple Face Detection using brightness analysis
+        function detectFace(video) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            
+            if (!video.videoWidth) return false;
+            
+            ctx.drawImage(video, 0, 0);
+            
+            // Analyze center region (where face should be)
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const regionW = 150;
+            const regionH = 200;
+            
+            const imageData = ctx.getImageData(
+                centerX - regionW/2, 
+                centerY - regionH/2, 
+                regionW, 
+                regionH
+            );
+            
+            const data = imageData.data;
+            let skinToneCount = 0;
+            let totalPixels = data.length / 4;
+            
+            // Simple skin tone detection
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                // Skin tone ranges (approximate)
+                if (r > 95 && g > 40 && b > 20 &&
+                    r > g && r > b &&
+                    Math.abs(r - g) > 15 &&
+                    r - b > 15) {
+                    skinToneCount++;
+                }
+            }
+            
+            // If more than 20% skin tone in center region, likely a face
+            return (skinToneCount / totalPixels) > 0.20;
+        }
+
+        // Start Face Detection Loop
+        function startFaceDetection() {
+            if (faceDetectionInterval) return;
+            
+            faceDetectionInterval = setInterval(() => {
+                const video = document.getElementById('trainingWebcam');
+                if (video && video.readyState >= 2) {
+                    const detected = detectFace(video);
+                    updateFaceStatus(detected);
+                }
+            }, 500); // Check every 500ms
+        }
+
         // Initialize Webcam
         async function initWebcam() {
             try {
@@ -760,6 +955,11 @@
                 });
                 captureState.stream = stream;
                 video.srcObject = stream;
+                
+                // Start face detection after video loads
+                video.onloadeddata = () => {
+                    startFaceDetection();
+                };
             } catch (err) {
                 showAlert('❌ Tidak bisa akses webcam: ' + err.message, 'danger');
                 console.error(err);
@@ -856,10 +1056,19 @@
         document.getElementById('captureManualBtn').addEventListener('click', async function() {
             if (captureState.isCapturing) return;
             
+            // Check if face is detected
+            if (!isFaceDetected) {
+                showAlert('⚠️ Wajah tidak terdeteksi! Posisikan wajah di tengah frame.', 'warning');
+                return;
+            }
+            
             captureState.isCapturing = true;
             const btn = this;
             btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Mengambil...';
             btn.disabled = true;
+            
+            // Trigger flash effect
+            triggerFlash();
 
             const video = document.getElementById('trainingWebcam');
             const canvas = document.createElement('canvas');
@@ -904,6 +1113,7 @@
 
             // InsightFace: 10 foto dalam 3 detik (300ms per foto)
             for (let i = 0; i < INSIGHTFACE_TARGET_PHOTOS; i++) {
+                triggerFlash();
                 ctx.drawImage(video, 0, 0);
                 captureState.photos.push(canvas.toDataURL('image/jpeg'));
                 updatePreviewGrid();

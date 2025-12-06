@@ -1,888 +1,1773 @@
-<!doctype html><!doctype html>
+<!DOCTYPE html><!doctype html><!doctype html>
 
-<html lang="id"><html lang="en">
+<html lang="id">
 
-<head><head>
+<head><html lang="id"><html lang="en">
 
-  <meta charset="utf-8">  <meta charset="utf-8">
+    <meta charset="UTF-8">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">  <meta name="viewport" content="    .btn-success.btn-modern {
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><head><head>
 
-  <title>Kafebasabasi - Sistem Absensi Modern</title>      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    <title>Kafebasabasi - Sistem Absensi Modern</title>
 
-      }
+      <meta charset="utf-8">  <meta charset="utf-8">
 
-  <!-- Meta Tags -->    
+    <!-- Meta Tags -->
 
-  <meta name="description" content="Sistem Absensi Kafebasabasi dengan teknologi face recognition dan QR authentication">    .btn-danger.btn-modern {
+    <meta name="description" content="Sistem Absensi Kafebasabasi dengan teknologi Face Recognition & QR Authentication">  <meta name="viewport" content="width=device-width, initial-scale=1">  <meta name="viewport" content="    .btn-success.btn-modern {
 
-  <meta name="theme-color" content="#8B4513">      background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    <meta name="theme-color" content="#3C2415">
 
-  <meta name="apple-mobile-web-app-capable" content="yes">    }
+    <meta name="apple-mobile-web-app-capable" content="yes">  <title>Kafebasabasi - Sistem Absensi Modern</title>      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-      .btn-modern:disabled {
+          }
 
-  <!-- PWA Manifest -->      opacity: 0.7;
+    <!-- PWA Manifest -->
 
-  <link rel="manifest" href="/static/manifest.json">      cursor: not-allowed;
+    <link rel="manifest" href="/static/manifest.json">  <!-- Meta Tags -->    
 
-        transform: none !important;
+    
 
-  <!-- Bootstrap CSS -->    }
+    <!-- CSS -->  <meta name="description" content="Sistem Absensi Kafebasabasi dengan teknologi face recognition dan QR authentication">    .btn-danger.btn-modern {
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">    #notificationArea {
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">  <meta name="theme-color" content="#8B4513">      background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
 
-        position: fixed;
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+      <meta name="apple-mobile-web-app-capable" content="yes">    }
+
+    <style>
+
+        :root {  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">    
+
+            --coffee-dark: #3C2415;
+
+            --coffee-medium: #8B4513;      .btn-modern:disabled {
+
+            --coffee-light: #D2691E;
+
+            --cream: #F5DEB3;  <!-- PWA Manifest -->      opacity: 0.7;
+
+            --warm-white: #FDF6E3;
+
+            --accent-gold: #DAA520;  <link rel="manifest" href="/static/manifest.json">      cursor: not-allowed;
+
+            --success: #28a745;
+
+            --danger: #dc3545;        transform: none !important;
+
+            --shadow: 0 10px 40px rgba(60, 36, 21, 0.15);
+
+        }  <!-- Bootstrap CSS -->    }
+
+
+
+        * {  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    
+
+            font-family: 'Poppins', sans-serif;
+
+            margin: 0;  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">    #notificationArea {
+
+            padding: 0;
+
+            box-sizing: border-box;        position: fixed;
+
+        }
 
   <!-- Modern UI Framework -->      top: 20px;
 
-  <link href="/static/css/modern-ui.css" rel="stylesheet">      right: 20px;
+        body {
 
-</head>      z-index: 1050;
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);  <link href="/static/css/modern-ui.css" rel="stylesheet">      right: 20px;
 
-      max-width: 400px;
+            min-height: 100vh;
 
-<body>    }
+        }</head>      z-index: 1050;
 
-  <!-- Loading Screen -->    
 
-  <div id="loadingScreen" class="loading-screen">    .alert {
 
-    <div class="loading-content">      border: none;
+        /* Loading Screen */      max-width: 400px;
 
-      <div class="coffee-cup">      border-radius: 12px;
+        .loading-screen {
 
-        <div class="cup">      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            position: fixed;<body>    }
+
+            top: 0;
+
+            left: 0;  <!-- Loading Screen -->    
+
+            width: 100%;
+
+            height: 100%;  <div id="loadingScreen" class="loading-screen">    .alert {
+
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+
+            display: flex;    <div class="loading-content">      border: none;
+
+            align-items: center;
+
+            justify-content: center;      <div class="coffee-cup">      border-radius: 12px;
+
+            z-index: 9999;
+
+            transition: opacity 0.5s ease;        <div class="cup">      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+
+        }
 
           <div class="handle"></div>      backdrop-filter: blur(10px);
 
-          <div class="steam">    }
+        .loading-screen.hidden {
 
-            <div class="steam-line"></div>    
+            opacity: 0;          <div class="steam">    }
 
-            <div class="steam-line"></div>    .alert-success {
+            pointer-events: none;
 
-            <div class="steam-line"></div>      background: linear-gradient(135deg, rgba(40, 167, 69, 0.9) 0%, rgba(32, 201, 151, 0.9) 100%);
+        }            <div class="steam-line"></div>    
+
+
+
+        .loading-content {            <div class="steam-line"></div>    .alert-success {
+
+            text-align: center;
+
+            color: white;            <div class="steam-line"></div>      background: linear-gradient(135deg, rgba(40, 167, 69, 0.9) 0%, rgba(32, 201, 151, 0.9) 100%);
+
+        }
 
           </div>      color: white;
 
-        </div>    }
+        .coffee-icon {
 
-      </div>    
+            font-size: 4rem;        </div>    }
+
+            color: var(--accent-gold);
+
+            animation: bounce 1s infinite;      </div>    
+
+        }
 
       <h3 class="loading-text">Kafebasabasi</h3>    .alert-info {
 
-      <p class="loading-subtitle">Memuat sistem absensi...</p>      background: linear-gradient(135deg, rgba(23, 162, 184, 0.9) 0%, rgba(0, 123, 255, 0.9) 100%);
+        @keyframes bounce {
 
-    </div>      color: white;
+            0%, 100% { transform: translateY(0); }      <p class="loading-subtitle">Memuat sistem absensi...</p>      background: linear-gradient(135deg, rgba(23, 162, 184, 0.9) 0%, rgba(0, 123, 255, 0.9) 100%);
 
-  </div>    }
+            50% { transform: translateY(-15px); }
 
-    
+        }    </div>      color: white;
 
-  <!-- Main Container -->    .alert-warning {
 
-  <div class="container-fluid main-wrapper" id="mainContent" style="display: none;">      background: linear-gradient(135deg, rgba(255, 193, 7, 0.9) 0%, rgba(253, 126, 20, 0.9) 100%);
 
-    <!-- Header Section -->      color: white;
+        .loading-text {  </div>    }
+
+            font-size: 1.5rem;
+
+            font-weight: 600;    
+
+            margin-top: 1rem;
+
+        }  <!-- Main Container -->    .alert-warning {
+
+
+
+        .loading-dots::after {  <div class="container-fluid main-wrapper" id="mainContent" style="display: none;">      background: linear-gradient(135deg, rgba(255, 193, 7, 0.9) 0%, rgba(253, 126, 20, 0.9) 100%);
+
+            content: '';
+
+            animation: dots 1.5s steps(4, end) infinite;    <!-- Header Section -->      color: white;
+
+        }
 
     <header class="glass-header">    }
 
-      <div class="container">    
+        @keyframes dots {
 
-        <div class="row align-items-center">    .alert-danger {
+            0%, 20% { content: ''; }      <div class="container">    
 
-          <div class="col-md-6">      background: linear-gradient(135deg, rgba(220, 53, 69, 0.9) 0%, rgba(253, 126, 20, 0.9) 100%);
+            40% { content: '.'; }
 
-            <div class="header-brand">      color: white;
+            60% { content: '..'; }        <div class="row align-items-center">    .alert-danger {
 
-              <div class="brand-icon">    }
+            80%, 100% { content: '...'; }
 
-                <i class="bi bi-cup-hot-fill"></i>    
+        }          <div class="col-md-6">      background: linear-gradient(135deg, rgba(220, 53, 69, 0.9) 0%, rgba(253, 126, 20, 0.9) 100%);
+
+
+
+        /* Main Container */            <div class="header-brand">      color: white;
+
+        .main-container {
+
+            max-width: 1200px;              <div class="brand-icon">    }
+
+            margin: 0 auto;
+
+            padding: 1.5rem;                <i class="bi bi-cup-hot-fill"></i>    
+
+        }
 
               </div>    .spinner-border-sm {
 
-              <div class="brand-text">      width: 1rem;
+        /* Header */
 
-                <h1 class="brand-title">Kafebasabasi</h1>      height: 1rem;
+        .header-card {              <div class="brand-text">      width: 1rem;
 
-                <p class="brand-subtitle">Sistem Absensi Modern</p>    }evice-width, initial-scale=1">
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
 
-              </div>  <title>Absensi Karyawan Makan Gratis</title>
+            border-radius: 20px;                <h1 class="brand-title">Kafebasabasi</h1>      height: 1rem;
+
+            padding: 2rem;
+
+            color: white;                <p class="brand-subtitle">Sistem Absensi Modern</p>    }evice-width, initial-scale=1">
+
+            margin-bottom: 1.5rem;
+
+            box-shadow: var(--shadow);              </div>  <title>Absensi Karyawan Makan Gratis</title>
+
+        }
 
             </div>  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-          </div>  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+        .header-content {
 
-          <div class="col-md-6 text-end">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            display: flex;          </div>  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-            <div class="header-info">  <style>
+            justify-content: space-between;
+
+            align-items: center;          <div class="col-md-6 text-end">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+            flex-wrap: wrap;
+
+            gap: 1rem;            <div class="header-info">  <style>
+
+        }
 
               <div class="live-clock">    body {
 
-                <div class="time-display" id="liveTime">--:--:--</div>      font-family: 'Inter', sans-serif;
+        .brand-section {
 
-                <div class="date-display" id="liveDate">Loading...</div>      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;                <div class="time-display" id="liveTime">--:--:--</div>      font-family: 'Inter', sans-serif;
+
+            align-items: center;
+
+            gap: 1rem;                <div class="date-display" id="liveDate">Loading...</div>      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        }
 
               </div>      min-height: 100vh;
 
-            </div>    }
+        .brand-icon {
 
-          </div>    
+            width: 60px;            </div>    }
 
-        </div>    .main-container {
+            height: 60px;
 
-      </div>      background: rgba(255, 255, 255, 0.95);
+            background: rgba(255,255,255,0.15);          </div>    
 
-    </header>      backdrop-filter: blur(10px);
+            border-radius: 50%;
+
+            display: flex;        </div>    .main-container {
+
+            align-items: center;
+
+            justify-content: center;      </div>      background: rgba(255, 255, 255, 0.95);
+
+            font-size: 1.8rem;
+
+            color: var(--accent-gold);    </header>      backdrop-filter: blur(10px);
+
+        }
 
       border-radius: 20px;
 
-    <!-- Status Cards Section -->      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        .brand-title {
 
-    <section class="status-section">      margin: 20px auto;
+            font-size: 1.8rem;    <!-- Status Cards Section -->      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+
+            font-weight: 700;
+
+            margin: 0;    <section class="status-section">      margin: 20px auto;
+
+        }
 
       <div class="container">      max-width: 1400px;
 
-        <div class="row g-4">      padding: 30px;
+        .brand-subtitle {
 
-          <!-- Status Masuk -->    }
+            font-size: 0.9rem;        <div class="row g-4">      padding: 30px;
+
+            opacity: 0.85;
+
+            margin: 0;          <!-- Status Masuk -->    }
+
+        }
 
           <div class="col-lg-6">    
 
-            <div class="status-card masuk-card">    .header-section {
+        .time-section {
+
+            text-align: right;            <div class="status-card masuk-card">    .header-section {
+
+        }
 
               <div class="status-header">      background: linear-gradient(135deg, #0b4c61 0%, #2c5282 100%);
 
-                <div class="status-icon">      border-radius: 15px;
+        .live-time {
 
-                  <i class="bi bi-box-arrow-in-right"></i>      padding: 30px;
+            font-size: 2.5rem;                <div class="status-icon">      border-radius: 15px;
+
+            font-weight: 700;
+
+            line-height: 1;                  <i class="bi bi-box-arrow-in-right"></i>      padding: 30px;
+
+        }
 
                 </div>      margin-bottom: 30px;
 
-                <div class="status-info">      color: white;
+        .live-date {
 
-                  <h3>Absen Masuk</h3>      position: relative;
+            font-size: 1rem;                <div class="status-info">      color: white;
 
-                  <p class="status-time" id="jamMasuk">Belum absen</p>      overflow: hidden;
+            opacity: 0.9;
 
-                </div>    }
+        }                  <h3>Absen Masuk</h3>      position: relative;
 
-                <div class="status-indicator" id="statusMasuk">    
 
-                  <i class="bi bi-circle"></i>    .header-section::before {
 
-                </div>      content: '';
+        /* Status Cards */                  <p class="status-time" id="jamMasuk">Belum absen</p>      overflow: hidden;
 
-              </div>      position: absolute;
+        .status-grid {
 
-            </div>      top: -50%;
+            display: grid;                </div>    }
 
-          </div>      right: -50%;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 
-      width: 100%;
+            gap: 1.5rem;                <div class="status-indicator" id="statusMasuk">    
+
+            margin-bottom: 1.5rem;
+
+        }                  <i class="bi bi-circle"></i>    .header-section::before {
+
+
+
+        .status-card {                </div>      content: '';
+
+            background: white;
+
+            border-radius: 16px;              </div>      position: absolute;
+
+            padding: 1.5rem;
+
+            box-shadow: var(--shadow);            </div>      top: -50%;
+
+            display: flex;
+
+            align-items: center;          </div>      right: -50%;
+
+            gap: 1rem;
+
+            transition: transform 0.3s ease;      width: 100%;
+
+        }
 
           <!-- Status Pulang -->      height: 100%;
 
-          <div class="col-lg-6">      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+        .status-card:hover {
+
+            transform: translateY(-5px);          <div class="col-lg-6">      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+
+        }
 
             <div class="status-card pulang-card">      animation: float 6s ease-in-out infinite;
 
-              <div class="status-header">    }
+        .status-card.masuk {
+
+            border-left: 5px solid var(--success);              <div class="status-header">    }
+
+        }
 
                 <div class="status-icon">    
 
-                  <i class="bi bi-box-arrow-right"></i>    @keyframes float {
+        .status-card.pulang {
+
+            border-left: 5px solid var(--danger);                  <i class="bi bi-box-arrow-right"></i>    @keyframes float {
+
+        }
 
                 </div>      0%, 100% { transform: translateY(0px); }
 
-                <div class="status-info">      50% { transform: translateY(-10px); }
+        .status-icon {
 
-                  <h3>Absen Pulang</h3>    }
+            width: 60px;                <div class="status-info">      50% { transform: translateY(-10px); }
 
-                  <p class="status-time" id="jamPulang">Belum absen</p>    
+            height: 60px;
 
-                </div>    .header-section h1 {
+            border-radius: 12px;                  <h3>Absen Pulang</h3>    }
 
-                <div class="status-indicator" id="statusPulang">      font-weight: 700;
+            display: flex;
 
-                  <i class="bi bi-circle"></i>      font-size: 2.5rem;
+            align-items: center;                  <p class="status-time" id="jamPulang">Belum absen</p>    
 
-                </div>      margin-bottom: 10px;
+            justify-content: center;
 
-              </div>      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 1.5rem;                </div>    .header-section h1 {
 
-            </div>    }
+            color: white;
 
-          </div>    
+        }                <div class="status-indicator" id="statusPulang">      font-weight: 700;
 
-        </div>    .header-section h3, .header-section h4 {
 
-      </div>      opacity: 0.9;
+
+        .status-card.masuk .status-icon {                  <i class="bi bi-circle"></i>      font-size: 2.5rem;
+
+            background: linear-gradient(135deg, var(--success), #20c997);
+
+        }                </div>      margin-bottom: 10px;
+
+
+
+        .status-card.pulang .status-icon {              </div>      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+
+            background: linear-gradient(135deg, var(--danger), #fd7e14);
+
+        }            </div>    }
+
+
+
+        .status-info h4 {          </div>    
+
+            font-size: 1rem;
+
+            font-weight: 600;        </div>    .header-section h3, .header-section h4 {
+
+            color: #333;
+
+            margin-bottom: 0.3rem;      </div>      opacity: 0.9;
+
+        }
 
     </section>      font-weight: 400;
 
-    }
+        .status-time {
 
-    <!-- Action Buttons Section -->    
+            font-size: 1.5rem;    }
+
+            font-weight: 700;
+
+            color: var(--coffee-dark);    <!-- Action Buttons Section -->    
+
+        }
 
     <section class="action-section">    .date-info {
 
-      <div class="container">      background: rgba(255,255,255,0.15);
+        .status-badge {
 
-        <div class="action-grid">      border-radius: 10px;
+            margin-left: auto;      <div class="container">      background: rgba(255,255,255,0.15);
 
-          <!-- Absen Masuk Button -->      padding: 15px;
+            padding: 0.4rem 0.8rem;
+
+            border-radius: 20px;        <div class="action-grid">      border-radius: 10px;
+
+            font-size: 0.75rem;
+
+            font-weight: 600;          <!-- Absen Masuk Button -->      padding: 15px;
+
+        }
 
           <div class="action-item">      margin-top: 20px;
 
-            <button class="btn-action btn-masuk" onclick="markAttendance('masuk')" id="btnMasuk">      backdrop-filter: blur(5px);
+        .status-badge.done {
 
-              <div class="btn-bg"></div>    }
+            background: #d4edda;            <button class="btn-action btn-masuk" onclick="markAttendance('masuk')" id="btnMasuk">      backdrop-filter: blur(5px);
 
-              <div class="btn-content">    
+            color: var(--success);
 
-                <div class="btn-icon">    .camera-section {
+        }              <div class="btn-bg"></div>    }
+
+
+
+        .status-badge.pending {              <div class="btn-content">    
+
+            background: #fff3cd;
+
+            color: #856404;                <div class="btn-icon">    .camera-section {
+
+        }
 
                   <i class="bi bi-camera-fill"></i>      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 
-                </div>      border-radius: 15px;
+        /* Action Buttons */
 
-                <h4>Absen Masuk</h4>      padding: 25px;
+        .action-grid {                </div>      border-radius: 15px;
 
-                <p>Scan wajah untuk masuk</p>      margin-bottom: 25px;
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));                <h4>Absen Masuk</h4>      padding: 25px;
+
+            gap: 1.5rem;
+
+            margin-bottom: 1.5rem;                <p>Scan wajah untuk masuk</p>      margin-bottom: 25px;
+
+        }
 
               </div>      border: 1px solid rgba(0,0,0,0.1);
 
-              <div class="btn-effects">    }
+        .action-btn {
 
-                <span></span><span></span><span></span><span></span>    
+            background: white;              <div class="btn-effects">    }
 
-              </div>    .btn-modern {
+            border: none;
 
-            </button>      border-radius: 12px;
+            border-radius: 16px;                <span></span><span></span><span></span><span></span>    
 
-          </div>      padding: 12px 25px;
+            padding: 2rem;
 
-      font-weight: 500;
+            cursor: pointer;              </div>    .btn-modern {
 
-          <!-- Absen Pulang Button -->      border: none;
+            box-shadow: var(--shadow);
 
-          <div class="action-item">      transition: all 0.3s ease;
+            transition: all 0.3s ease;            </button>      border-radius: 12px;
 
-            <button class="btn-action btn-pulang" onclick="markAttendance('pulang')" id="btnPulang">      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
 
-              <div class="btn-bg"></div>    }
+            position: relative;          </div>      padding: 12px 25px;
+
+            overflow: hidden;
+
+        }      font-weight: 500;
+
+
+
+        .action-btn::before {          <!-- Absen Pulang Button -->      border: none;
+
+            content: '';
+
+            position: absolute;          <div class="action-item">      transition: all 0.3s ease;
+
+            top: 0;
+
+            left: 0;            <button class="btn-action btn-pulang" onclick="markAttendance('pulang')" id="btnPulang">      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+            width: 100%;
+
+            height: 5px;              <div class="btn-bg"></div>    }
+
+        }
 
               <div class="btn-content">    
 
-                <div class="btn-icon">    .btn-modern:hover {
+        .action-btn.masuk::before {
+
+            background: linear-gradient(90deg, var(--success), #20c997);                <div class="btn-icon">    .btn-modern:hover {
+
+        }
 
                   <i class="bi bi-camera-fill"></i>      transform: translateY(-2px);
 
-                </div>      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        .action-btn.pulang::before {
+
+            background: linear-gradient(90deg, var(--danger), #fd7e14);                </div>      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+
+        }
 
                 <h4>Absen Pulang</h4>    }
 
-                <p>Scan wajah untuk pulang</p>    
+        .action-btn:hover {
 
-              </div>    .btn-primary.btn-modern {
+            transform: translateY(-8px);                <p>Scan wajah untuk pulang</p>    
 
-              <div class="btn-effects">      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            box-shadow: 0 20px 50px rgba(60, 36, 21, 0.2);
 
-                <span></span><span></span><span></span><span></span>    }
+        }              </div>    .btn-primary.btn-modern {
 
-              </div>    
 
-            </button>    .btn-warning.btn-modern {
 
-          </div>      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        .action-btn:active {              <div class="btn-effects">      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
 
-        </div>    }
+            transform: scale(0.98);
 
-    
+        }                <span></span><span></span><span></span><span></span>    }
 
-        <!-- Camera Selection -->    .btn-success.btn-modern {
 
-        <div class="camera-selection">      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
 
-          <div class="glass-card">    }
+        .action-icon {              </div>    
 
-            <div class="card-header">    
+            width: 80px;
 
-              <i class="bi bi-camera2 me-2"></i>    .btn-danger.btn-modern {
+            height: 80px;            </button>    .btn-warning.btn-modern {
 
-              <span>Pengaturan Kamera</span>      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border-radius: 50%;
 
-            </div>    }
+            display: flex;          </div>      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
 
-            <div class="card-body">    
+            align-items: center;
+
+            justify-content: center;        </div>    }
+
+            font-size: 2rem;
+
+            color: white;    
+
+            margin: 0 auto 1rem;
+
+        }        <!-- Camera Selection -->    .btn-success.btn-modern {
+
+
+
+        .action-btn.masuk .action-icon {        <div class="camera-selection">      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+
+            background: linear-gradient(135deg, var(--success), #20c997);
+
+        }          <div class="glass-card">    }
+
+
+
+        .action-btn.pulang .action-icon {            <div class="card-header">    
+
+            background: linear-gradient(135deg, var(--danger), #fd7e14);
+
+        }              <i class="bi bi-camera2 me-2"></i>    .btn-danger.btn-modern {
+
+
+
+        .action-btn h3 {              <span>Pengaturan Kamera</span>      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+
+            font-size: 1.3rem;
+
+            font-weight: 600;            </div>    }
+
+            color: var(--coffee-dark);
+
+            margin-bottom: 0.5rem;            <div class="card-body">    
+
+        }
 
               <select class="form-select modern-select" id="cameraSelect">    .btn-dark.btn-modern {
 
-                <option value="0">Kamera Default</option>      background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+        .action-btn p {
 
-              </select>    }
+            font-size: 0.9rem;                <option value="0">Kamera Default</option>      background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+
+            color: #6c757d;
+
+            margin: 0;              </select>    }
+
+        }
 
             </div>    
 
-          </div>    .card-modern {
+        .action-btn:disabled {
 
-        </div>      border: none;
+            opacity: 0.6;          </div>    .card-modern {
+
+            cursor: not-allowed;
+
+            transform: none !important;        </div>      border: none;
+
+        }
 
       </div>      border-radius: 15px;
 
-    </section>      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        /* Info Card */
 
-      transition: all 0.3s ease;
+        .info-card {    </section>      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 
-    <!-- Data Table Section -->      overflow: hidden;
+            background: white;
+
+            border-radius: 16px;      transition: all 0.3s ease;
+
+            padding: 1.5rem;
+
+            box-shadow: var(--shadow);    <!-- Data Table Section -->      overflow: hidden;
+
+        }
 
     <section class="data-section">    }
 
-      <div class="container">    
+        .info-header {
 
-        <div class="glass-card">    .card-modern:hover {
+            display: flex;      <div class="container">    
 
-          <div class="card-header">      transform: translateY(-5px);
+            align-items: center;
 
-            <div class="d-flex justify-content-between align-items-center">      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            gap: 0.8rem;        <div class="glass-card">    .card-modern:hover {
 
-              <div>    }
+            margin-bottom: 1rem;
 
-                <i class="bi bi-table me-2"></i>    
+            padding-bottom: 1rem;          <div class="card-header">      transform: translateY(-5px);
+
+            border-bottom: 2px solid #f0f0f0;
+
+        }            <div class="d-flex justify-content-between align-items-center">      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+
+
+
+        .info-header i {              <div>    }
+
+            font-size: 1.5rem;
+
+            color: var(--accent-gold);                <i class="bi bi-table me-2"></i>    
+
+        }
 
                 <span>Data Absensi Hari Ini</span>    .card-header-modern {
 
-              </div>      background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+        .info-header h4 {
 
-              <button class="btn btn-sm btn-outline-light" onclick="window.attendanceSystem.refreshAttendanceData()">      border-bottom: none;
+            font-size: 1.1rem;              </div>      background: linear-gradient(135deg, #343a40 0%, #495057 100%);
 
-                <i class="bi bi-arrow-clockwise me-1"></i>      padding: 20px;
+            font-weight: 600;
 
-                Refresh    }
+            color: var(--coffee-dark);              <button class="btn btn-sm btn-outline-light" onclick="window.attendanceSystem.refreshAttendanceData()">      border-bottom: none;
 
-              </button>    
+            margin: 0;
 
-            </div>    .card-header-info {
+        }                <i class="bi bi-arrow-clockwise me-1"></i>      padding: 20px;
+
+
+
+        .info-item {                Refresh    }
+
+            display: flex;
+
+            justify-content: space-between;              </button>    
+
+            padding: 0.8rem 0;
+
+            border-bottom: 1px dashed #eee;            </div>    .card-header-info {
+
+        }
 
           </div>      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
 
-          <div class="card-body">    }
+        .info-item:last-child {
+
+            border-bottom: none;          <div class="card-body">    }
+
+        }
 
             <div class="table-responsive">    
 
-              <table class="table modern-table" id="attendanceTable">    .form-control-modern {
+        .info-label {
 
-                <thead>      border-radius: 10px;
+            color: #6c757d;              <table class="table modern-table" id="attendanceTable">    .form-control-modern {
 
-                  <tr>      border: 2px solid #e9ecef;
+            font-size: 0.9rem;
 
-                    <th><i class="bi bi-person me-2"></i>Nama</th>      padding: 12px 15px;
+        }                <thead>      border-radius: 10px;
+
+
+
+        .info-value {                  <tr>      border: 2px solid #e9ecef;
+
+            font-weight: 600;
+
+            color: var(--coffee-dark);                    <th><i class="bi bi-person me-2"></i>Nama</th>      padding: 12px 15px;
+
+        }
 
                     <th><i class="bi bi-briefcase me-2"></i>Bagian</th>      transition: all 0.3s ease;
 
-                    <th><i class="bi bi-calendar me-2"></i>Tanggal</th>    }
+        /* Footer */
 
-                    <th><i class="bi bi-clock me-2"></i>Waktu</th>    
+        .footer {                    <th><i class="bi bi-calendar me-2"></i>Tanggal</th>    }
 
-                    <th><i class="bi bi-check-circle me-2"></i>Status</th>    .form-control-modern:focus {
+            text-align: center;
+
+            padding: 1.5rem;                    <th><i class="bi bi-clock me-2"></i>Waktu</th>    
+
+            color: #6c757d;
+
+            font-size: 0.85rem;                    <th><i class="bi bi-check-circle me-2"></i>Status</th>    .form-control-modern:focus {
+
+        }
 
                   </tr>      border-color: #007bff;
 
-                </thead>      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        .footer a {
 
-                <tbody id="attendanceTableBody">    }
+            color: var(--coffee-medium);                </thead>      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
 
-                  <tr>    
+            text-decoration: none;
 
-                    <td colspan="5" class="text-center py-4">    .table-modern {
+        }                <tbody id="attendanceTableBody">    }
 
-                      <div class="loading-spinner">      border-radius: 10px;
 
-                        <div class="spinner-border text-primary" role="status">      overflow: hidden;
+
+        /* Notification */                  <tr>    
+
+        .notification-area {
+
+            position: fixed;                    <td colspan="5" class="text-center py-4">    .table-modern {
+
+            top: 20px;
+
+            right: 20px;                      <div class="loading-spinner">      border-radius: 10px;
+
+            z-index: 1050;
+
+            max-width: 400px;                        <div class="spinner-border text-primary" role="status">      overflow: hidden;
+
+        }
 
                           <span class="visually-hidden">Loading...</span>      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
 
-                        </div>    }
+        .alert-custom {
 
-                        <p class="mt-2 mb-0">Memuat data absensi...</p>    
+            border: none;                        </div>    }
 
-                      </div>    .table-modern th {
+            border-radius: 12px;
 
-                    </td>      background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            padding: 1rem 1.5rem;                        <p class="mt-2 mb-0">Memuat data absensi...</p>    
 
-                  </tr>      border: none;
+            margin-bottom: 0.5rem;
 
-                </tbody>      font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);                      </div>    .table-modern th {
+
+            animation: slideIn 0.3s ease;
+
+        }                    </td>      background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+
+
+
+        @keyframes slideIn {                  </tr>      border: none;
+
+            from { transform: translateX(100%); opacity: 0; }
+
+            to { transform: translateX(0); opacity: 1; }                </tbody>      font-weight: 600;
+
+        }
 
               </table>      padding: 15px;
 
-            </div>    }
+        .alert-success-custom {
 
-          </div>    
+            background: linear-gradient(135deg, var(--success), #20c997);            </div>    }
 
-        </div>    .table-modern td {
+            color: white;
 
-      </div>      padding: 12px 15px;
+        }          </div>    
+
+
+
+        .alert-danger-custom {        </div>    .table-modern td {
+
+            background: linear-gradient(135deg, var(--danger), #fd7e14);
+
+            color: white;      </div>      padding: 12px 15px;
+
+        }
 
     </section>      border-color: #f8f9fa;
 
-      vertical-align: middle;
+        .alert-info-custom {
 
-    <!-- Footer -->    }
+            background: linear-gradient(135deg, #17a2b8, #007bff);      vertical-align: middle;
 
-    <footer class="glass-footer">    
+            color: white;
 
-      <div class="container">    .table-modern tbody tr:hover {
+        }    <!-- Footer -->    }
 
-        <div class="row">      background-color: rgba(0,123,255,0.05);
+
+
+        /* Responsive */    <footer class="glass-footer">    
+
+        @media (max-width: 768px) {
+
+            .header-content {      <div class="container">    .table-modern tbody tr:hover {
+
+                flex-direction: column;
+
+                text-align: center;        <div class="row">      background-color: rgba(0,123,255,0.05);
+
+            }
 
           <div class="col-md-6">      transform: scale(1.005);
 
-            <p class="mb-0">      transition: all 0.2s ease;
+            .brand-section {
+
+                flex-direction: column;            <p class="mb-0">      transition: all 0.2s ease;
+
+            }
 
               <i class="bi bi-shield-check me-2"></i>    }
 
-              Sistem Absensi Kafebasabasi v2.0    
+            .time-section {
+
+                text-align: center;              Sistem Absensi Kafebasabasi v2.0    
+
+            }
 
             </p>    .message-success {
 
-          </div>      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            .live-time {
+
+                font-size: 2rem;          </div>      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+
+            }
 
           <div class="col-md-6 text-end">      color: #155724;
 
-            <p class="mb-0">      border-radius: 10px;
+            .action-btn {
+
+                padding: 1.5rem;            <p class="mb-0">      border-radius: 10px;
+
+            }
 
               <i class="bi bi-cpu me-2"></i>      padding: 15px;
 
-              Powered by Face Recognition & QR Auth      margin-bottom: 20px;
+            .action-icon {
 
-            </p>      border: 1px solid #c3e6cb;
+                width: 60px;              Powered by Face Recognition & QR Auth      margin-bottom: 20px;
 
-          </div>      font-weight: 600;
+                height: 60px;
 
-        </div>    }
+                font-size: 1.5rem;            </p>      border: 1px solid #c3e6cb;
 
-      </div>    
+            }
 
-    </footer>    .select-modern {
+        }          </div>      font-weight: 600;
 
-  </div>      border-radius: 10px;
 
-      border: 2px solid #e9ecef;
 
-  <!-- Connection Status -->      padding: 10px 15px;
+        /* Camera Modal */        </div>    }
 
-  <div class="connection-status" id="connectionStatus">      background: white;
+        .camera-modal {
 
-    <div class="status-dot"></div>      transition: all 0.3s ease;
+            display: none;      </div>    
 
-    <span class="status-text">Online</span>    }
+            position: fixed;
 
-  </div>    
+            top: 0;    </footer>    .select-modern {
 
-    .select-modern:focus {
+            left: 0;
 
-  <!-- Notification Area -->      border-color: #007bff;
+            width: 100%;  </div>      border-radius: 10px;
 
-  <div id="notificationArea"></div>      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+            height: 100%;
+
+            background: rgba(0,0,0,0.9);      border: 2px solid #e9ecef;
+
+            z-index: 2000;
+
+            align-items: center;  <!-- Connection Status -->      padding: 10px 15px;
+
+            justify-content: center;
+
+        }  <div class="connection-status" id="connectionStatus">      background: white;
+
+
+
+        .camera-modal.active {    <div class="status-dot"></div>      transition: all 0.3s ease;
+
+            display: flex;
+
+        }    <span class="status-text">Online</span>    }
+
+
+
+        .camera-container {  </div>    
+
+            background: white;
+
+            border-radius: 20px;    .select-modern:focus {
+
+            overflow: hidden;
+
+            max-width: 600px;  <!-- Notification Area -->      border-color: #007bff;
+
+            width: 90%;
+
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);  <div id="notificationArea"></div>      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+
+        }
 
     }
 
-  <!-- Scripts -->    
+        .camera-header {
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>    .stats-card {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));  <!-- Scripts -->    
 
-  <script src="/static/js/attendance-optimized.js"></script>      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            color: white;
 
-      border-radius: 10px;
+            padding: 1rem 1.5rem;  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>    .stats-card {
 
-  <script>      padding: 15px;
+            display: flex;
 
-    // Initialize page      margin-bottom: 20px;
+            justify-content: space-between;  <script src="/static/js/attendance-optimized.js"></script>      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+
+            align-items: center;
+
+        }      border-radius: 10px;
+
+
+
+        .camera-header h4 {  <script>      padding: 15px;
+
+            margin: 0;
+
+            font-size: 1.1rem;    // Initialize page      margin-bottom: 20px;
+
+        }
 
     document.addEventListener('DOMContentLoaded', function() {      border-left: 4px solid #007bff;
 
-      // Hide loading screen      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        .camera-close {
 
-      setTimeout(() => {    }
+            background: rgba(255,255,255,0.2);      // Hide loading screen      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 
-        document.getElementById('loadingScreen').style.display = 'none';  </style>
+            border: none;
 
-        document.getElementById('mainContent').style.display = 'block';</head>
+            color: white;      setTimeout(() => {    }
 
-        document.getElementById('mainContent').classList.add('fade-in');<body>
+            width: 35px;
 
-      }, 2000);  <div class="main-container">
+            height: 35px;        document.getElementById('loadingScreen').style.display = 'none';  </style>
+
+            border-radius: 50%;
+
+            cursor: pointer;        document.getElementById('mainContent').style.display = 'block';</head>
+
+            font-size: 1.2rem;
+
+            display: flex;        document.getElementById('mainContent').classList.add('fade-in');<body>
+
+            align-items: center;
+
+            justify-content: center;      }, 2000);  <div class="main-container">
+
+        }
 
     <div class='header-section text-center'>
 
-      // Connection status monitoring      <h1>Absensi Karyawan</h1>
+        .camera-body {
+
+            padding: 1.5rem;      // Connection status monitoring      <h1>Absensi Karyawan</h1>
+
+        }
 
       function updateConnectionStatus() {      <h3>Makan Gratis - Badan Gizi Nasional</h3>
 
-        const statusElement = document.getElementById('connectionStatus');      <h4>Kota Bogor, Jawa Barat</h4>
+        .camera-feed {
 
-        const statusDot = statusElement.querySelector('.status-dot');      <div class="date-info">
+            width: 100%;        const statusElement = document.getElementById('connectionStatus');      <h4>Kota Bogor, Jawa Barat</h4>
 
-        const statusText = statusElement.querySelector('.status-text');        <p class="mb-2">Minggu Ini: <strong>{{ date_range_week }}</strong></p>
+            aspect-ratio: 4/3;
 
-        <p class="mb-0">Hari Ini: <strong>{{ tanggal_hari_ini }}</strong></p>
+            background: #000;        const statusDot = statusElement.querySelector('.status-dot');      <div class="date-info">
 
-        if (navigator.onLine) {      </div>
+            border-radius: 12px;
 
-          statusDot.classList.remove('offline');    </div>
+            overflow: hidden;        const statusText = statusElement.querySelector('.status-text');        <p class="mb-2">Minggu Ini: <strong>{{ date_range_week }}</strong></p>
 
-          statusText.textContent = 'Online';
+            position: relative;
+
+        }        <p class="mb-0">Hari Ini: <strong>{{ tanggal_hari_ini }}</strong></p>
+
+
+
+        .camera-feed video {        if (navigator.onLine) {      </div>
+
+            width: 100%;
+
+            height: 100%;          statusDot.classList.remove('offline');    </div>
+
+            object-fit: cover;
+
+            transform: scaleX(-1);          statusText.textContent = 'Online';
+
+        }
 
         } else {    {% if mess %}
 
-          statusDot.classList.add('offline');    <div class="message-success text-center">
+        .face-guide {
 
-          statusText.textContent = 'Offline';      {{ mess }}
+            position: absolute;          statusDot.classList.add('offline');    <div class="message-success text-center">
 
-        }    </div>
+            top: 50%;
 
-      }    {% endif %}
+            left: 50%;          statusText.textContent = 'Offline';      {{ mess }}
 
+            transform: translate(-50%, -50%);
 
+            width: 200px;        }    </div>
+
+            height: 260px;
+
+            border: 3px dashed rgba(255,255,255,0.5);      }    {% endif %}
+
+            border-radius: 50% 50% 45% 45%;
+
+            pointer-events: none;
+
+        }
 
       // Monitor connection changes    <div class="camera-section">
 
-      window.addEventListener('online', updateConnectionStatus);      <form method="POST" action="{{ url_for('set_camera') }}" class="text-center mb-4">
+        .camera-actions {
 
-      window.addEventListener('offline', updateConnectionStatus);        <label for="camera" class="form-label fw-bold mb-3">
+            display: flex;      window.addEventListener('online', updateConnectionStatus);      <form method="POST" action="{{ url_for('set_camera') }}" class="text-center mb-4">
+
+            gap: 1rem;
+
+            margin-top: 1rem;      window.addEventListener('offline', updateConnectionStatus);        <label for="camera" class="form-label fw-bold mb-3">
+
+        }
 
                 <i class="material-icons align-middle me-2">videocam</i>Pilih Kamera:
 
-      // Initial status check        </label>
+        .camera-actions button {
 
-      updateConnectionStatus();        <select name="camera" id="camera" class="form-select select-modern w-50 mx-auto">
+            flex: 1;      // Initial status check        </label>
 
-          {% for i in range(6) %}
+            padding: 0.8rem;
 
-      // Keyboard shortcuts tooltip          <option value="{{ i }}" {% if selected_camera == i %}selected{% endif %}>
+            border: none;      updateConnectionStatus();        <select name="camera" id="camera" class="form-select select-modern w-50 mx-auto">
+
+            border-radius: 10px;
+
+            font-weight: 600;          {% for i in range(6) %}
+
+            cursor: pointer;
+
+            transition: all 0.3s ease;      // Keyboard shortcuts tooltip          <option value="{{ i }}" {% if selected_camera == i %}selected{% endif %}>
+
+        }
 
       document.addEventListener('keydown', function(e) {            Kamera {{ i }} {% if i == 3 %} {% endif %}
 
-        if (e.ctrlKey && (e.key === 'm' || e.key === 'p')) {          </option>
+        .btn-capture {
 
-          e.preventDefault();          {% endfor %}
+            background: linear-gradient(135deg, var(--success), #20c997);        if (e.ctrlKey && (e.key === 'm' || e.key === 'p')) {          </option>
 
-        }        </select>
+            color: white;
 
-      });        <button type="submit" class="btn btn-primary btn-modern mt-3">
+        }          e.preventDefault();          {% endfor %}
+
+
+
+        .btn-cancel {        }        </select>
+
+            background: #f0f0f0;
+
+            color: #333;      });        <button type="submit" class="btn btn-primary btn-modern mt-3">
+
+        }
 
           <i class="material-icons align-middle me-2">camera_alt</i>Gunakan Kamera
 
-      // Add keyboard shortcuts info        </button>
+        .camera-status {
 
-      const shortcutsInfo = document.createElement('div');      </form>
+            text-align: center;      // Add keyboard shortcuts info        </button>
 
-      shortcutsInfo.className = 'keyboard-shortcuts';
+            padding: 1rem;
 
-      shortcutsInfo.innerHTML = `      <div class="text-center">
+            font-size: 0.9rem;      const shortcutsInfo = document.createElement('div');      </form>
 
-        <div class="shortcuts-content">        <a href="{{ url_for('test_camera') }}">
+            color: #6c757d;
 
-          <small><i class="bi bi-keyboard me-1"></i> Ctrl+M: Absen Masuk | Ctrl+P: Absen Pulang</small>          <button class="btn btn-warning btn-modern">
+        }      shortcutsInfo.className = 'keyboard-shortcuts';
 
-        </div>            <i class="material-icons align-middle me-2">settings</i>Uji Kamera
+    </style>
 
-      `;          </button>
+</head>      shortcutsInfo.innerHTML = `      <div class="text-center">
+
+<body>
+
+    <!-- Loading Screen -->        <div class="shortcuts-content">        <a href="{{ url_for('test_camera') }}">
+
+    <div class="loading-screen" id="loadingScreen">
+
+        <div class="loading-content">          <small><i class="bi bi-keyboard me-1"></i> Ctrl+M: Absen Masuk | Ctrl+P: Absen Pulang</small>          <button class="btn btn-warning btn-modern">
+
+            <i class="bi bi-cup-hot-fill coffee-icon"></i>
+
+            <h3 class="loading-text">Kafebasabasi</h3>        </div>            <i class="material-icons align-middle me-2">settings</i>Uji Kamera
+
+            <p>Memuat sistem absensi<span class="loading-dots"></span></p>
+
+        </div>      `;          </button>
+
+    </div>
 
       document.body.appendChild(shortcutsInfo);        </a>
 
-    });      </div>
+    <!-- Notification Area -->
 
-    </div>
+    <div class="notification-area" id="notificationArea"></div>    });      </div>
 
-    // Performance monitoring
 
-    window.addEventListener('load', function() {    {% if selected_camera is not none %}
 
-      if ('performance' in window) {    <div class="text-center mb-4">
+    <!-- Main Container -->    </div>
 
-        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;      <button class="btn btn-success btn-modern me-3" id="btnAbsenMasuk" onclick="startAttendance('masuk')">
+    <div class="main-container" id="mainContent" style="display: none;">
 
-        console.log(`Page loaded in ${loadTime}ms`);        <i class="material-icons align-middle me-2">login</i>
+        <!-- Header -->    // Performance monitoring
 
-                <span class="btn-text">Absen Masuk</span>
+        <div class="header-card">
 
-        if (loadTime > 3000) {        <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+            <div class="header-content">    window.addEventListener('load', function() {    {% if selected_camera is not none %}
 
-          console.warn('Page load time is slower than expected');          <span class="visually-hidden">Loading...</span>
+                <div class="brand-section">
 
-        }        </div>
+                    <div class="brand-icon">      if ('performance' in window) {    <div class="text-center mb-4">
+
+                        <i class="bi bi-cup-hot-fill"></i>
+
+                    </div>        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;      <button class="btn btn-success btn-modern me-3" id="btnAbsenMasuk" onclick="startAttendance('masuk')">
+
+                    <div>
+
+                        <h1 class="brand-title">Kafebasabasi</h1>        console.log(`Page loaded in ${loadTime}ms`);        <i class="material-icons align-middle me-2">login</i>
+
+                        <p class="brand-subtitle">Sistem Absensi Face Recognition</p>
+
+                    </div>                <span class="btn-text">Absen Masuk</span>
+
+                </div>
+
+                <div class="time-section">        if (loadTime > 3000) {        <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+
+                    <div class="live-time" id="liveTime">--:--:--</div>
+
+                    <div class="live-date" id="liveDate">Loading...</div>          console.warn('Page load time is slower than expected');          <span class="visually-hidden">Loading...</span>
+
+                </div>
+
+            </div>        }        </div>
+
+        </div>
 
       }      </button>
 
-    });      <button class="btn btn-danger btn-modern" id="btnAbsenPulang" onclick="startAttendance('pulang')">
+        <!-- Status Cards -->
 
-        <i class="material-icons align-middle me-2">logout</i>
+        <div class="status-grid">    });      <button class="btn btn-danger btn-modern" id="btnAbsenPulang" onclick="startAttendance('pulang')">
 
-    // PWA install prompt        <span class="btn-text">Absen Pulang</span>
+            <div class="status-card masuk">
 
-    let deferredPrompt;        <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                <div class="status-icon">        <i class="material-icons align-middle me-2">logout</i>
 
-    window.addEventListener('beforeinstallprompt', (e) => {          <span class="visually-hidden">Loading...</span>
+                    <i class="bi bi-box-arrow-in-right"></i>
 
-      e.preventDefault();        </div>
+                </div>    // PWA install prompt        <span class="btn-text">Absen Pulang</span>
 
-      deferredPrompt = e;      </button>
+                <div class="status-info">
 
-          </div>
+                    <h4>Absen Masuk</h4>    let deferredPrompt;        <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
 
-      // Show install button    {% endif %}
+                    <div class="status-time" id="jamMasuk">--:--</div>
 
-      const installButton = document.createElement('button');
+                </div>    window.addEventListener('beforeinstallprompt', (e) => {          <span class="visually-hidden">Loading...</span>
 
-      installButton.className = 'btn btn-outline-light btn-sm position-fixed';    <!-- Notification Area -->
+                <span class="status-badge pending" id="badgeMasuk">Belum</span>
+
+            </div>      e.preventDefault();        </div>
+
+            <div class="status-card pulang">
+
+                <div class="status-icon">      deferredPrompt = e;      </button>
+
+                    <i class="bi bi-box-arrow-right"></i>
+
+                </div>          </div>
+
+                <div class="status-info">
+
+                    <h4>Absen Pulang</h4>      // Show install button    {% endif %}
+
+                    <div class="status-time" id="jamPulang">--:--</div>
+
+                </div>      const installButton = document.createElement('button');
+
+                <span class="status-badge pending" id="badgePulang">Belum</span>
+
+            </div>      installButton.className = 'btn btn-outline-light btn-sm position-fixed';    <!-- Notification Area -->
+
+        </div>
 
       installButton.style.cssText = 'top: 10px; left: 10px; z-index: 1060;';    <div id="notificationArea" class="mb-4" style="display: none;">
 
-      installButton.innerHTML = '<i class="bi bi-download me-1"></i> Install App';      <div class="alert alert-dismissible fade show" role="alert" id="alertNotification">
+        <!-- Action Buttons -->
 
-      installButton.onclick = async () => {        <div class="d-flex align-items-center">
+        <div class="action-grid">      installButton.innerHTML = '<i class="bi bi-download me-1"></i> Install App';      <div class="alert alert-dismissible fade show" role="alert" id="alertNotification">
 
-        if (deferredPrompt) {          <i class="material-icons me-2" id="alertIcon">info</i>
+            <button class="action-btn masuk" id="btnMasuk" onclick="openCamera('masuk')">
 
-          deferredPrompt.prompt();          <div>
+                <div class="action-icon">      installButton.onclick = async () => {        <div class="d-flex align-items-center">
 
-          const result = await deferredPrompt.userChoice;            <strong id="alertTitle">Info</strong>
+                    <i class="bi bi-camera-fill"></i>
 
-          if (result.outcome === 'accepted') {            <div id="alertMessage">Message</div>
+                </div>        if (deferredPrompt) {          <i class="material-icons me-2" id="alertIcon">info</i>
 
-            installButton.remove();          </div>
+                <h3>Absen Masuk</h3>
 
-          }        </div>
+                <p>Scan wajah untuk absen masuk</p>          deferredPrompt.prompt();          <div>
+
+            </button>
+
+            <button class="action-btn pulang" id="btnPulang" onclick="openCamera('pulang')">          const result = await deferredPrompt.userChoice;            <strong id="alertTitle">Info</strong>
+
+                <div class="action-icon">
+
+                    <i class="bi bi-camera-fill"></i>          if (result.outcome === 'accepted') {            <div id="alertMessage">Message</div>
+
+                </div>
+
+                <h3>Absen Pulang</h3>            installButton.remove();          </div>
+
+                <p>Scan wajah untuk absen pulang</p>
+
+            </button>          }        </div>
+
+        </div>
 
           deferredPrompt = null;        <button type="button" class="btn-close" onclick="hideNotification()"></button>
 
-        }      </div>
+        <!-- Info Card -->
 
-      };    </div>
+        <div class="info-card">        }      </div>
 
-      document.body.appendChild(installButton);
+            <div class="info-header">
 
-    });    <div class="row g-4">
+                <i class="bi bi-info-circle-fill"></i>      };    </div>
 
-  </script>      <div class="col-md-8">
+                <h4>Informasi Hari Ini</h4>
 
-        <div class="card card-modern">
+            </div>      document.body.appendChild(installButton);
 
-  <style>          <div class="card-header card-header-modern text-white">
+            <div class="info-item">
 
-    /* Additional component styles */            <h4 class="mb-0">
+                <span class="info-label">Status Karyawan</span>    });    <div class="row g-4">
 
-    .keyboard-shortcuts {              <i class="material-icons align-middle me-2">table_chart</i>Data Kehadiran Minggu Ini
+                <span class="info-value" id="employeeName">-</span>
+
+            </div>  </script>      <div class="col-md-8">
+
+            <div class="info-item">
+
+                <span class="info-label">Departemen</span>        <div class="card card-modern">
+
+                <span class="info-value" id="employeeDept">-</span>
+
+            </div>  <style>          <div class="card-header card-header-modern text-white">
+
+            <div class="info-item">
+
+                <span class="info-label">Total Jam Kerja</span>    /* Additional component styles */            <h4 class="mb-0">
+
+                <span class="info-value" id="totalJamKerja">-</span>
+
+            </div>    .keyboard-shortcuts {              <i class="material-icons align-middle me-2">table_chart</i>Data Kehadiran Minggu Ini
+
+        </div>
 
       position: fixed;            </h4>
 
-      bottom: 20px;            <small class="mt-1 d-block opacity-75">{{ date_range_week }}</small>
+        <!-- Footer -->
 
-      left: 20px;          </div>
+        <footer class="footer">      bottom: 20px;            <small class="mt-1 d-block opacity-75">{{ date_range_week }}</small>
+
+            <p>© 2025 Kafebasabasi Attendance System | <a href="/admin/login">Admin Login</a></p>
+
+        </footer>      left: 20px;          </div>
+
+    </div>
 
       background: rgba(0, 0, 0, 0.8);          <div class="card-body">
 
-      color: white;            <div class="stats-card">
+    <!-- Camera Modal -->
 
-      padding: 8px 12px;              <h6 class="mb-0">
+    <div class="camera-modal" id="cameraModal">      color: white;            <div class="stats-card">
 
-      border-radius: 20px;                <i class="material-icons align-middle me-2">people</i>Total Terdaftar: <strong>{{ totalreg }}</strong>
+        <div class="camera-container">
 
-      font-size: 0.8rem;              </h6>
+            <div class="camera-header">      padding: 8px 12px;              <h6 class="mb-0">
 
-      z-index: 1050;              <small class="text-muted mt-1 d-block">
+                <h4 id="cameraTitle">📸 Absen Masuk</h4>
 
-      backdrop-filter: blur(10px);                <i class="material-icons align-middle me-1" style="font-size: 14px;">info</i>
+                <button class="camera-close" onclick="closeCamera()">      border-radius: 20px;                <i class="material-icons align-middle me-2">people</i>Total Terdaftar: <strong>{{ totalreg }}</strong>
 
-    }                Tabel menampilkan data absensi minggu ini. Karyawan terdaftar harus melakukan absensi untuk muncul di tabel.
+                    <i class="bi bi-x"></i>
 
-              </small>
+                </button>      font-size: 0.8rem;              </h6>
 
-    .connection-status {            </div>
+            </div>
 
-      position: fixed;            <div class="table-responsive">
+            <div class="camera-body">      z-index: 1050;              <small class="text-muted mt-1 d-block">
 
-      top: 20px;              <table class="table table-striped table-modern" id="attendanceTable">
+                <div class="camera-feed">
 
-      left: 50%;                <thead class="table-dark">
+                    <video id="videoElement" autoplay playsinline></video>      backdrop-filter: blur(10px);                <i class="material-icons align-middle me-1" style="font-size: 14px;">info</i>
 
-      transform: translateX(-50%);                  <tr>
+                    <div class="face-guide"></div>
 
-      background: rgba(255, 255, 255, 0.9);                    <th>No</th>
+                </div>    }                Tabel menampilkan data absensi minggu ini. Karyawan terdaftar harus melakukan absensi untuk muncul di tabel.
+
+                <div class="camera-status" id="cameraStatus">
+
+                    Posisikan wajah dalam area guide              </small>
+
+                </div>
+
+                <div class="camera-actions">    .connection-status {            </div>
+
+                    <button class="btn-cancel" onclick="closeCamera()">Batal</button>
+
+                    <button class="btn-capture" id="captureBtn" onclick="captureAndSubmit()">      position: fixed;            <div class="table-responsive">
+
+                        <i class="bi bi-camera"></i> Capture & Submit
+
+                    </button>      top: 20px;              <table class="table table-striped table-modern" id="attendanceTable">
+
+                </div>
+
+            </div>      left: 50%;                <thead class="table-dark">
+
+        </div>
+
+    </div>      transform: translateX(-50%);                  <tr>
+
+
+
+    <!-- Canvas for capture (hidden) -->      background: rgba(255, 255, 255, 0.9);                    <th>No</th>
+
+    <canvas id="captureCanvas" style="display: none;"></canvas>
 
       backdrop-filter: blur(10px);                    <th>Nama</th>
 
-      padding: 8px 16px;                    <th>Bagian</th>
+    <!-- Scripts -->
 
-      border-radius: 20px;                    <th>Tanggal</th>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>      padding: 8px 16px;                    <th>Bagian</th>
 
-      display: flex;                    <th>Jam Masuk</th>
+    <script>
 
-      align-items: center;                    <th>Jam Pulang</th>
+        // Global variables      border-radius: 20px;                    <th>Tanggal</th>
 
-      gap: 8px;                    <th>Total Jam Kerja</th>
+        let currentMode = '';
 
-      font-size: 0.85rem;                    <th>Aksi</th>
+        let videoStream = null;      display: flex;                    <th>Jam Masuk</th>
 
-      font-weight: 500;                  </tr>
 
-      z-index: 1060;                </thead>
 
-      transition: all 0.3s ease;                <tbody>
+        // Initialize      align-items: center;                    <th>Jam Pulang</th>
 
-    }                  {% if l > 0 %}
+        document.addEventListener('DOMContentLoaded', function() {
 
-                    {% for i in range(l) %}
+            // Hide loading screen after 1.5s      gap: 8px;                    <th>Total Jam Kerja</th>
 
-    .status-dot {                    <tr>
+            setTimeout(() => {
 
-      width: 8px;                      <td>{{ i+1 }}</td>
+                document.getElementById('loadingScreen').classList.add('hidden');      font-size: 0.85rem;                    <th>Aksi</th>
 
-      height: 8px;                      <td>{{ names[i] }}</td>
+                document.getElementById('mainContent').style.display = 'block';
 
-      border-radius: 50%;                      <td>{{ rolls[i] }}</td>
+            }, 1500);      font-weight: 500;                  </tr>
 
-      background: #28a745;                      <td>{{ tanggal[i] }}</td>
 
-      animation: pulse 2s infinite;                      <td>{{ times[i][0] }}</td>
 
-    }                      <td>{{ times[i][1] }}</td>
+            // Start live clock      z-index: 1060;                </thead>
 
-                      <td>{{ times[i][2] }}</td>
+            updateClock();
 
-    .status-dot.offline {                      <td>
+            setInterval(updateClock, 1000);      transition: all 0.3s ease;                <tbody>
 
-      background: #dc3545;                        <button class="btn btn-sm btn-danger" onclick="deleteAttendance('{{ names[i] }}', '{{ rolls[i] }}', '{{ tanggal[i] }}')">
 
-    }                          <i class="material-icons" style="font-size: 16px;">delete</i>
 
-                        </button>
+            // Load attendance status    }                  {% if l > 0 %}
 
-    @keyframes pulse {                      </td>
+            loadAttendanceStatus();
 
-      0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }                    </tr>
+        });                    {% for i in range(l) %}
 
-      70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }                    {% endfor %}
 
-      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }                  {% else %}
 
-    }                    <tr>
+        // Update clock    .status-dot {                    <tr>
 
-                      <td colspan="8" class="text-center py-4">
+        function updateClock() {
 
-    /* Mobile optimizations */                        <i class="material-icons" style="font-size: 48px; color: #ccc;">event_busy</i>
+            const now = new Date();      width: 8px;                      <td>{{ i+1 }}</td>
+
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });      height: 8px;                      <td>{{ names[i] }}</td>
+
+            
+
+            document.getElementById('liveTime').textContent = timeStr;      border-radius: 50%;                      <td>{{ rolls[i] }}</td>
+
+            document.getElementById('liveDate').textContent = dateStr;
+
+        }      background: #28a745;                      <td>{{ tanggal[i] }}</td>
+
+
+
+        // Show notification      animation: pulse 2s infinite;                      <td>{{ times[i][0] }}</td>
+
+        function showNotification(message, type = 'info') {
+
+            const area = document.getElementById('notificationArea');    }                      <td>{{ times[i][1] }}</td>
+
+            const alert = document.createElement('div');
+
+            alert.className = `alert-custom alert-${type}-custom`;                      <td>{{ times[i][2] }}</td>
+
+            alert.innerHTML = message;
+
+            area.appendChild(alert);    .status-dot.offline {                      <td>
+
+
+
+            setTimeout(() => {      background: #dc3545;                        <button class="btn btn-sm btn-danger" onclick="deleteAttendance('{{ names[i] }}', '{{ rolls[i] }}', '{{ tanggal[i] }}')">
+
+                alert.style.animation = 'slideIn 0.3s ease reverse';
+
+                setTimeout(() => alert.remove(), 300);    }                          <i class="material-icons" style="font-size: 16px;">delete</i>
+
+            }, 4000);
+
+        }                        </button>
+
+
+
+        // Load attendance status    @keyframes pulse {                      </td>
+
+        async function loadAttendanceStatus() {
+
+            try {      0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }                    </tr>
+
+                const response = await fetch('/api/attendance/status');
+
+                const data = await response.json();      70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }                    {% endfor %}
+
+
+
+                if (data.status === 'success') {      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }                  {% else %}
+
+                    const att = data.attendance;
+
+                        }                    <tr>
+
+                    // Update employee info
+
+                    if (data.employee) {                      <td colspan="8" class="text-center py-4">
+
+                        document.getElementById('employeeName').textContent = data.employee.nama || '-';
+
+                        document.getElementById('employeeDept').textContent = data.employee.bagian || '-';    /* Mobile optimizations */                        <i class="material-icons" style="font-size: 48px; color: #ccc;">event_busy</i>
+
+                    }
 
     @media (max-width: 768px) {                        <p class="mb-1 mt-2"><strong>Belum Ada Data Absensi Minggu Ini</strong></p>
 
-      .connection-status {                        <small class="text-muted">
+                    // Update masuk status
 
-        top: 10px;                          {% if totalreg > 0 %}
+                    if (att && att.jam_masuk) {      .connection-status {                        <small class="text-muted">
 
-        font-size: 0.75rem;                            {{ totalreg }} karyawan terdaftar. Silakan lakukan absensi masuk/pulang untuk menampilkan data.
+                        document.getElementById('jamMasuk').textContent = att.jam_masuk;
+
+                        document.getElementById('badgeMasuk').textContent = '✓ Done';        top: 10px;                          {% if totalreg > 0 %}
+
+                        document.getElementById('badgeMasuk').className = 'status-badge done';
+
+                        document.getElementById('btnMasuk').disabled = true;        font-size: 0.75rem;                            {{ totalreg }} karyawan terdaftar. Silakan lakukan absensi masuk/pulang untuk menampilkan data.
+
+                    }
 
         padding: 6px 12px;                          {% else %}
 
-      }                            Belum ada karyawan terdaftar. Tambahkan karyawan baru terlebih dahulu.
+                    // Update pulang status
 
-                          {% endif %}
+                    if (att && att.jam_pulang) {      }                            Belum ada karyawan terdaftar. Tambahkan karyawan baru terlebih dahulu.
 
-      .keyboard-shortcuts {                        </small>
+                        document.getElementById('jamPulang').textContent = att.jam_pulang;
+
+                        document.getElementById('badgePulang').textContent = '✓ Done';                          {% endif %}
+
+                        document.getElementById('badgePulang').className = 'status-badge done';
+
+                        document.getElementById('btnPulang').disabled = true;      .keyboard-shortcuts {                        </small>
+
+                    }
 
         display: none;                      </td>
 
-      }                    </tr>
+                    // Update total jam kerja
 
-                  {% endif %}
+                    if (att && att.total_jam_kerja) {      }                    </tr>
 
-      .action-grid {                </tbody>
+                        document.getElementById('totalJamKerja').textContent = att.total_jam_kerja;
 
-        grid-template-columns: 1fr;              </table>
+                    }                  {% endif %}
+
+                }
+
+            } catch (error) {      .action-grid {                </tbody>
+
+                console.error('Error loading status:', error);
+
+            }        grid-template-columns: 1fr;              </table>
+
+        }
 
         gap: 1rem;            </div>
 
-      }          </div>
+        // Open camera modal
 
-        </div>
+        async function openCamera(mode) {      }          </div>
 
-      .glass-header .row {      </div>
+            currentMode = mode;
 
-        text-align: center;
+            document.getElementById('cameraTitle').textContent = mode === 'masuk' ? '📸 Absen Masuk' : '📸 Absen Pulang';        </div>
 
-      }      <div class="col-md-4">
+            document.getElementById('cameraModal').classList.add('active');
 
-        <div class="card card-modern">
+            document.getElementById('cameraStatus').textContent = 'Memulai kamera...';      .glass-header .row {      </div>
 
-      .header-info {          <div class="card-header card-header-info text-white">
 
-        margin-top: 1rem;            <h5 class="mb-0">
 
-      }              <i class="material-icons align-middle me-2">person_add</i>Tambah Karyawan Baru
+            try {        text-align: center;
 
-    }            </h5>
+                videoStream = await navigator.mediaDevices.getUserMedia({
 
-  </style>          </div>
+                    video: { facingMode: 'user', width: 640, height: 480 }      }      <div class="col-md-4">
 
-</body>          <div class="card-body">
+                });
 
-</html>            <form id="addEmployeeForm" action='/add' method="POST" enctype="multipart/form-data">
-              <div class="mb-3">
+                document.getElementById('videoElement').srcObject = videoStream;        <div class="card card-modern">
+
+                document.getElementById('cameraStatus').textContent = 'Posisikan wajah dalam area guide';
+
+            } catch (error) {      .header-info {          <div class="card-header card-header-info text-white">
+
+                document.getElementById('cameraStatus').textContent = '❌ Gagal mengakses kamera: ' + error.message;
+
+                showNotification('Gagal mengakses kamera', 'danger');        margin-top: 1rem;            <h5 class="mb-0">
+
+            }
+
+        }      }              <i class="material-icons align-middle me-2">person_add</i>Tambah Karyawan Baru
+
+
+
+        // Close camera modal    }            </h5>
+
+        function closeCamera() {
+
+            document.getElementById('cameraModal').classList.remove('active');  </style>          </div>
+
+            if (videoStream) {
+
+                videoStream.getTracks().forEach(track => track.stop());</body>          <div class="card-body">
+
+                videoStream = null;
+
+            }</html>            <form id="addEmployeeForm" action='/add' method="POST" enctype="multipart/form-data">
+
+        }              <div class="mb-3">
+
                 <label class="form-label fw-semibold">
-                  <i class="material-icons align-middle me-2">badge</i>Nama Karyawan*
-                </label>
-                <input type="text" class="form-control form-control-modern" name='newusername' required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-semibold">
+
+        // Capture and submit                  <i class="material-icons align-middle me-2">badge</i>Nama Karyawan*
+
+        async function captureAndSubmit() {                </label>
+
+            const video = document.getElementById('videoElement');                <input type="text" class="form-control form-control-modern" name='newusername' required>
+
+            const canvas = document.getElementById('captureCanvas');              </div>
+
+            const status = document.getElementById('cameraStatus');              <div class="mb-3">
+
+            const captureBtn = document.getElementById('captureBtn');                <label class="form-label fw-semibold">
+
                   <i class="material-icons align-middle me-2">business</i>Bagian*
-                </label>
-                <input type="text" class="form-control form-control-modern" name='newuserid' required>
+
+            captureBtn.disabled = true;                </label>
+
+            status.textContent = '🔄 Memproses...';                <input type="text" class="form-control form-control-modern" name='newuserid' required>
+
               </div>
-              <button type="submit" class="btn btn-dark btn-modern w-100">
-                <i class="material-icons align-middle me-2">add</i>Tambah Karyawan
-              </button>
-            </form>
-            <div class="stats-card mt-4">
+
+            // Capture image              <button type="submit" class="btn btn-dark btn-modern w-100">
+
+            canvas.width = video.videoWidth;                <i class="material-icons align-middle me-2">add</i>Tambah Karyawan
+
+            canvas.height = video.videoHeight;              </button>
+
+            const ctx = canvas.getContext('2d');            </form>
+
+            ctx.drawImage(video, 0, 0);            <div class="stats-card mt-4">
+
               <h6 class="mb-0 text-center">
-                <i class="material-icons align-middle me-2">group</i>Total Karyawan Terdaftar: <strong>{{ totalreg }}</strong>
+
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);                <i class="material-icons align-middle me-2">group</i>Total Karyawan Terdaftar: <strong>{{ totalreg }}</strong>
+
               </h6>
-            </div>
-            
-            <!-- Employee Management Section -->
-            <div class="card mt-4">
-              <div class="card-header bg-warning text-dark">
-                <h6 class="mb-0">
-                  <i class="material-icons align-middle me-2">manage_accounts</i>Kelola Karyawan
-                </h6>
-              </div>
+
+            try {            </div>
+
+                const response = await fetch('/api/attendance/mark', {            
+
+                    method: 'POST',            <!-- Employee Management Section -->
+
+                    headers: { 'Content-Type': 'application/json' },            <div class="card mt-4">
+
+                    body: JSON.stringify({              <div class="card-header bg-warning text-dark">
+
+                        type: currentMode,                <h6 class="mb-0">
+
+                        image: imageData                  <i class="material-icons align-middle me-2">manage_accounts</i>Kelola Karyawan
+
+                    })                </h6>
+
+                });              </div>
+
               <div class="card-body">
-                <p class="small text-muted mb-3">Hapus karyawan dari sistem (akan menghapus semua data terkait)</p>
+
+                const data = await response.json();                <p class="small text-muted mb-3">Hapus karyawan dari sistem (akan menghapus semua data terkait)</p>
+
                 <div class="row">
-                  <div class="col">
-                    <select class="form-select" id="employeeSelect">
-                      <option value="">Pilih karyawan untuk dihapus...</option>
-                    </select>
-                  </div>
-                  <div class="col-auto">
-                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedEmployee()">
-                      <i class="material-icons align-middle me-1">delete</i>Hapus
-                    </button>
-                  </div>
-                </div>
-              </div>
+
+                if (data.status === 'success') {                  <div class="col">
+
+                    showNotification(`✅ ${data.message}`, 'success');                    <select class="form-select" id="employeeSelect">
+
+                    closeCamera();                      <option value="">Pilih karyawan untuk dihapus...</option>
+
+                    loadAttendanceStatus();                    </select>
+
+                } else {                  </div>
+
+                    status.textContent = '❌ ' + data.message;                  <div class="col-auto">
+
+                    showNotification(data.message, 'danger');                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedEmployee()">
+
+                }                      <i class="material-icons align-middle me-1">delete</i>Hapus
+
+            } catch (error) {                    </button>
+
+                status.textContent = '❌ Gagal mengirim data';                  </div>
+
+                showNotification('Gagal mengirim data absensi', 'danger');                </div>
+
+            }              </div>
+
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+
+            captureBtn.disabled = false;          </div>
+
+        }        </div>
+
+    </script>      </div>
+
+</body>    </div>
+
+</html>  </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
   
