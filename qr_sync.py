@@ -98,6 +98,18 @@ class QRSyncManager:
                         latest = data
                         latest_time = verified_at
             return latest
+    
+    def verify_qr_auth(self, code, device_info=None):
+        """Verify QR auth by code (called when mobile scans QR)"""
+        with self.lock:
+            # Find session by code
+            for session_id, data in self.sessions.items():
+                if data.get('code') == code.upper():
+                    self.sessions[session_id]['verified'] = True
+                    self.sessions[session_id]['verified_at'] = datetime.now()
+                    self.sessions[session_id]['device_info'] = device_info
+                    return True
+        return False
 
 
 # Global instance

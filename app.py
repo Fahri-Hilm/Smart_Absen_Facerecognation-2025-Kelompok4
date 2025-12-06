@@ -617,7 +617,10 @@ def accept_qr_sync():
             'status': 'error',
             'message': str(e)
         })
-    """Endpoint untuk refresh QR code via AJAX"""
+
+@app.route('/api/refresh_qr')
+def refresh_qr():
+    """Endpoint untuk refresh QR code via AJAX - dipanggil otomatis setiap 10 menit"""
     try:
         # Force regenerate QR code
         global current_unit_code, qr_code_generated_time
@@ -635,6 +638,8 @@ def accept_qr_sync():
         else:
             remaining_seconds = QR_VALIDITY_MINUTES * 60
         
+        logger.info(f"🔄 QR code refreshed: {unit_code}")
+        
         return jsonify({
             'success': True,
             'qr_image': qr_image,
@@ -643,7 +648,31 @@ def accept_qr_sync():
             'remaining_seconds': remaining_seconds
         })
     except Exception as e:
-        logger.error(f"Error generating QR code: {e}")
+        logger.error(f"Error refreshing QR code: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/qr_info')
+def qr_info():
+    """API untuk mendapatkan info QR code saat ini (tanpa regenerate)"""
+    try:
+        unit_code = get_current_unit_code()
+        
+        # Hitung sisa waktu berlaku
+        current_time = datetime.now()
+        if qr_code_generated_time:
+            elapsed_seconds = int((current_time - qr_code_generated_time).total_seconds())
+            remaining_seconds = max(0, (QR_VALIDITY_MINUTES * 60) - elapsed_seconds)
+        else:
+            remaining_seconds = QR_VALIDITY_MINUTES * 60
+        
+        return jsonify({
+            'success': True,
+            'unit_code': unit_code,
+            'remaining_seconds': remaining_seconds,
+            'validity_minutes': QR_VALIDITY_MINUTES
+        })
+    except Exception as e:
+        logger.error(f"Error getting QR info: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/verify')
@@ -725,15 +754,9 @@ def qr_verification_required(f):
 # ======================== MAIN ROUTES ========================
 
 @app.route('/')
-@qr_verification_required
 def home():
-    """Halaman utama untuk user - interface sederhana untuk absensi"""
-    names, bagian, tanggal, times, l = extract_attendance()
-    return render_template('user_home.html',
-        names=names, rolls=bagian, tanggal=tanggal, times=times, l=l,
-        totalreg=totalreg(), datetoday2=datetoday2,
-        date_range_week=date_range_week, tanggal_hari_ini=tanggal_hari_ini,
-        selected_camera=selected_camera_id)
+    """Halaman utama - langsung redirect ke QR auth"""
+    return redirect(url_for('qr_auth'))
 
 @app.route('/report')
 def ui_ux_report():
@@ -2655,8 +2678,9 @@ def mark_attendance_mobile():
 @app.route('/mobile')
 @qr_verification_required
 def mobile_attendance():
-    """Route untuk halaman absensi mobile"""
-    return render_template('mobile_attendance.html')
+    """Route untuk halaman absensi mobile - redirect ke web_attendance"""
+    mode = request.args.get('mode', 'masuk')
+    return redirect(url_for('web_attendance', mode=mode))
 
 def run_attendance_ajax(mode='masuk', camera_id=None):
     """Fungsi absensi yang return JSON untuk AJAX - tanpa GUI window"""

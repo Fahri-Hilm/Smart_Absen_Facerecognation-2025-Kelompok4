@@ -344,6 +344,30 @@
             from { opacity: 0; transform: translateX(50px); }
             to { opacity: 1; transform: translateX(0); }
         }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
 
         .sync-status .spinner-border {
             width: 20px;
@@ -591,17 +615,34 @@
         updateTime();
         setInterval(updateTime, 1000);
 
-        // Countdown timer
-        let timeRemaining = 600; // 10 minutes
+        // Countdown timer - use remaining_seconds from backend
+        let timeRemaining = {{ remaining_seconds|default(600) }}; // From backend
+        let countdownBadge = document.querySelector('.countdown-badge');
+        
         function updateCountdown() {
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
-            document.getElementById('timeLeft').textContent = 
+            const timeLeftEl = document.getElementById('timeLeft');
+            
+            timeLeftEl.textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
+            // Change color when time is low
+            if (timeRemaining <= 60) {
+                countdownBadge.style.background = '#dc3545'; // Red
+                countdownBadge.style.animation = 'pulse 1s infinite';
+            } else if (timeRemaining <= 120) {
+                countdownBadge.style.background = '#ffc107'; // Yellow
+                countdownBadge.style.color = '#000';
+            } else {
+                countdownBadge.style.background = '#ff6b6b';
+                countdownBadge.style.color = 'white';
+            }
+            
             if (timeRemaining <= 0) {
+                // Auto refresh when timer expires
+                console.log('⏰ Timer expired, auto-refreshing QR code...');
                 refreshQR();
-                timeRemaining = 600;
             } else {
                 timeRemaining--;
             }
@@ -609,18 +650,67 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
 
-        // Refresh QR
+        // Refresh QR - called automatically when timer expires or manually by user
         function refreshQR() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Memuat...';
+            refreshBtn.disabled = true;
+            
             fetch('/api/refresh_qr')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         document.getElementById('qrImage').src = 'data:image/png;base64,' + data.qr_image;
                         document.getElementById('unitCode').textContent = data.unit_code;
-                        timeRemaining = 600;
+                        timeRemaining = data.remaining_seconds || 600;
+                        
+                        // Reset countdown badge color
+                        countdownBadge.style.background = '#ff6b6b';
+                        countdownBadge.style.color = 'white';
+                        countdownBadge.style.animation = '';
+                        
+                        console.log('✅ QR code refreshed. New code:', data.unit_code);
+                        
+                        // Show notification
+                        showNotification('QR Code diperbarui!', 'success');
+                    } else {
+                        console.error('❌ Failed to refresh QR:', data.message);
+                        showNotification('Gagal memperbarui QR Code', 'error');
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('❌ Error refreshing QR:', error);
+                    showNotification('Error memperbarui QR Code', 'error');
+                })
+                .finally(() => {
+                    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh QR';
+                    refreshBtn.disabled = false;
+                });
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 12px 25px;
+                border-radius: 25px;
+                font-weight: 600;
+                z-index: 9999;
+                animation: slideUp 0.3s ease;
+            `;
+            notification.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
         // Copy unit code
