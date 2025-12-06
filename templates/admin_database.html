@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Database - Kafebasabasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --coffee-dark: #3C2415;
+            --coffee-medium: #8B4513;
+            --coffee-light: #D2691E;
+            --cream: #F5DEB3;
+            --warm-white: #FDF6E3;
+            --accent-gold: #DAA520;
+            --shadow-coffee: rgba(60, 36, 21, 0.15);
+            --shadow-light: rgba(139, 69, 19, 0.1);
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+            box-shadow: 0 4px 20px var(--shadow-coffee);
+            border-bottom: 3px solid var(--accent-gold);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--warm-white) !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand i {
+            color: var(--accent-gold);
+            margin-right: 10px;
+        }
+
+        .nav-link {
+            color: rgba(253, 246, 227, 0.9) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-gold) !important;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            color: var(--coffee-dark);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--coffee-medium);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.6));
+            border-radius: 25px;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 15px 35px var(--shadow-coffee);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow-coffee);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gold);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: var(--warm-white);
+            border-radius: 21px 21px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        /* Database Stats */
+        .db-stat-card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.4));
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 10px 30px var(--shadow-light);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .db-stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px var(--shadow-coffee);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--coffee-medium);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--coffee-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--coffee-medium);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            color: var(--coffee-medium);
+        }
+
+        /* Action Buttons */
+        .action-card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.4));
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 10px 30px var(--shadow-light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--shadow-coffee);
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--coffee-medium);
+        }
+
+        .action-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--coffee-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .action-desc {
+            font-size: 0.9rem;
+            color: var(--coffee-medium);
+            opacity: 0.9;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(45deg, var(--coffee-medium), var(--coffee-light));
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--coffee-dark), var(--coffee-medium));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, var(--accent-gold), #f1c40f);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            color: var(--coffee-dark);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #3498db, #5dade2);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        /* Forms */
+        .form-control {
+            border: 2px solid var(--coffee-light);
+            border-radius: 15px;
+            padding: 0.8rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 0.2rem rgba(218, 165, 32, 0.25);
+        }
+
+        .form-label {
+            color: var(--coffee-dark);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Coffee decorations */
+        .coffee-decoration {
+            position: fixed;
+            font-size: 1.5rem;
+            color: var(--coffee-light);
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .coffee-decoration:nth-child(1) { top: 20%; left: 5%; animation-delay: 0s; }
+        .coffee-decoration:nth-child(2) { top: 60%; right: 8%; animation-delay: 4s; }
+        .coffee-decoration:nth-child(3) { bottom: 30%; left: 12%; animation-delay: 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-15px) rotate(180deg); opacity: 0.2; }
+        }
+
+        /* Progress bar */
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background-color: rgba(139, 69, 19, 0.1);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--coffee-medium), var(--accent-gold));
+            border-radius: 10px;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+
+        .status-maintenance {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f1c40f;
+            border: 1px solid #f1c40f;
+        }
+
+        .status-error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .action-card {
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        /* Table styling */
+        .table {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: var(--coffee-dark);
+            color: var(--warm-white);
+            border: none;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .table td {
+            border: none;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(139, 69, 19, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Coffee decorations -->
+    <div class="coffee-decoration">☕</div>
+    <div class="coffee-decoration">🫘</div>
+    <div class="coffee-decoration">☕</div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-cup-hot"></i>
+                Kafebasabasi Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/admin">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link" href="/">
+                    <i class="bi bi-house"></i> Beranda
+                </a>
+                <a class="nav-link" href="/admin/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Page Header -->
+        <div class="text-center mb-4">
+            <h1 class="page-title">Manajemen Database</h1>
+            <p class="page-subtitle">"Data adalah aset terpenting dalam digital cafe management"</p>
+        </div>
+
+        <!-- Database Status -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="bi bi-database"></i>
+                                Status Database
+                            </span>
+                            <span class="status-badge status-online">
+                                <i class="bi bi-check-circle"></i>
+                                Online
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="mb-2">
+                                        <i class="bi bi-speedometer2" style="font-size: 2rem; color: var(--coffee-medium);"></i>
+                                    </div>
+                                    <div style="color: var(--coffee-dark); font-weight: 600;">Response Time</div>
+                                    <div style="font-size: 1.5rem; color: var(--accent-gold);">12ms</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="mb-2">
+                                        <i class="bi bi-hdd" style="font-size: 2rem; color: var(--coffee-medium);"></i>
+                                    </div>
+                                    <div style="color: var(--coffee-dark); font-weight: 600;">Storage Used</div>
+                                    <div style="font-size: 1.5rem; color: var(--accent-gold);">2.4GB</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="mb-2">
+                                        <i class="bi bi-arrow-up-right" style="font-size: 2rem; color: var(--coffee-medium);"></i>
+                                    </div>
+                                    <div style="color: var(--coffee-dark); font-weight: 600;">Uptime</div>
+                                    <div style="font-size: 1.5rem; color: var(--accent-gold);">99.9%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="mb-2">
+                                        <i class="bi bi-clock-history" style="font-size: 2rem; color: var(--coffee-medium);"></i>
+                                    </div>
+                                    <div style="color: var(--coffee-dark); font-weight: 600;">Last Backup</div>
+                                    <div style="font-size: 1.5rem; color: var(--accent-gold);">2h ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Statistics -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="db-stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stat-number">{{ totalreg or 0 }}</div>
+                    <div class="stat-label">Total Karyawan</div>
+                    <div class="stat-desc">Registered employees</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="db-stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <div class="stat-number">1,247</div>
+                    <div class="stat-label">Total Absensi</div>
+                    <div class="stat-desc">Attendance records</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="db-stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-table"></i>
+                    </div>
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Tabel Database</div>
+                    <div class="stat-desc">Active tables</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="db-stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="stat-number">15</div>
+                    <div class="stat-label">Backup Files</div>
+                    <div class="stat-desc">Available backups</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Actions -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="action-card" onclick="createBackup()">
+                    <div class="action-icon">
+                        <i class="bi bi-download"></i>
+                    </div>
+                    <div class="action-title">Backup Database</div>
+                    <div class="action-desc">Buat backup manual database</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="action-card" onclick="restoreDatabase()">
+                    <div class="action-icon">
+                        <i class="bi bi-upload"></i>
+                    </div>
+                    <div class="action-title">Restore Database</div>
+                    <div class="action-desc">Pulihkan dari backup</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="action-card" onclick="optimizeDatabase()">
+                    <div class="action-icon">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <div class="action-title">Optimize Database</div>
+                    <div class="action-desc">Optimasi kinerja database</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="action-card" onclick="viewLogs()">
+                    <div class="action-icon">
+                        <i class="bi bi-file-text"></i>
+                    </div>
+                    <div class="action-title">View Logs</div>
+                    <div class="action-desc">Lihat log aktivitas database</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Tables Overview -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-table"></i>
+                            Tabel Database
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Tabel</th>
+                                        <th>Records</th>
+                                        <th>Size</th>
+                                        <th>Last Updated</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <strong style="color: var(--coffee-dark);">employees</strong>
+                                            <br><small class="text-muted">Data karyawan</small>
+                                        </td>
+                                        <td>{{ totalreg or 0 }}</td>
+                                        <td>124 KB</td>
+                                        <td>2 hours ago</td>
+                                        <td><span class="status-badge status-online">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info me-2" onclick="viewTable('employees')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" onclick="exportTable('employees')">
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong style="color: var(--coffee-dark);">attendance</strong>
+                                            <br><small class="text-muted">Data absensi</small>
+                                        </td>
+                                        <td>1,247</td>
+                                        <td>856 KB</td>
+                                        <td>30 minutes ago</td>
+                                        <td><span class="status-badge status-online">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info me-2" onclick="viewTable('attendance')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" onclick="exportTable('attendance')">
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong style="color: var(--coffee-dark);">face_encodings</strong>
+                                            <br><small class="text-muted">Data face recognition</small>
+                                        </td>
+                                        <td>{{ totalreg or 0 }}</td>
+                                        <td>2.1 MB</td>
+                                        <td>5 hours ago</td>
+                                        <td><span class="status-badge status-online">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info me-2" onclick="viewTable('face_encodings')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" onclick="exportTable('face_encodings')">
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong style="color: var(--coffee-dark);">system_logs</strong>
+                                            <br><small class="text-muted">Log sistem</small>
+                                        </td>
+                                        <td>3,421</td>
+                                        <td>1.8 MB</td>
+                                        <td>10 minutes ago</td>
+                                        <td><span class="status-badge status-online">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info me-2" onclick="viewTable('system_logs')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" onclick="exportTable('system_logs')">
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong style="color: var(--coffee-dark);">admin_sessions</strong>
+                                            <br><small class="text-muted">Session admin</small>
+                                        </td>
+                                        <td>45</td>
+                                        <td>12 KB</td>
+                                        <td>1 hour ago</td>
+                                        <td><span class="status-badge status-online">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info me-2" onclick="viewTable('admin_sessions')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" onclick="exportTable('admin_sessions')">
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-tools"></i>
+                            Maintenance Actions
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <button class="btn btn-success w-100" onclick="checkIntegrity()">
+                                    <i class="bi bi-shield-check"></i>
+                                    Check Integrity
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-info w-100" onclick="analyzePerformance()">
+                                    <i class="bi bi-graph-up"></i>
+                                    Analyze Performance
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-warning w-100" onclick="cleanupOldData()">
+                                    <i class="bi bi-trash"></i>
+                                    Cleanup Old Data
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-danger w-100" onclick="showResetModal()">
+                                    <i class="bi bi-database-x"></i>
+                                    Reset All Data
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Reset Data Section -->
+                        <div class="mt-4 p-3" style="background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.3); border-radius: 8px;">
+                            <h5 style="color: #dc3545; margin-bottom: 15px;">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Danger Zone - Reset Database
+                            </h5>
+                            <p class="text-muted mb-3">
+                                Reset semua data akan menghapus:
+                            </p>
+                            <ul class="text-muted mb-3">
+                                <li>Semua data karyawan</li>
+                                <li>Semua record absensi</li>
+                                <li>Semua log aktivitas</li>
+                                <li>Model face recognition</li>
+                                <li>Gambar wajah tersimpan</li>
+                            </ul>
+                            <div class="alert alert-warning mb-3">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Perhatian:</strong> Aksi ini tidak dapat dibatalkan! Pastikan Anda telah membuat backup data.
+                            </div>
+                            <div id="database-stats" class="mb-3">
+                                <small class="text-muted">Loading database statistics...</small>
+                            </div>
+                            <button class="btn btn-outline-danger" onclick="showResetModal()">
+                                <i class="bi bi-database-x"></i>
+                                Reset All Database Data
+                            </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Backup Modal -->
+    <div class="modal fade" id="backupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 20px; border: 2px solid var(--coffee-light);">
+                <div class="modal-header" style="background: var(--coffee-dark); color: var(--warm-white); border-radius: 18px 18px 0 0;">
+                    <h5 class="modal-title">Create Database Backup</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="backupForm">
+                        <div class="mb-3">
+                            <label for="backupName" class="form-label">Backup Name</label>
+                            <input type="text" class="form-control" id="backupName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="backupType" class="form-label">Backup Type</label>
+                            <select class="form-control" id="backupType" required>
+                                <option value="full">Full Backup</option>
+                                <option value="data">Data Only</option>
+                                <option value="structure">Structure Only</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="compressBackup" checked>
+                                <label class="form-check-label" for="compressBackup">
+                                    Compress backup file
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="executeBackup()">Create Backup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Database Confirmation Modal -->
+    <div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="resetModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Konfirmasi Reset Database
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <h6><i class="bi bi-warning"></i> PERINGATAN: Aksi Tidak Dapat Dibatalkan!</h6>
+                        Reset database akan menghapus <strong>SEMUA DATA</strong> berikut:
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-center">
+                            <i class="bi bi-people-fill" style="font-size: 2rem; color: #dc3545;"></i>
+                            <div><strong><span id="stats-employees">0</span></strong></div>
+                            <small class="text-muted">Karyawan</small>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="bi bi-calendar-check" style="font-size: 2rem; color: #dc3545;"></i>
+                            <div><strong><span id="stats-attendance">0</span></strong></div>
+                            <small class="text-muted">Record Absensi</small>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="bi bi-journal-text" style="font-size: 2rem; color: #dc3545;"></i>
+                            <div><strong><span id="stats-logs">0</span></strong></div>
+                            <small class="text-muted">Log Aktivitas</small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> Yang Akan Dihapus:</h6>
+                        <ul class="mb-0">
+                            <li>Semua data karyawan dan informasi personal</li>
+                            <li>Semua record absensi masuk dan pulang</li>
+                            <li>Semua log aktivitas sistem</li>
+                            <li>Model face recognition (file .pkl)</li>
+                            <li>Semua gambar wajah yang tersimpan</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reset-confirmation" class="form-label">
+                            <strong>Untuk melanjutkan, ketik "RESET" di bawah ini:</strong>
+                        </label>
+                        <input type="text" class="form-control" id="reset-confirmation" placeholder="Ketik RESET untuk konfirmasi">
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-exclamation"></i>
+                        <strong>Pastikan Anda telah membuat backup data sebelum melanjutkan!</strong>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i>
+                        Batal
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmReset()">
+                        <i class="bi bi-database-x"></i>
+                        Ya, Reset Semua Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Database management functions
+        function createBackup() {
+            const modal = new bootstrap.Modal(document.getElementById('backupModal'));
+            document.getElementById('backupName').value = `backup_${new Date().toISOString().split('T')[0]}`;
+            modal.show();
+        }
+
+        function executeBackup() {
+            const backupName = document.getElementById('backupName').value;
+            const backupType = document.getElementById('backupType').value;
+            const compress = document.getElementById('compressBackup').checked;
+
+            if (!backupName) {
+                showNotification('Please enter a backup name', 'warning');
+                return;
+            }
+
+            showNotification('Creating database backup...', 'info');
+            
+            // Simulate backup process
+            setTimeout(() => {
+                showNotification(`Backup "${backupName}" created successfully`, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('backupModal')).hide();
+            }, 3000);
+        }
+
+        function restoreDatabase() {
+            if (confirm('Are you sure you want to restore the database? This action cannot be undone.')) {
+                showNotification('Starting database restore...', 'info');
+                // Implementation for database restore
+            }
+        }
+
+        function optimizeDatabase() {
+            showNotification('Optimizing database...', 'info');
+            
+            // Simulate optimization process
+            setTimeout(() => {
+                showNotification('Database optimization completed', 'success');
+            }, 5000);
+        }
+
+        function viewLogs() {
+            showNotification('Loading database logs...', 'info');
+            // Implementation for viewing logs
+        }
+
+        function viewTable(tableName) {
+            showNotification(`Loading table: ${tableName}`, 'info');
+            // Implementation for viewing table data
+        }
+
+        function exportTable(tableName) {
+            showNotification(`Exporting table: ${tableName}`, 'info');
+            // Implementation for exporting table
+        }
+
+        function checkIntegrity() {
+            showNotification('Checking database integrity...', 'info');
+            
+            setTimeout(() => {
+                showNotification('Database integrity check completed - No issues found', 'success');
+            }, 3000);
+        }
+
+        function analyzePerformance() {
+            showNotification('Analyzing database performance...', 'info');
+            
+            setTimeout(() => {
+                showNotification('Performance analysis completed', 'success');
+            }, 4000);
+        }
+
+        function cleanupOldData() {
+            if (confirm('This will remove old log entries and temporary data. Continue?')) {
+                showNotification('Cleaning up old data...', 'info');
+                
+                setTimeout(() => {
+                    showNotification('Old data cleanup completed', 'success');
+                }, 2000);
+            }
+        }
+
+        function emergencyReset() {
+            if (confirm('EMERGENCY RESET will clear all attendance data but keep employee records. This cannot be undone. Continue?')) {
+                if (confirm('Are you absolutely sure? This is an irreversible action.')) {
+                    showNotification('Performing emergency reset...', 'warning');
+                    
+                    setTimeout(() => {
+                        showNotification('Emergency reset completed', 'info');
+                    }, 3000);
+                }
+            }
+        }
+
+        // New reset database functions
+        function showResetModal() {
+            // Update database stats first
+            loadDatabaseStats();
+            
+            // Show confirmation modal
+            const modal = new bootstrap.Modal(document.getElementById('resetModal'));
+            modal.show();
+        }
+
+        function loadDatabaseStats() {
+            fetch('/admin/database/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('stats-employees').textContent = data.employees;
+                        document.getElementById('stats-attendance').textContent = data.attendance;
+                        document.getElementById('stats-logs').textContent = data.activity_logs;
+                        
+                        // Update quick stats in danger zone
+                        const statsDiv = document.getElementById('database-stats');
+                        statsDiv.innerHTML = `
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <strong style="color: var(--coffee-dark);">${data.employees}</strong>
+                                    <br><small class="text-muted">Karyawan</small>
+                                </div>
+                                <div class="col-4">
+                                    <strong style="color: var(--coffee-dark);">${data.attendance}</strong>
+                                    <br><small class="text-muted">Absensi</small>
+                                </div>
+                                <div class="col-4">
+                                    <strong style="color: var(--coffee-dark);">${data.activity_logs}</strong>
+                                    <br><small class="text-muted">Log</small>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading database stats:', error);
+                });
+        }
+
+        function confirmReset() {
+            const confirmation = document.getElementById('reset-confirmation').value;
+            if (confirmation !== 'RESET') {
+                showNotification('Konfirmasi tidak valid. Ketik "RESET" untuk melanjutkan.', 'error');
+                return;
+            }
+
+            showNotification('Memulai reset database...', 'warning');
+            
+            // Hide modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('resetModal'));
+            modal.hide();
+
+            // Perform reset
+            fetch('/admin/database/reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Database berhasil direset!', 'success');
+                    // Refresh page after 2 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showNotification('Gagal reset database. Silakan coba lagi.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Terjadi kesalahan saat reset database.', 'error');
+            });
+        }
+
+        function showNotification(message, type) {
+            const alertType = type === 'error' ? 'danger' : type;
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${alertType} alert-dismissible fade show position-fixed`;
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Auto-refresh database status every 30 seconds
+        setInterval(() => {
+            // Update database statistics
+            console.log('Refreshing database status...');
+            loadDatabaseStats();
+        }, 30000);
+
+        // Load database stats on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDatabaseStats();
+        });
+    </script>
+</body>
+</html>

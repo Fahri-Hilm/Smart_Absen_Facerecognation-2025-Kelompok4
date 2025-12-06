@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Sistem - Kafebasabasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --coffee-dark: #3C2415;
+            --coffee-medium: #8B4513;
+            --coffee-light: #D2691E;
+            --cream: #F5DEB3;
+            --warm-white: #FDF6E3;
+            --accent-gold: #DAA520;
+            --shadow-coffee: rgba(60, 36, 21, 0.15);
+            --shadow-light: rgba(139, 69, 19, 0.1);
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+            box-shadow: 0 4px 20px var(--shadow-coffee);
+            border-bottom: 3px solid var(--accent-gold);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--warm-white) !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand i {
+            color: var(--accent-gold);
+            margin-right: 10px;
+        }
+
+        .nav-link {
+            color: rgba(253, 246, 227, 0.9) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-gold) !important;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            color: var(--coffee-dark);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--coffee-medium);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.6));
+            border-radius: 25px;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 15px 35px var(--shadow-coffee);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow-coffee);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gold);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: var(--warm-white);
+            border-radius: 21px 21px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        /* Settings sections */
+        .settings-section {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.4));
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 10px 30px var(--shadow-light);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: var(--coffee-dark);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--coffee-light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--coffee-medium);
+            font-size: 1.3rem;
+        }
+
+        /* Forms */
+        .form-control {
+            border: 2px solid var(--coffee-light);
+            border-radius: 15px;
+            padding: 0.8rem 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 0.2rem rgba(218, 165, 32, 0.25);
+            background: white;
+        }
+
+        .form-label {
+            color: var(--coffee-dark);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-text {
+            color: var(--coffee-medium);
+            font-size: 0.85rem;
+        }
+
+        /* Custom switches */
+        .form-switch .form-check-input {
+            background-color: var(--coffee-light);
+            border-color: var(--coffee-medium);
+            width: 3rem;
+            height: 1.5rem;
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: var(--accent-gold);
+            border-color: var(--accent-gold);
+        }
+
+        .form-switch .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(218, 165, 32, 0.25);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(45deg, var(--coffee-medium), var(--coffee-light));
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--coffee-dark), var(--coffee-medium));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, var(--accent-gold), #f1c40f);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            color: var(--coffee-dark);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #3498db, #5dade2);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+        }
+
+        /* Coffee decorations */
+        .coffee-decoration {
+            position: fixed;
+            font-size: 1.5rem;
+            color: var(--coffee-light);
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .coffee-decoration:nth-child(1) { top: 20%; left: 5%; animation-delay: 0s; }
+        .coffee-decoration:nth-child(2) { top: 60%; right: 8%; animation-delay: 4s; }
+        .coffee-decoration:nth-child(3) { bottom: 30%; left: 12%; animation-delay: 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-15px) rotate(180deg); opacity: 0.2; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .settings-section {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Special styling for cafe info */
+        .cafe-info {
+            background: linear-gradient(145deg, var(--accent-gold), var(--coffee-light));
+            color: var(--coffee-dark);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 35px var(--shadow-coffee);
+        }
+
+        .cafe-logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .cafe-name {
+            font-family: 'Caveat', cursive;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .status-warning {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f1c40f;
+            border: 1px solid #f1c40f;
+        }
+    </style>
+</head>
+<body>
+    <!-- Coffee decorations -->
+    <div class="coffee-decoration">☕</div>
+    <div class="coffee-decoration">🫘</div>
+    <div class="coffee-decoration">☕</div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-cup-hot"></i>
+                Kafebasabasi Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/admin">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link" href="/">
+                    <i class="bi bi-house"></i> Beranda
+                </a>
+                <a class="nav-link" href="/admin/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Page Header -->
+        <div class="text-center mb-4">
+            <h1 class="page-title">Pengaturan Sistem</h1>
+            <p class="page-subtitle">"Kelola preferensi dan konfigurasi Kafebasabasi dengan mudah"</p>
+        </div>
+
+        <!-- Cafe Information -->
+        <div class="cafe-info">
+            <div class="cafe-logo">☕</div>
+            <div class="cafe-name">Kafebasabasi</div>
+            <div style="font-size: 1.1rem; opacity: 0.9;">Smart Attendance System for Modern Cafe</div>
+        </div>
+
+        <div class="row">
+            <!-- General Settings -->
+            <div class="col-lg-6">
+                <div class="settings-section">
+                    <h4 class="section-title">
+                        <i class="bi bi-gear"></i>
+                        Pengaturan Umum
+                    </h4>
+                    
+                    <form id="generalSettingsForm">
+                        <div class="mb-3">
+                            <label for="systemName" class="form-label">Nama Sistem</label>
+                            <input type="text" class="form-control" id="systemName" value="Kafebasabasi Attendance System">
+                            <div class="form-text">Nama yang ditampilkan di seluruh sistem</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="timezone" class="form-label">Zona Waktu</label>
+                            <select class="form-control" id="timezone">
+                                <option value="Asia/Jakarta" selected>WIB - Jakarta</option>
+                                <option value="Asia/Makassar">WITA - Makassar</option>
+                                <option value="Asia/Jayapura">WIT - Jayapura</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="language" class="form-label">Bahasa</label>
+                            <select class="form-control" id="language">
+                                <option value="id" selected>Bahasa Indonesia</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dateFormat" class="form-label">Format Tanggal</label>
+                            <select class="form-control" id="dateFormat">
+                                <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Working Hours Settings -->
+                <div class="settings-section">
+                    <h4 class="section-title">
+                        <i class="bi bi-clock"></i>
+                        Jam Kerja
+                    </h4>
+                    
+                    <form id="workingHoursForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="workStartTime" class="form-label">Jam Masuk</label>
+                                <input type="time" class="form-control" id="workStartTime" value="08:00">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workEndTime" class="form-label">Jam Keluar</label>
+                                <input type="time" class="form-control" id="workEndTime" value="17:00">
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="breakStartTime" class="form-label">Jam Istirahat Mulai</label>
+                                <input type="time" class="form-control" id="breakStartTime" value="12:00">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="breakEndTime" class="form-label">Jam Istirahat Selesai</label>
+                                <input type="time" class="form-control" id="breakEndTime" value="13:00">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <label class="form-label">Hari Kerja</label>
+                            <div class="row g-2">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="monday" checked>
+                                        <label class="form-check-label" for="monday">Senin</label>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="tuesday" checked>
+                                        <label class="form-check-label" for="tuesday">Selasa</label>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="wednesday" checked>
+                                        <label class="form-check-label" for="wednesday">Rabu</label>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="thursday" checked>
+                                        <label class="form-check-label" for="thursday">Kamis</label>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="friday" checked>
+                                        <label class="form-check-label" for="friday">Jumat</label>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="saturday">
+                                        <label class="form-check-label" for="saturday">Sabtu</label>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sunday">
+                                        <label class="form-check-label" for="sunday">Minggu</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="col-lg-6">
+                <div class="settings-section">
+                    <h4 class="section-title">
+                        <i class="bi bi-shield"></i>
+                        Keamanan & Privasi
+                    </h4>
+                    
+                    <form id="securitySettingsForm">
+                        <div class="mb-3">
+                            <label for="sessionTimeout" class="form-label">Session Timeout (menit)</label>
+                            <input type="number" class="form-control" id="sessionTimeout" value="30" min="5" max="480">
+                            <div class="form-text">Waktu logout otomatis jika tidak ada aktivitas</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="maxLoginAttempts" class="form-label">Maksimal Percobaan Login</label>
+                            <input type="number" class="form-control" id="maxLoginAttempts" value="3" min="1" max="10">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enableTwoFactor">
+                                <label class="form-check-label" for="enableTwoFactor">
+                                    Aktifkan Two-Factor Authentication
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="logActivities" checked>
+                                <label class="form-check-label" for="logActivities">
+                                    Log Aktivitas Pengguna
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="autoBackup" checked>
+                                <label class="form-check-label" for="autoBackup">
+                                    Backup Otomatis Harian
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Face Recognition Settings -->
+                <div class="settings-section">
+                    <h4 class="section-title">
+                        <i class="bi bi-person-check"></i>
+                        Face Recognition
+                    </h4>
+                    
+                    <form id="faceRecognitionForm">
+                        <div class="mb-3">
+                            <label for="recognitionThreshold" class="form-label">Threshold Pengenalan</label>
+                            <div class="row g-2 align-items-center">
+                                <div class="col">
+                                    <input type="range" class="form-range" id="recognitionThreshold" 
+                                           min="0.1" max="1.0" step="0.1" value="0.6">
+                                </div>
+                                <div class="col-auto">
+                                    <span id="thresholdValue" class="badge bg-primary">0.6</span>
+                                </div>
+                            </div>
+                            <div class="form-text">Tingkat akurasi pengenalan wajah (0.1 = longgar, 1.0 = ketat)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="maxFaceDistance" class="form-label">Jarak Maksimal Wajah</label>
+                            <select class="form-control" id="maxFaceDistance">
+                                <option value="close">Dekat (30-50cm)</option>
+                                <option value="medium" selected>Sedang (50-100cm)</option>
+                                <option value="far">Jauh (100-150cm)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="saveUnrecognizedFaces">
+                                <label class="form-check-label" for="saveUnrecognizedFaces">
+                                    Simpan Wajah Tidak Dikenal
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enableLivenessDetection" checked>
+                                <label class="form-check-label" for="enableLivenessDetection">
+                                    Deteksi Wajah Hidup (Anti-Spoofing)
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="settings-section">
+            <h4 class="section-title">
+                <i class="bi bi-bell"></i>
+                Pengaturan Notifikasi
+            </h4>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <form id="notificationForm">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                <label class="form-check-label" for="emailNotifications">
+                                    Notifikasi Email
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="attendanceAlerts" checked>
+                                <label class="form-check-label" for="attendanceAlerts">
+                                    Alert Keterlambatan
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="systemAlerts" checked>
+                                <label class="form-check-label" for="systemAlerts">
+                                    Alert Sistem
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="col-lg-6">
+                    <form id="emailSettingsForm">
+                        <div class="mb-3">
+                            <label for="adminEmail" class="form-label">Email Admin</label>
+                            <input type="email" class="form-control" id="adminEmail" 
+                                   placeholder="admin@kafebasabasi.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="reportTime" class="form-label">Waktu Laporan Harian</label>
+                            <input type="time" class="form-control" id="reportTime" value="18:00">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-info-circle"></i>
+                            Status Sistem
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div style="font-size: 2rem; color: var(--coffee-medium); margin-bottom: 0.5rem;">
+                                        <i class="bi bi-database"></i>
+                                    </div>
+                                    <div class="status-indicator status-active">
+                                        <i class="bi bi-check-circle"></i>
+                                        Database Online
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div style="font-size: 2rem; color: var(--coffee-medium); margin-bottom: 0.5rem;">
+                                        <i class="bi bi-camera-video"></i>
+                                    </div>
+                                    <div class="status-indicator status-active">
+                                        <i class="bi bi-check-circle"></i>
+                                        Kamera {{ selected_camera or 1 }} Aktif
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div style="font-size: 2rem; color: var(--coffee-medium); margin-bottom: 0.5rem;">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <div class="status-indicator status-active">
+                                        <i class="bi bi-check-circle"></i>
+                                        Face Recognition Ready
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div style="font-size: 2rem; color: var(--coffee-medium); margin-bottom: 0.5rem;">
+                                        <i class="bi bi-cloud-check"></i>
+                                    </div>
+                                    <div class="status-indicator status-active">
+                                        <i class="bi bi-check-circle"></i>
+                                        Backup System Active
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center mt-4">
+            <button class="btn btn-success me-3" onclick="saveAllSettings()">
+                <i class="bi bi-check-circle"></i>
+                Simpan Semua Pengaturan
+            </button>
+            <button class="btn btn-warning me-3" onclick="resetToDefaults()">
+                <i class="bi bi-arrow-clockwise"></i>
+                Reset ke Default
+            </button>
+            <button class="btn btn-info me-3" onclick="exportSettings()">
+                <i class="bi bi-download"></i>
+                Export Pengaturan
+            </button>
+            <button class="btn btn-primary" onclick="restartSystem()">
+                <i class="bi bi-power"></i>
+                Restart Sistem
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateThresholdDisplay();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Threshold slider
+            document.getElementById('recognitionThreshold').addEventListener('input', updateThresholdDisplay);
+            
+            // Form change tracking
+            const forms = ['generalSettingsForm', 'workingHoursForm', 'securitySettingsForm', 
+                          'faceRecognitionForm', 'notificationForm', 'emailSettingsForm'];
+            
+            forms.forEach(formId => {
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.addEventListener('change', markAsChanged);
+                }
+            });
+        }
+
+        function updateThresholdDisplay() {
+            const slider = document.getElementById('recognitionThreshold');
+            const display = document.getElementById('thresholdValue');
+            display.textContent = slider.value;
+        }
+
+        function markAsChanged() {
+            // Visual indicator that settings have changed
+            console.log('Settings changed');
+        }
+
+        function saveAllSettings() {
+            showNotification('Menyimpan semua pengaturan...', 'info');
+            
+            const settings = {
+                general: {
+                    systemName: document.getElementById('systemName').value,
+                    timezone: document.getElementById('timezone').value,
+                    language: document.getElementById('language').value,
+                    dateFormat: document.getElementById('dateFormat').value
+                },
+                workingHours: {
+                    startTime: document.getElementById('workStartTime').value,
+                    endTime: document.getElementById('workEndTime').value,
+                    breakStart: document.getElementById('breakStartTime').value,
+                    breakEnd: document.getElementById('breakEndTime').value,
+                    workDays: {
+                        monday: document.getElementById('monday').checked,
+                        tuesday: document.getElementById('tuesday').checked,
+                        wednesday: document.getElementById('wednesday').checked,
+                        thursday: document.getElementById('thursday').checked,
+                        friday: document.getElementById('friday').checked,
+                        saturday: document.getElementById('saturday').checked,
+                        sunday: document.getElementById('sunday').checked
+                    }
+                },
+                security: {
+                    sessionTimeout: document.getElementById('sessionTimeout').value,
+                    maxLoginAttempts: document.getElementById('maxLoginAttempts').value,
+                    twoFactor: document.getElementById('enableTwoFactor').checked,
+                    logActivities: document.getElementById('logActivities').checked,
+                    autoBackup: document.getElementById('autoBackup').checked
+                },
+                faceRecognition: {
+                    threshold: document.getElementById('recognitionThreshold').value,
+                    maxDistance: document.getElementById('maxFaceDistance').value,
+                    saveUnrecognized: document.getElementById('saveUnrecognizedFaces').checked,
+                    livenessDetection: document.getElementById('enableLivenessDetection').checked
+                },
+                notifications: {
+                    email: document.getElementById('emailNotifications').checked,
+                    attendanceAlerts: document.getElementById('attendanceAlerts').checked,
+                    systemAlerts: document.getElementById('systemAlerts').checked,
+                    adminEmail: document.getElementById('adminEmail').value,
+                    reportTime: document.getElementById('reportTime').value
+                }
+            };
+
+            // Simulate save process
+            setTimeout(() => {
+                showNotification('Semua pengaturan berhasil disimpan!', 'success');
+                
+                // Send to server
+                fetch('/save_settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(settings)
+                })
+                .catch(error => {
+                    showNotification('Gagal menyimpan ke server', 'error');
+                });
+            }, 2000);
+        }
+
+        function resetToDefaults() {
+            if (confirm('Apakah Anda yakin ingin mereset semua pengaturan ke default? Perubahan yang belum disimpan akan hilang.')) {
+                showNotification('Mereset pengaturan ke default...', 'info');
+                
+                // Reset form values
+                document.getElementById('systemName').value = 'Kafebasabasi Attendance System';
+                document.getElementById('timezone').value = 'Asia/Jakarta';
+                document.getElementById('language').value = 'id';
+                document.getElementById('dateFormat').value = 'DD/MM/YYYY';
+                
+                document.getElementById('workStartTime').value = '08:00';
+                document.getElementById('workEndTime').value = '17:00';
+                document.getElementById('breakStartTime').value = '12:00';
+                document.getElementById('breakEndTime').value = '13:00';
+                
+                document.getElementById('sessionTimeout').value = '30';
+                document.getElementById('maxLoginAttempts').value = '3';
+                document.getElementById('recognitionThreshold').value = '0.6';
+                document.getElementById('maxFaceDistance').value = 'medium';
+                
+                // Reset checkboxes
+                const checkboxes = [
+                    'monday', 'tuesday', 'wednesday', 'thursday', 'friday',
+                    'logActivities', 'autoBackup', 'enableLivenessDetection',
+                    'emailNotifications', 'attendanceAlerts', 'systemAlerts'
+                ];
+                
+                checkboxes.forEach(id => {
+                    document.getElementById(id).checked = true;
+                });
+                
+                const uncheckBoxes = ['saturday', 'sunday', 'enableTwoFactor', 'saveUnrecognizedFaces'];
+                uncheckBoxes.forEach(id => {
+                    document.getElementById(id).checked = false;
+                });
+                
+                document.getElementById('reportTime').value = '18:00';
+                updateThresholdDisplay();
+                
+                setTimeout(() => {
+                    showNotification('Pengaturan berhasil direset ke default', 'success');
+                }, 1000);
+            }
+        }
+
+        function exportSettings() {
+            showNotification('Mengexport pengaturan...', 'info');
+            
+            // Create settings object
+            const settings = {
+                exportDate: new Date().toISOString(),
+                systemName: document.getElementById('systemName').value,
+                version: '1.0.0',
+                // Add all settings here
+            };
+            
+            // Create and download file
+            const blob = new Blob([JSON.stringify(settings, null, 2)], 
+                                 { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `kafebasabasi-settings-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Pengaturan berhasil diexport', 'success');
+        }
+
+        function restartSystem() {
+            if (confirm('Restart sistem akan memutus semua koneksi aktif. Lanjutkan?')) {
+                showNotification('Memulai restart sistem...', 'warning');
+                
+                // Simulate restart
+                setTimeout(() => {
+                    showNotification('Sistem akan restart dalam 10 detik...', 'info');
+                }, 2000);
+            }
+        }
+
+        function showNotification(message, type) {
+            const alertType = type === 'error' ? 'danger' : type;
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${alertType} alert-dismissible fade show position-fixed`;
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

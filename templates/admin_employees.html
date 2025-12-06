@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Karyawan - Kafebasabasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --coffee-dark: #3C2415;
+            --coffee-medium: #8B4513;
+            --coffee-light: #D2691E;
+            --cream: #F5DEB3;
+            --warm-white: #FDF6E3;
+            --accent-gold: #DAA520;
+            --shadow-coffee: rgba(60, 36, 21, 0.15);
+            --shadow-light: rgba(139, 69, 19, 0.1);
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-medium) 100%);
+            box-shadow: 0 4px 20px var(--shadow-coffee);
+            border-bottom: 3px solid var(--accent-gold);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--warm-white) !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand i {
+            color: var(--accent-gold);
+            margin-right: 10px;
+        }
+
+        .nav-link {
+            color: rgba(253, 246, 227, 0.9) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-gold) !important;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            color: var(--coffee-dark);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--coffee-medium);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(145deg, var(--warm-white), rgba(245, 222, 179, 0.6));
+            border-radius: 25px;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 15px 35px var(--shadow-coffee);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow-coffee);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gold);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: var(--warm-white);
+            border-radius: 21px 21px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(45deg, var(--coffee-medium), var(--coffee-light));
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--coffee-dark), var(--coffee-medium));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, var(--accent-gold), #f1c40f);
+            border: none;
+            color: var(--coffee-dark);
+            font-weight: 600;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #ec7063);
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: none;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--shadow-light);
+        }
+
+        .table thead th {
+            background: var(--coffee-medium);
+            color: var(--warm-white);
+            border: none;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(139, 69, 19, 0.1);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(245, 222, 179, 0.3);
+        }
+
+        /* Forms */
+        .form-control,
+        .form-select {
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 0.2rem rgba(218, 165, 32, 0.15);
+            background-color: white;
+        }
+
+        .input-group-text {
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            color: var(--coffee-medium);
+        }
+
+        .input-group-lg .form-control,
+        .input-group-lg .form-select,
+        .form-select-lg {
+            font-size: 1rem;
+            padding: 0.875rem 1.2rem;
+            border-radius: 10px;
+        }
+
+        .form-label {
+            color: var(--coffee-dark);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal */
+        .modal-content {
+            border-radius: 25px;
+            border: 2px solid var(--coffee-light);
+            box-shadow: 0 20px 60px var(--shadow-coffee);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: var(--warm-white);
+            border-radius: 23px 23px 0 0;
+            border: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .bg-secondary {
+            background: linear-gradient(45deg, var(--coffee-medium), var(--coffee-light)) !important;
+            color: var(--warm-white) !important;
+        }
+
+        .bg-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+        }
+
+        /* Stats */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 69, 19, 0.1);
+            box-shadow: 0 5px 20px rgba(60, 36, 21, 0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(60, 36, 21, 0.15);
+        }
+
+        .stats-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .stats-icon.bg-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .stats-icon.bg-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .stats-icon.bg-info {
+            background: linear-gradient(135deg, #8e44ad, #6c3483);
+        }
+
+        .stats-icon.bg-warning {
+            background: linear-gradient(135deg, #f39c12, #d68910);
+        }
+
+        .stats-content {
+            flex: 1;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--coffee-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .stats-label {
+            color: var(--coffee-medium);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Coffee decorations */
+        .coffee-decoration {
+            position: fixed;
+            font-size: 1.5rem;
+            color: var(--coffee-light);
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .coffee-decoration:nth-child(1) { top: 20%; left: 5%; animation-delay: 0s; }
+        .coffee-decoration:nth-child(2) { top: 60%; right: 8%; animation-delay: 4s; }
+        .coffee-decoration:nth-child(3) { bottom: 30%; left: 12%; animation-delay: 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-15px) rotate(180deg); opacity: 0.2; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Face Capture Styles */
+        .face-capture-option {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .face-capture-option:hover {
+            background-color: var(--cream);
+            border-color: var(--accent-gold) !important;
+        }
+        
+        .mobile-camera-container {
+            text-align: center;
+            background: var(--warm-white);
+        }
+        
+        #faceCaptureSection {
+            background: rgba(218, 165, 32, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .capture-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .capture-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .capture-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Coffee decorations -->
+    <div class="coffee-decoration">☕</div>
+    <div class="coffee-decoration">🫘</div>
+    <div class="coffee-decoration">☕</div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-cup-hot"></i>
+                Kafebasabasi Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/localhost" target="_blank">
+                    <i class="bi bi-person-check"></i> Halaman Absensi
+                </a>
+                <a class="nav-link" href="/admin">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link" href="/">
+                    <i class="bi bi-house"></i> Beranda
+                </a>
+                <a class="nav-link" href="/admin/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Page Header with CTA -->
+        <div class="mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="page-title mb-1">Kelola Karyawan</h1>
+                    <p class="page-subtitle mb-0">"Setiap barista terbaik dimulai dari manajemen yang baik"</p>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <a href="/admin/add_employee_form" class="btn btn-success btn-lg">
+                        <i class="bi bi-plus-circle"></i>
+                        Tambah Karyawan Baru
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon bg-primary">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-number">{{ employees|length }}</div>
+                        <div class="stats-label">Total Karyawan</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon bg-success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-number">{{ totalreg }}</div>
+                        <div class="stats-label">Terdaftar Wajah</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon bg-info">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-number">{{ employees|length }}</div>
+                        <div class="stats-label">Status Aktif</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon bg-warning">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-number">0</div>
+                        <div class="stats-label">Cuti/Izin</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control border-start-0" 
+                           placeholder="Cari nama, email, atau NIK...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select form-select-lg" id="filterBagian">
+                    <option value="">Semua Bagian</option>
+                    <option value="Barista">Barista</option>
+                    <option value="Kasir">Kasir</option>
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Manager">Manager</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select form-select-lg" id="filterStatus">
+                    <option value="">Semua Status</option>
+                    <option value="aktif">Aktif</option>
+                    <option value="cuti">Cuti</option>
+                    <option value="tidak_aktif">Tidak Aktif</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Employees List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">
+                                <i class="bi bi-people"></i>
+                                Daftar Karyawan
+                            </h3>
+                            <div class="badge bg-info">{{ employees|length }} Karyawan</div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%;">ID</th>
+                                        <th style="width: 12%;">Nama</th>
+                                        <th style="width: 10%;">Bagian</th>
+                                        <th style="width: 15%;">Email</th>
+                                        <th style="width: 12%;">No. HP</th>
+                                        <th style="width: 10%;">Posisi</th>
+                                        <th style="width: 10%;">Status</th>
+                                        <th style="width: 12%;">Bergabung</th>
+                                        <th style="width: 14%;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeTableBody">
+                                    {% if employees %}
+                                        {% for employee in employees %}
+                                        <tr>
+                                            <td><strong>#{{ employee.id or employee['id'] }}</strong></td>
+                                            <td class="fw-bold">
+                                                <i class="bi bi-person-circle text-primary"></i>
+                                                {{ employee.name or employee['name'] }}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ employee.bagian or employee['bagian'] }}</span>
+                                            </td>
+                                            <td>
+                                                {% if employee.email or employee.get('email') %}
+                                                    <small>{{ employee.email or employee['email'] }}</small>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if employee.phone or employee.get('phone') %}
+                                                    <small>{{ employee.phone or employee['phone'] }}</small>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if employee.position or employee.get('position') %}
+                                                    <small>{{ employee.position or employee['position'] }}</small>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% set emp_status = employee.status or employee.get('status', 'aktif') %}
+                                                {% if emp_status == 'aktif' %}
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Aktif</span>
+                                                {% elif emp_status == 'cuti' %}
+                                                    <span class="badge bg-warning"><i class="bi bi-calendar-event"></i> Cuti</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Tidak Aktif</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small>{{ employee.created_at or employee.get('created_at', '-') }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button class="btn btn-warning" title="Edit" onclick="editEmployee({{ employee.id or employee['id'] }}, '{{ employee.name or employee['name'] }}', '{{ employee.bagian or employee['bagian'] }}')">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-info" title="Lihat Detail" onclick="viewEmployeeDetails({{ employee.id or employee['id'] }})">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-danger" title="Hapus" onclick="deleteEmployee({{ employee.id or employee['id'] }}, '{{ employee.name or employee['name'] }}')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="9" class="text-center py-5">
+                                                <i class="bi bi-person-x text-muted" style="font-size: 3rem;"></i>
+                                                <p class="text-muted mt-3 mb-2">📭 Belum ada karyawan terdaftar</p>
+                                                <p class="text-muted small">Mulai tambahkan karyawan pertama menggunakan form di atas atau klik tombol "Form Pendaftaran Lengkap"</p>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Employee Modal -->
+    <div class="modal fade" id="editEmployeeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil"></i>
+                        Edit Karyawan
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editEmployeeForm">
+                        <input type="hidden" id="editEmployeeId">
+                        <div class="mb-3">
+                            <label for="editName" class="form-label">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="editName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editBagian" class="form-label">Bagian/Posisi</label>
+                            <select class="form-control" id="editBagian" required>
+                                <option value="Barista">Barista</option>
+                                <option value="Kasir">Kasir</option>
+                                <option value="Kitchen">Kitchen</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Manager">Manager</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEmployee()">
+                        <i class="bi bi-check-lg"></i>
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteEmployeeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                        Konfirmasi Hapus
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus karyawan <strong id="deleteEmployeeName"></strong>?</p>
+                    <p class="text-muted">Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data absensi karyawan tersebut.</p>
+                    <input type="hidden" id="deleteEmployeeId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteEmployee()">
+                        <i class="bi bi-trash"></i>
+                        Hapus Karyawan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function editEmployee(id, name, bagian) {
+            document.getElementById('editEmployeeId').value = id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editBagian').value = bagian;
+            new bootstrap.Modal(document.getElementById('editEmployeeModal')).show();
+        }
+
+        function viewEmployeeDetails(id) {
+            // Show employee details in a modal or navigate to detail page
+            alert('Fitur detail karyawan akan ditampilkan segera');
+            // TODO: Implement employee details modal/page
+        }
+
+        function deleteEmployee(id, name) {
+            document.getElementById('deleteEmployeeId').value = id;
+            document.getElementById('deleteEmployeeName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteEmployeeModal')).show();
+        }
+
+        function saveEmployee() {
+            // Implementation for saving employee changes
+            alert('Fitur edit akan diimplementasikan');
+        }
+
+        function confirmDeleteEmployee() {
+            // Implementation for deleting employee
+            alert('Fitur hapus akan diimplementasikan');
+        }
+
+        // ==================== FILTERING FUNCTIONALITY ====================
+        function filterTable() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const filterBagian = document.getElementById('filterBagian').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const tableRows = document.querySelectorAll('#employeeTableBody tr');
+            
+            let visibleCount = 0;
+            
+            tableRows.forEach(row => {
+                let show = true;
+                
+                // Get data from row cells
+                const nama = row.cells[1]?.textContent.toLowerCase() || '';
+                const bagian = row.cells[2]?.textContent.toLowerCase() || '';
+                const email = row.cells[4]?.textContent.toLowerCase() || '';
+                const nik = row.cells[0]?.textContent.toLowerCase() || '';
+                const status = row.cells[6]?.textContent.toLowerCase() || '';
+                
+                // Apply search filter (name, email, NIK)
+                if (searchInput) {
+                    const searchMatch = nama.includes(searchInput) || 
+                                      email.includes(searchInput) || 
+                                      nik.includes(searchInput);
+                    if (!searchMatch) show = false;
+                }
+                
+                // Apply department filter
+                if (filterBagian !== 'semua' && show) {
+                    if (bagian !== filterBagian.toLowerCase()) {
+                        show = false;
+                    }
+                }
+                
+                // Apply status filter
+                if (filterStatus !== 'semua' && show) {
+                    if (status !== filterStatus.toLowerCase()) {
+                        show = false;
+                    }
+                }
+                
+                // Show/hide row
+                row.style.display = show ? '' : 'none';
+                if (show) visibleCount++;
+            });
+            
+            // Show/hide no results message
+            const noResultsRow = document.querySelector('.no-results-row');
+            if (visibleCount === 0) {
+                if (!noResultsRow) {
+                    const newRow = document.createElement('tr');
+                    newRow.className = 'no-results-row';
+                    newRow.innerHTML = `
+                        <td colspan="9" class="text-center py-4">
+                            <i class="bi bi-search" style="font-size: 2rem; color: #ddd;"></i>
+                            <p class="text-muted mt-2">Tidak ada data karyawan yang sesuai dengan filter</p>
+                        </td>
+                    `;
+                    document.getElementById('employeeTableBody').appendChild(newRow);
+                }
+            } else {
+                if (noResultsRow) noResultsRow.remove();
+            }
+        }
+        
+        // Event listeners for filters
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const filterBagian = document.getElementById('filterBagian');
+            const filterStatus = document.getElementById('filterStatus');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', filterTable);
+            }
+            if (filterBagian) {
+                filterBagian.addEventListener('change', filterTable);
+            }
+            if (filterStatus) {
+                filterStatus.addEventListener('change', filterTable);
+            }
+        });
+
+        // Show flash messages
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    showNotification('{{ message }}', '{{ category }}');
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        function showNotification(message, type) {
+            const alertType = type === 'error' ? 'danger' : type;
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${alertType} alert-dismissible fade show position-fixed`;
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin employees page loaded');
+        });
+    </script>
+</body>
+</html>

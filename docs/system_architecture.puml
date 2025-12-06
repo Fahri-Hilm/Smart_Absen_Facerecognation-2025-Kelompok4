@@ -1,0 +1,143 @@
+@startuml SystemArchitecture
+!theme cerulean-outline
+
+title Kafebasabasi Attendance System - System Architecture Diagram
+
+!define RECTANGLE class
+
+package "Web Layer" {
+  [Flask Web Server] as Flask
+  [Static Files] as Static
+  [Templates] as Templates
+  
+  package "API Endpoints" {
+    [Home Routes] as HomeRoutes
+    [Admin Routes] as AdminRoutes
+    [QR Auth Routes] as QRRoutes
+    [Attendance API] as AttendanceAPI
+  }
+}
+
+package "Business Logic Layer" {
+  [QR Manager] as QRManager
+  [Attendance Controller] as AttendanceController
+  [Admin Controller] as AdminController
+  [Face Recognition Engine] as FaceEngine
+}
+
+package "Data Layer" {
+  [Database Manager] as DatabaseManager
+  [Models Package] as Models
+  
+  package "Models" {
+    [Employee Model] as EmployeeModel
+    [Attendance Model] as AttendanceModel
+    [Activity Log Model] as ActivityModel
+  }
+}
+
+package "External Systems" {
+  [MySQL Database] as MySQL
+  [File System] as FileSystem
+  [Camera Hardware] as Camera
+}
+
+package "Isolated Processes" {
+  [Camera Isolated Process] as CameraProcess
+  [Face Recognition Model] as FRModel
+}
+
+package "Administrative Tools" {
+  [Database Reset Script] as ResetScript
+  [Data Management Scripts] as DataScripts
+}
+
+package "Client Layer" {
+  [Web Browser] as Browser
+  [Mobile Device QR Scanner] as Mobile
+}
+
+' Web Layer Connections
+Flask --> HomeRoutes
+Flask --> AdminRoutes
+Flask --> QRRoutes
+Flask --> AttendanceAPI
+Flask --> Static
+Flask --> Templates
+
+' Business Logic Connections
+HomeRoutes --> QRManager
+HomeRoutes --> AttendanceController
+AdminRoutes --> AdminController
+AttendanceAPI --> AttendanceController
+QRRoutes --> QRManager
+
+AttendanceController --> FaceEngine
+AttendanceController --> CameraProcess
+AdminController --> DatabaseManager
+
+' Data Layer Connections
+AttendanceController --> Models
+AdminController --> Models
+QRManager --> Models
+
+Models --> EmployeeModel
+Models --> AttendanceModel
+Models --> ActivityModel
+
+EmployeeModel --> DatabaseManager
+AttendanceModel --> DatabaseManager
+ActivityModel --> DatabaseManager
+
+DatabaseManager --> MySQL
+
+' External System Connections
+CameraProcess --> Camera
+CameraProcess --> FRModel
+CameraProcess --> DatabaseManager
+FaceEngine --> FileSystem
+FRModel --> FileSystem
+
+' Administrative Tools
+ResetScript --> MySQL
+ResetScript --> FileSystem
+DataScripts --> MySQL
+
+' Client Connections
+Browser --> Flask
+Mobile --> QRRoutes
+
+' File System Connections
+Static --> FileSystem
+Templates --> FileSystem
+
+note top of CameraProcess
+  Isolated subprocess to prevent
+  GUI window conflicts
+end note
+
+note bottom of FRModel
+  KNeighborsClassifier model
+  Stored as .pkl file
+  Loaded via joblib
+end note
+
+note right of QRManager
+  Session-based authentication
+  using QR codes for mobile access
+end note
+
+note left of DatabaseManager
+  MySQL connection management
+  Transaction handling
+  Connection pooling
+end note
+
+' Color coding
+Flask #LightBlue
+Models #LightGreen
+MySQL #Orange
+CameraProcess #Yellow
+FRModel #Pink
+
+@enduml

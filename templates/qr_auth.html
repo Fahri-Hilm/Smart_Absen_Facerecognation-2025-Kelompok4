@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafebasabasi - QR Authentication</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --coffee-dark: #3C2415;
+            --coffee-medium: #8B4513;
+            --coffee-light: #D2691E;
+            --cream: #F5DEB3;
+            --warm-white: #FDF6E3;
+            --accent-gold: #DAA520;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .qr-page-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(60, 36, 21, 0.15);
+            width: 100%;
+            max-width: 1000px;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .qr-header {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: white;
+            padding: 25px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-brand .logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-brand .logo i {
+            font-size: 28px;
+        }
+
+        .header-brand h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .header-brand small {
+            opacity: 0.85;
+            font-size: 0.9rem;
+        }
+
+        .header-time {
+            text-align: right;
+        }
+
+        .header-time .time {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .header-time .date {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* Main Content */
+        .qr-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        /* Left - QR Section */
+        .qr-section {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #eee;
+        }
+
+        .qr-title {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .qr-title h2 {
+            color: var(--coffee-dark);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .qr-title p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        .qr-card {
+            background: linear-gradient(135deg, #f8f9fa, #fff);
+            padding: 25px;
+            border-radius: 20px;
+            border: 3px solid var(--accent-gold);
+            box-shadow: 0 10px 40px rgba(60, 36, 21, 0.1);
+            position: relative;
+        }
+
+        .qr-card img {
+            width: 220px;
+            height: 220px;
+            display: block;
+        }
+
+        .qr-pulse {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 3px solid var(--accent-gold);
+            border-radius: 20px;
+            animation: qrPulse 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes qrPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.02); }
+        }
+
+        .unit-code-badge {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(60, 36, 21, 0.3);
+        }
+
+        .countdown-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .refresh-btn {
+            margin-top: 20px;
+            background: transparent;
+            border: 2px solid var(--coffee-medium);
+            color: var(--coffee-medium);
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .refresh-btn:hover {
+            background: var(--coffee-medium);
+            color: white;
+        }
+
+        /* Right - Instructions Section */
+        .instructions-section {
+            padding: 40px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .instructions-section h3 {
+            color: var(--coffee-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+        }
+
+        .step-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .step-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, var(--coffee-medium), var(--coffee-light));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            color: var(--coffee-dark);
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .step-content p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Manual Input */
+        .manual-input-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px dashed #ddd;
+            margin-top: auto;
+        }
+
+        .manual-input-box h4 {
+            color: var(--coffee-dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .manual-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .manual-form input {
+            flex: 1;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .manual-form input:focus {
+            border-color: var(--coffee-medium);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+
+        .manual-form button {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .manual-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(60, 36, 21, 0.3);
+        }
+
+        /* Sync Status */
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.15);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sync-status.show {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .sync-status .spinner-border {
+            width: 20px;
+            height: 20px;
+        }
+
+        .sync-status span {
+            color: var(--coffee-dark);
+            font-weight: 500;
+        }
+
+        /* Sync Notification Modal */
+        .sync-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sync-modal-overlay.show {
+            display: flex;
+        }
+
+        .sync-modal {
+            background: white;
+            border-radius: 25px;
+            padding: 50px 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: modalPop 0.4s ease;
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .sync-modal .icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: pulse 1s infinite;
+        }
+
+        .sync-modal .icon i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .sync-modal h3 {
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .sync-modal p {
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .qr-body {
+                grid-template-columns: 1fr;
+            }
+
+            .qr-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding: 30px;
+            }
+
+            .instructions-section {
+                padding: 30px;
+            }
+
+            .qr-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .header-time {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 10px;
+            }
+
+            .qr-page-container {
+                border-radius: 16px;
+            }
+
+            .qr-card img {
+                width: 180px;
+                height: 180px;
+            }
+
+            .unit-code-badge {
+                font-size: 1.1rem;
+                padding: 10px 20px;
+            }
+
+            .manual-form {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sync Status Indicator -->
+    <div class="sync-status" id="syncStatus">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span>Menunggu scan dari HP...</span>
+    </div>
+
+    <!-- Sync Notification Modal -->
+    <div class="sync-modal-overlay" id="syncModal">
+        <div class="sync-modal">
+            <div class="icon">
+                <i class="bi bi-phone-vibrate"></i>
+            </div>
+            <h3><i class="bi bi-check-circle"></i> QR Scan Berhasil!</h3>
+            <p>Mengarahkan ke halaman absensi...</p>
+        </div>
+    </div>
+
+    <div class="qr-page-container">
+        <!-- Header -->
+        <div class="qr-header">
+            <div class="header-brand">
+                <div class="logo">
+                    <i class="bi bi-cup-hot"></i>
+                </div>
+                <div>
+                    <h1>Kafebasabasi</h1>
+                    <small>Sistem Absensi Karyawan</small>
+                </div>
+            </div>
+            <div class="header-time">
+                <div class="time" id="currentTime">--:--:--</div>
+                <div class="date" id="currentDate">Memuat...</div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="qr-body">
+            <!-- QR Section -->
+            <div class="qr-section">
+                <div class="qr-title">
+                    <h2><i class="bi bi-qr-code-scan"></i> Scan QR Code</h2>
+                    <p>Gunakan HP untuk scan dan membuka akses absensi</p>
+                </div>
+
+                <div class="qr-card">
+                    <div class="qr-pulse"></div>
+                    <img id="qrImage" src="data:image/png;base64,{{ qr_image }}" alt="QR Code">
+                </div>
+
+                <div class="unit-code-badge">
+                    <i class="bi bi-key"></i> <span id="unitCode">{{ unit_code }}</span>
+                </div>
+
+                <div class="countdown-badge">
+                    <i class="bi bi-clock"></i> Berlaku: <span id="timeLeft">10:00</span>
+                </div>
+
+                <button class="refresh-btn" onclick="refreshQR()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh QR
+                </button>
+            </div>
+
+            <!-- Instructions Section -->
+            <div class="instructions-section">
+                <h3><i class="bi bi-list-check"></i> Langkah Penggunaan</h3>
+
+                <ul class="step-list">
+                    <li>
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Buka Kamera HP</h4>
+                            <p>Gunakan aplikasi kamera atau QR scanner di HP Anda</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Scan QR Code</h4>
+                            <p>Arahkan kamera HP ke QR code di sebelah kiri</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>HP Menampilkan Sukses</h4>
+                            <p>HP akan menampilkan pesan "Kunci Terbuka"</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Laptop Auto Redirect</h4>
+                            <p>Laptop akan otomatis masuk ke halaman absensi</p>
+                        </div>
+                    </li>
+                </ul>
+
+                <!-- Manual Input -->
+                <div class="manual-input-box">
+                    <h4><i class="bi bi-keyboard"></i> Input Manual (Alternatif)</h4>
+                    <form class="manual-form" action="/verify" method="get">
+                        <input type="text" name="unit" id="manualUnitCode" placeholder="Masukkan kode..." maxlength="8" required>
+                        <button type="submit">
+                            <i class="bi bi-arrow-right-circle"></i> Masuk
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Time update
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID');
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Countdown timer
+        let timeRemaining = 600; // 10 minutes
+        function updateCountdown() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timeLeft').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeRemaining <= 0) {
+                refreshQR();
+                timeRemaining = 600;
+            } else {
+                timeRemaining--;
+            }
+        }
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Refresh QR
+        function refreshQR() {
+            fetch('/api/refresh_qr')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('qrImage').src = 'data:image/png;base64,' + data.qr_image;
+                        document.getElementById('unitCode').textContent = data.unit_code;
+                        timeRemaining = 600;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Copy unit code
+        function copyUnitCode() {
+            const code = document.getElementById('unitCode').textContent;
+            document.getElementById('manualUnitCode').value = code;
+        }
+
+        // QR Sync monitoring
+        let syncCheckCount = 0;
+        const MAX_SYNC_CHECKS = 720; // 1 hour at 5-second intervals
+        let qrSyncInterval = null;
+
+        function startQRSyncMonitoring() {
+            syncCheckCount = 0;
+            if (qrSyncInterval) clearInterval(qrSyncInterval);
+            
+            document.getElementById('syncStatus').classList.add('show');
+            qrSyncInterval = setInterval(checkQRSyncStatus, 5000);
+            console.log('📡 QR sync monitoring started');
+        }
+
+        function checkQRSyncStatus() {
+            syncCheckCount++;
+            
+            if (syncCheckCount > MAX_SYNC_CHECKS) {
+                console.log('🛑 QR sync monitoring stopped - max attempts reached');
+                clearInterval(qrSyncInterval);
+                document.getElementById('syncStatus').classList.remove('show');
+                return;
+            }
+            
+            fetch('/api/qr_sync_status')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`📊 QR Sync Check ${syncCheckCount}:`, data);
+                    
+                    if (data.success && data.has_pending_sync) {
+                        console.log('🎯 Pending QR sync detected from mobile device!');
+                        handlePendingQRSync(data);
+                    }
+                })
+                .catch(error => console.error('❌ QR sync check error:', error));
+        }
+
+        function handlePendingQRSync(syncData) {
+            clearInterval(qrSyncInterval);
+            document.getElementById('syncStatus').classList.remove('show');
+            document.getElementById('syncModal').classList.add('show');
+
+            setTimeout(() => {
+                acceptQRSync(syncData.session_id);
+            }, 1500);
+        }
+
+        function acceptQRSync(sessionId) {
+            console.log('✅ Accepting QR sync for session:', sessionId);
+            
+            fetch('/api/accept_qr_sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('🎉 QR sync response:', data);
+                if (data.success && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    document.getElementById('syncModal').classList.remove('show');
+                    alert('QR sync gagal: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('❌ QR sync accept error:', error);
+                document.getElementById('syncModal').classList.remove('show');
+                alert('Terjadi kesalahan saat sync QR Code');
+            });
+        }
+
+        // Start monitoring on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(startQRSyncMonitoring, 1000);
+        });
+    </script>
+</body>
+</html>

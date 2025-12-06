@@ -1,0 +1,445 @@
+/* ===============================
+   KAFEBASABASI - MODERN UI FRAMEWORK
+   Enhanced Design System v2.0
+   =============================== */
+
+:root {
+    /* Coffee Theme Colors */
+    --coffee-dark: #2C1810;
+    --coffee-medium: #8B4513;
+    --coffee-light: #D2691E;
+    --cream: #F5DEB3;
+    --warm-white: #FDF6E3;
+    --accent-gold: #DAA520;
+    
+    /* Gradients */
+    --gradient-coffee: linear-gradient(135deg, var(--coffee-medium), var(--coffee-light));
+    --gradient-cream: linear-gradient(135deg, var(--warm-white), var(--cream));
+    --gradient-success: linear-gradient(135deg, #28a745, #20c997);
+    --gradient-warning: linear-gradient(135deg, #fd7e14, #ffc107);
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --shadow-strong: 0 15px 40px rgba(0, 0, 0, 0.15);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ===============================
+   GLASS MORPHISM SYSTEM
+   =============================== */
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-medium);
+    border-radius: 20px;
+}
+
+.glass-dark {
+    background: rgba(44, 24, 16, 0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===============================
+   MODERN NAVBAR
+   =============================== */
+
+.navbar-modern {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem 0;
+    transition: var(--transition-smooth);
+}
+
+.navbar-brand.coffee-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    color: var(--coffee-dark);
+    text-decoration: none;
+}
+
+.coffee-icon {
+    font-size: 1.8rem;
+    color: var(--coffee-medium);
+    animation: steam 3s ease-in-out infinite;
+}
+
+@keyframes steam {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(5deg) scale(1.1); }
+}
+
+.brand-text {
+    font-size: 1.5rem;
+    background: var(--gradient-coffee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===============================
+   STAT CARDS SYSTEM
+   =============================== */
+
+.stat-card {
+    background: var(--gradient-cream);
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: none;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-coffee);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-strong);
+}
+
+.card-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    opacity: 0.3;
+    color: var(--coffee-medium);
+}
+
+.card-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--coffee-dark);
+}
+
+.card-content p {
+    margin: 0;
+    color: var(--coffee-medium);
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Card Variants */
+.card-attendance::before { background: var(--gradient-success); }
+.card-time::before { background: var(--gradient-warning); }
+.card-week::before { background: linear-gradient(135deg, #6f42c1, #e83e8c); }
+.card-month::before { background: linear-gradient(135deg, #20c997, #17a2b8); }
+
+/* ===============================
+   ENHANCED ATTENDANCE SYSTEM
+   =============================== */
+
+.attendance-section {
+    padding: 2rem 0;
+}
+
+.attendance-card {
+    padding: 2rem;
+    border-radius: 25px;
+    margin-bottom: 2rem;
+}
+
+.attendance-btn {
+    width: 100%;
+    height: 140px;
+    border-radius: 20px;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-bounce);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    text-align: left;
+    color: white;
+    font-weight: 600;
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-masuk {
+    background: var(--gradient-success);
+}
+
+.btn-pulang {
+    background: var(--gradient-warning);
+}
+
+.attendance-btn:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: var(--shadow-strong);
+    color: white;
+}
+
+.attendance-btn:active {
+    transform: scale(0.98);
+}
+
+.btn-icon {
+    font-size: 2.5rem;
+}
+
+.btn-content h4 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.btn-content p {
+    margin: 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.btn-status {
+    font-size: 1.5rem;
+}
+
+/* Loading State */
+.attendance-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.attendance-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Completed State */
+.attendance-btn.completed {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    opacity: 0.8;
+}
+
+.attendance-btn.completed::before {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* ===============================
+   LIVE CLOCK COMPONENT
+   =============================== */
+
+.live-clock {
+    background: var(--gradient-coffee);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 20px;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-medium);
+}
+
+.live-clock h2 {
+    font-size: 3rem;
+    margin: 0;
+    font-weight: 300;
+    letter-spacing: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.live-clock p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+/* ===============================
+   ATTENDANCE HISTORY TABLE
+   =============================== */
+
+.attendance-table {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+}
+
+.table-modern {
+    margin: 0;
+}
+
+.table-modern thead th {
+    background: var(--coffee-dark);
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+}
+
+.table-modern tbody tr {
+    transition: var(--transition-smooth);
+}
+
+.table-modern tbody tr:hover {
+    background: rgba(139, 69, 19, 0.05);
+    transform: scale(1.01);
+}
+
+.table-modern td {
+    padding: 1rem;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ===============================
+   MOBILE RESPONSIVE
+   =============================== */
+
+@media (max-width: 768px) {
+    .stat-card {
+        height: 120px;
+        margin-bottom: 1rem;
+    }
+    
+    .attendance-btn {
+        height: 120px;
+        padding: 1rem;
+    }
+    
+    .btn-content h4 {
+        font-size: 1.1rem;
+    }
+    
+    .btn-content p {
+        font-size: 1rem;
+    }
+    
+    .live-clock h2 {
+        font-size: 2.5rem;
+    }
+    
+    .brand-text {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .attendance-btn {
+        height: 100px;
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem 0.5rem;
+    }
+    
+    .btn-icon {
+        font-size: 2rem;
+    }
+    
+    .btn-content h4 {
+        font-size: 1rem;
+    }
+    
+    .stat-card {
+        height: 110px;
+    }
+    
+    .card-content h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* ===============================
+   LOADING ANIMATIONS
+   =============================== */
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up {
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* ===============================
+   UTILITY CLASSES
+   =============================== */
+
+.text-coffee { color: var(--coffee-dark); }
+.text-coffee-light { color: var(--coffee-light); }
+.bg-coffee { background: var(--coffee-dark); }
+.bg-gradient-coffee { background: var(--gradient-coffee); }
+
+.rounded-xl { border-radius: 1rem; }
+.rounded-2xl { border-radius: 1.5rem; }
+.rounded-3xl { border-radius: 2rem; }
+
+.shadow-soft { box-shadow: var(--shadow-soft); }
+.shadow-medium { box-shadow: var(--shadow-medium); }
+.shadow-strong { box-shadow: var(--shadow-strong); }
+
+/* ===============================
+   PRINT STYLES
+   =============================== */
+
+@media print {
+    .navbar-modern,
+    .attendance-section,
+    .glass-effect {
+        background: white !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+    }
+    
+    .attendance-btn {
+        border: 2px solid #333 !important;
+        background: white !important;
+        color: #333 !important;
+    }
+}

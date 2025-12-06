@@ -1,0 +1,1276 @@
+<!doctype html><!doctype html>
+
+<html lang="id"><html lang="en">
+
+<head><head>
+
+  <meta charset="utf-8">  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">  <meta name="viewport" content="    .btn-success.btn-modern {
+
+  <title>Kafebasabasi - Sistem Absensi Modern</title>      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+
+      }
+
+  <!-- Meta Tags -->    
+
+  <meta name="description" content="Sistem Absensi Kafebasabasi dengan teknologi face recognition dan QR authentication">    .btn-danger.btn-modern {
+
+  <meta name="theme-color" content="#8B4513">      background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+
+  <meta name="apple-mobile-web-app-capable" content="yes">    }
+
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">    
+
+      .btn-modern:disabled {
+
+  <!-- PWA Manifest -->      opacity: 0.7;
+
+  <link rel="manifest" href="/static/manifest.json">      cursor: not-allowed;
+
+        transform: none !important;
+
+  <!-- Bootstrap CSS -->    }
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">    
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">    #notificationArea {
+
+        position: fixed;
+
+  <!-- Modern UI Framework -->      top: 20px;
+
+  <link href="/static/css/modern-ui.css" rel="stylesheet">      right: 20px;
+
+</head>      z-index: 1050;
+
+      max-width: 400px;
+
+<body>    }
+
+  <!-- Loading Screen -->    
+
+  <div id="loadingScreen" class="loading-screen">    .alert {
+
+    <div class="loading-content">      border: none;
+
+      <div class="coffee-cup">      border-radius: 12px;
+
+        <div class="cup">      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+
+          <div class="handle"></div>      backdrop-filter: blur(10px);
+
+          <div class="steam">    }
+
+            <div class="steam-line"></div>    
+
+            <div class="steam-line"></div>    .alert-success {
+
+            <div class="steam-line"></div>      background: linear-gradient(135deg, rgba(40, 167, 69, 0.9) 0%, rgba(32, 201, 151, 0.9) 100%);
+
+          </div>      color: white;
+
+        </div>    }
+
+      </div>    
+
+      <h3 class="loading-text">Kafebasabasi</h3>    .alert-info {
+
+      <p class="loading-subtitle">Memuat sistem absensi...</p>      background: linear-gradient(135deg, rgba(23, 162, 184, 0.9) 0%, rgba(0, 123, 255, 0.9) 100%);
+
+    </div>      color: white;
+
+  </div>    }
+
+    
+
+  <!-- Main Container -->    .alert-warning {
+
+  <div class="container-fluid main-wrapper" id="mainContent" style="display: none;">      background: linear-gradient(135deg, rgba(255, 193, 7, 0.9) 0%, rgba(253, 126, 20, 0.9) 100%);
+
+    <!-- Header Section -->      color: white;
+
+    <header class="glass-header">    }
+
+      <div class="container">    
+
+        <div class="row align-items-center">    .alert-danger {
+
+          <div class="col-md-6">      background: linear-gradient(135deg, rgba(220, 53, 69, 0.9) 0%, rgba(253, 126, 20, 0.9) 100%);
+
+            <div class="header-brand">      color: white;
+
+              <div class="brand-icon">    }
+
+                <i class="bi bi-cup-hot-fill"></i>    
+
+              </div>    .spinner-border-sm {
+
+              <div class="brand-text">      width: 1rem;
+
+                <h1 class="brand-title">Kafebasabasi</h1>      height: 1rem;
+
+                <p class="brand-subtitle">Sistem Absensi Modern</p>    }evice-width, initial-scale=1">
+
+              </div>  <title>Absensi Karyawan Makan Gratis</title>
+
+            </div>  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+          </div>  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+          <div class="col-md-6 text-end">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+            <div class="header-info">  <style>
+
+              <div class="live-clock">    body {
+
+                <div class="time-display" id="liveTime">--:--:--</div>      font-family: 'Inter', sans-serif;
+
+                <div class="date-display" id="liveDate">Loading...</div>      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+              </div>      min-height: 100vh;
+
+            </div>    }
+
+          </div>    
+
+        </div>    .main-container {
+
+      </div>      background: rgba(255, 255, 255, 0.95);
+
+    </header>      backdrop-filter: blur(10px);
+
+      border-radius: 20px;
+
+    <!-- Status Cards Section -->      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+
+    <section class="status-section">      margin: 20px auto;
+
+      <div class="container">      max-width: 1400px;
+
+        <div class="row g-4">      padding: 30px;
+
+          <!-- Status Masuk -->    }
+
+          <div class="col-lg-6">    
+
+            <div class="status-card masuk-card">    .header-section {
+
+              <div class="status-header">      background: linear-gradient(135deg, #0b4c61 0%, #2c5282 100%);
+
+                <div class="status-icon">      border-radius: 15px;
+
+                  <i class="bi bi-box-arrow-in-right"></i>      padding: 30px;
+
+                </div>      margin-bottom: 30px;
+
+                <div class="status-info">      color: white;
+
+                  <h3>Absen Masuk</h3>      position: relative;
+
+                  <p class="status-time" id="jamMasuk">Belum absen</p>      overflow: hidden;
+
+                </div>    }
+
+                <div class="status-indicator" id="statusMasuk">    
+
+                  <i class="bi bi-circle"></i>    .header-section::before {
+
+                </div>      content: '';
+
+              </div>      position: absolute;
+
+            </div>      top: -50%;
+
+          </div>      right: -50%;
+
+      width: 100%;
+
+          <!-- Status Pulang -->      height: 100%;
+
+          <div class="col-lg-6">      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+
+            <div class="status-card pulang-card">      animation: float 6s ease-in-out infinite;
+
+              <div class="status-header">    }
+
+                <div class="status-icon">    
+
+                  <i class="bi bi-box-arrow-right"></i>    @keyframes float {
+
+                </div>      0%, 100% { transform: translateY(0px); }
+
+                <div class="status-info">      50% { transform: translateY(-10px); }
+
+                  <h3>Absen Pulang</h3>    }
+
+                  <p class="status-time" id="jamPulang">Belum absen</p>    
+
+                </div>    .header-section h1 {
+
+                <div class="status-indicator" id="statusPulang">      font-weight: 700;
+
+                  <i class="bi bi-circle"></i>      font-size: 2.5rem;
+
+                </div>      margin-bottom: 10px;
+
+              </div>      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+
+            </div>    }
+
+          </div>    
+
+        </div>    .header-section h3, .header-section h4 {
+
+      </div>      opacity: 0.9;
+
+    </section>      font-weight: 400;
+
+    }
+
+    <!-- Action Buttons Section -->    
+
+    <section class="action-section">    .date-info {
+
+      <div class="container">      background: rgba(255,255,255,0.15);
+
+        <div class="action-grid">      border-radius: 10px;
+
+          <!-- Absen Masuk Button -->      padding: 15px;
+
+          <div class="action-item">      margin-top: 20px;
+
+            <button class="btn-action btn-masuk" onclick="markAttendance('masuk')" id="btnMasuk">      backdrop-filter: blur(5px);
+
+              <div class="btn-bg"></div>    }
+
+              <div class="btn-content">    
+
+                <div class="btn-icon">    .camera-section {
+
+                  <i class="bi bi-camera-fill"></i>      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+
+                </div>      border-radius: 15px;
+
+                <h4>Absen Masuk</h4>      padding: 25px;
+
+                <p>Scan wajah untuk masuk</p>      margin-bottom: 25px;
+
+              </div>      border: 1px solid rgba(0,0,0,0.1);
+
+              <div class="btn-effects">    }
+
+                <span></span><span></span><span></span><span></span>    
+
+              </div>    .btn-modern {
+
+            </button>      border-radius: 12px;
+
+          </div>      padding: 12px 25px;
+
+      font-weight: 500;
+
+          <!-- Absen Pulang Button -->      border: none;
+
+          <div class="action-item">      transition: all 0.3s ease;
+
+            <button class="btn-action btn-pulang" onclick="markAttendance('pulang')" id="btnPulang">      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+              <div class="btn-bg"></div>    }
+
+              <div class="btn-content">    
+
+                <div class="btn-icon">    .btn-modern:hover {
+
+                  <i class="bi bi-camera-fill"></i>      transform: translateY(-2px);
+
+                </div>      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+
+                <h4>Absen Pulang</h4>    }
+
+                <p>Scan wajah untuk pulang</p>    
+
+              </div>    .btn-primary.btn-modern {
+
+              <div class="btn-effects">      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+
+                <span></span><span></span><span></span><span></span>    }
+
+              </div>    
+
+            </button>    .btn-warning.btn-modern {
+
+          </div>      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+
+        </div>    }
+
+    
+
+        <!-- Camera Selection -->    .btn-success.btn-modern {
+
+        <div class="camera-selection">      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+
+          <div class="glass-card">    }
+
+            <div class="card-header">    
+
+              <i class="bi bi-camera2 me-2"></i>    .btn-danger.btn-modern {
+
+              <span>Pengaturan Kamera</span>      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+
+            </div>    }
+
+            <div class="card-body">    
+
+              <select class="form-select modern-select" id="cameraSelect">    .btn-dark.btn-modern {
+
+                <option value="0">Kamera Default</option>      background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+
+              </select>    }
+
+            </div>    
+
+          </div>    .card-modern {
+
+        </div>      border: none;
+
+      </div>      border-radius: 15px;
+
+    </section>      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+
+      transition: all 0.3s ease;
+
+    <!-- Data Table Section -->      overflow: hidden;
+
+    <section class="data-section">    }
+
+      <div class="container">    
+
+        <div class="glass-card">    .card-modern:hover {
+
+          <div class="card-header">      transform: translateY(-5px);
+
+            <div class="d-flex justify-content-between align-items-center">      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+
+              <div>    }
+
+                <i class="bi bi-table me-2"></i>    
+
+                <span>Data Absensi Hari Ini</span>    .card-header-modern {
+
+              </div>      background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+
+              <button class="btn btn-sm btn-outline-light" onclick="window.attendanceSystem.refreshAttendanceData()">      border-bottom: none;
+
+                <i class="bi bi-arrow-clockwise me-1"></i>      padding: 20px;
+
+                Refresh    }
+
+              </button>    
+
+            </div>    .card-header-info {
+
+          </div>      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+
+          <div class="card-body">    }
+
+            <div class="table-responsive">    
+
+              <table class="table modern-table" id="attendanceTable">    .form-control-modern {
+
+                <thead>      border-radius: 10px;
+
+                  <tr>      border: 2px solid #e9ecef;
+
+                    <th><i class="bi bi-person me-2"></i>Nama</th>      padding: 12px 15px;
+
+                    <th><i class="bi bi-briefcase me-2"></i>Bagian</th>      transition: all 0.3s ease;
+
+                    <th><i class="bi bi-calendar me-2"></i>Tanggal</th>    }
+
+                    <th><i class="bi bi-clock me-2"></i>Waktu</th>    
+
+                    <th><i class="bi bi-check-circle me-2"></i>Status</th>    .form-control-modern:focus {
+
+                  </tr>      border-color: #007bff;
+
+                </thead>      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+
+                <tbody id="attendanceTableBody">    }
+
+                  <tr>    
+
+                    <td colspan="5" class="text-center py-4">    .table-modern {
+
+                      <div class="loading-spinner">      border-radius: 10px;
+
+                        <div class="spinner-border text-primary" role="status">      overflow: hidden;
+
+                          <span class="visually-hidden">Loading...</span>      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+
+                        </div>    }
+
+                        <p class="mt-2 mb-0">Memuat data absensi...</p>    
+
+                      </div>    .table-modern th {
+
+                    </td>      background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+
+                  </tr>      border: none;
+
+                </tbody>      font-weight: 600;
+
+              </table>      padding: 15px;
+
+            </div>    }
+
+          </div>    
+
+        </div>    .table-modern td {
+
+      </div>      padding: 12px 15px;
+
+    </section>      border-color: #f8f9fa;
+
+      vertical-align: middle;
+
+    <!-- Footer -->    }
+
+    <footer class="glass-footer">    
+
+      <div class="container">    .table-modern tbody tr:hover {
+
+        <div class="row">      background-color: rgba(0,123,255,0.05);
+
+          <div class="col-md-6">      transform: scale(1.005);
+
+            <p class="mb-0">      transition: all 0.2s ease;
+
+              <i class="bi bi-shield-check me-2"></i>    }
+
+              Sistem Absensi Kafebasabasi v2.0    
+
+            </p>    .message-success {
+
+          </div>      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+
+          <div class="col-md-6 text-end">      color: #155724;
+
+            <p class="mb-0">      border-radius: 10px;
+
+              <i class="bi bi-cpu me-2"></i>      padding: 15px;
+
+              Powered by Face Recognition & QR Auth      margin-bottom: 20px;
+
+            </p>      border: 1px solid #c3e6cb;
+
+          </div>      font-weight: 600;
+
+        </div>    }
+
+      </div>    
+
+    </footer>    .select-modern {
+
+  </div>      border-radius: 10px;
+
+      border: 2px solid #e9ecef;
+
+  <!-- Connection Status -->      padding: 10px 15px;
+
+  <div class="connection-status" id="connectionStatus">      background: white;
+
+    <div class="status-dot"></div>      transition: all 0.3s ease;
+
+    <span class="status-text">Online</span>    }
+
+  </div>    
+
+    .select-modern:focus {
+
+  <!-- Notification Area -->      border-color: #007bff;
+
+  <div id="notificationArea"></div>      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+
+    }
+
+  <!-- Scripts -->    
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>    .stats-card {
+
+  <script src="/static/js/attendance-optimized.js"></script>      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+
+      border-radius: 10px;
+
+  <script>      padding: 15px;
+
+    // Initialize page      margin-bottom: 20px;
+
+    document.addEventListener('DOMContentLoaded', function() {      border-left: 4px solid #007bff;
+
+      // Hide loading screen      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+
+      setTimeout(() => {    }
+
+        document.getElementById('loadingScreen').style.display = 'none';  </style>
+
+        document.getElementById('mainContent').style.display = 'block';</head>
+
+        document.getElementById('mainContent').classList.add('fade-in');<body>
+
+      }, 2000);  <div class="main-container">
+
+    <div class='header-section text-center'>
+
+      // Connection status monitoring      <h1>Absensi Karyawan</h1>
+
+      function updateConnectionStatus() {      <h3>Makan Gratis - Badan Gizi Nasional</h3>
+
+        const statusElement = document.getElementById('connectionStatus');      <h4>Kota Bogor, Jawa Barat</h4>
+
+        const statusDot = statusElement.querySelector('.status-dot');      <div class="date-info">
+
+        const statusText = statusElement.querySelector('.status-text');        <p class="mb-2">Minggu Ini: <strong>{{ date_range_week }}</strong></p>
+
+        <p class="mb-0">Hari Ini: <strong>{{ tanggal_hari_ini }}</strong></p>
+
+        if (navigator.onLine) {      </div>
+
+          statusDot.classList.remove('offline');    </div>
+
+          statusText.textContent = 'Online';
+
+        } else {    {% if mess %}
+
+          statusDot.classList.add('offline');    <div class="message-success text-center">
+
+          statusText.textContent = 'Offline';      {{ mess }}
+
+        }    </div>
+
+      }    {% endif %}
+
+
+
+      // Monitor connection changes    <div class="camera-section">
+
+      window.addEventListener('online', updateConnectionStatus);      <form method="POST" action="{{ url_for('set_camera') }}" class="text-center mb-4">
+
+      window.addEventListener('offline', updateConnectionStatus);        <label for="camera" class="form-label fw-bold mb-3">
+
+                <i class="material-icons align-middle me-2">videocam</i>Pilih Kamera:
+
+      // Initial status check        </label>
+
+      updateConnectionStatus();        <select name="camera" id="camera" class="form-select select-modern w-50 mx-auto">
+
+          {% for i in range(6) %}
+
+      // Keyboard shortcuts tooltip          <option value="{{ i }}" {% if selected_camera == i %}selected{% endif %}>
+
+      document.addEventListener('keydown', function(e) {            Kamera {{ i }} {% if i == 3 %} {% endif %}
+
+        if (e.ctrlKey && (e.key === 'm' || e.key === 'p')) {          </option>
+
+          e.preventDefault();          {% endfor %}
+
+        }        </select>
+
+      });        <button type="submit" class="btn btn-primary btn-modern mt-3">
+
+          <i class="material-icons align-middle me-2">camera_alt</i>Gunakan Kamera
+
+      // Add keyboard shortcuts info        </button>
+
+      const shortcutsInfo = document.createElement('div');      </form>
+
+      shortcutsInfo.className = 'keyboard-shortcuts';
+
+      shortcutsInfo.innerHTML = `      <div class="text-center">
+
+        <div class="shortcuts-content">        <a href="{{ url_for('test_camera') }}">
+
+          <small><i class="bi bi-keyboard me-1"></i> Ctrl+M: Absen Masuk | Ctrl+P: Absen Pulang</small>          <button class="btn btn-warning btn-modern">
+
+        </div>            <i class="material-icons align-middle me-2">settings</i>Uji Kamera
+
+      `;          </button>
+
+      document.body.appendChild(shortcutsInfo);        </a>
+
+    });      </div>
+
+    </div>
+
+    // Performance monitoring
+
+    window.addEventListener('load', function() {    {% if selected_camera is not none %}
+
+      if ('performance' in window) {    <div class="text-center mb-4">
+
+        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;      <button class="btn btn-success btn-modern me-3" id="btnAbsenMasuk" onclick="startAttendance('masuk')">
+
+        console.log(`Page loaded in ${loadTime}ms`);        <i class="material-icons align-middle me-2">login</i>
+
+                <span class="btn-text">Absen Masuk</span>
+
+        if (loadTime > 3000) {        <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+
+          console.warn('Page load time is slower than expected');          <span class="visually-hidden">Loading...</span>
+
+        }        </div>
+
+      }      </button>
+
+    });      <button class="btn btn-danger btn-modern" id="btnAbsenPulang" onclick="startAttendance('pulang')">
+
+        <i class="material-icons align-middle me-2">logout</i>
+
+    // PWA install prompt        <span class="btn-text">Absen Pulang</span>
+
+    let deferredPrompt;        <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+
+    window.addEventListener('beforeinstallprompt', (e) => {          <span class="visually-hidden">Loading...</span>
+
+      e.preventDefault();        </div>
+
+      deferredPrompt = e;      </button>
+
+          </div>
+
+      // Show install button    {% endif %}
+
+      const installButton = document.createElement('button');
+
+      installButton.className = 'btn btn-outline-light btn-sm position-fixed';    <!-- Notification Area -->
+
+      installButton.style.cssText = 'top: 10px; left: 10px; z-index: 1060;';    <div id="notificationArea" class="mb-4" style="display: none;">
+
+      installButton.innerHTML = '<i class="bi bi-download me-1"></i> Install App';      <div class="alert alert-dismissible fade show" role="alert" id="alertNotification">
+
+      installButton.onclick = async () => {        <div class="d-flex align-items-center">
+
+        if (deferredPrompt) {          <i class="material-icons me-2" id="alertIcon">info</i>
+
+          deferredPrompt.prompt();          <div>
+
+          const result = await deferredPrompt.userChoice;            <strong id="alertTitle">Info</strong>
+
+          if (result.outcome === 'accepted') {            <div id="alertMessage">Message</div>
+
+            installButton.remove();          </div>
+
+          }        </div>
+
+          deferredPrompt = null;        <button type="button" class="btn-close" onclick="hideNotification()"></button>
+
+        }      </div>
+
+      };    </div>
+
+      document.body.appendChild(installButton);
+
+    });    <div class="row g-4">
+
+  </script>      <div class="col-md-8">
+
+        <div class="card card-modern">
+
+  <style>          <div class="card-header card-header-modern text-white">
+
+    /* Additional component styles */            <h4 class="mb-0">
+
+    .keyboard-shortcuts {              <i class="material-icons align-middle me-2">table_chart</i>Data Kehadiran Minggu Ini
+
+      position: fixed;            </h4>
+
+      bottom: 20px;            <small class="mt-1 d-block opacity-75">{{ date_range_week }}</small>
+
+      left: 20px;          </div>
+
+      background: rgba(0, 0, 0, 0.8);          <div class="card-body">
+
+      color: white;            <div class="stats-card">
+
+      padding: 8px 12px;              <h6 class="mb-0">
+
+      border-radius: 20px;                <i class="material-icons align-middle me-2">people</i>Total Terdaftar: <strong>{{ totalreg }}</strong>
+
+      font-size: 0.8rem;              </h6>
+
+      z-index: 1050;              <small class="text-muted mt-1 d-block">
+
+      backdrop-filter: blur(10px);                <i class="material-icons align-middle me-1" style="font-size: 14px;">info</i>
+
+    }                Tabel menampilkan data absensi minggu ini. Karyawan terdaftar harus melakukan absensi untuk muncul di tabel.
+
+              </small>
+
+    .connection-status {            </div>
+
+      position: fixed;            <div class="table-responsive">
+
+      top: 20px;              <table class="table table-striped table-modern" id="attendanceTable">
+
+      left: 50%;                <thead class="table-dark">
+
+      transform: translateX(-50%);                  <tr>
+
+      background: rgba(255, 255, 255, 0.9);                    <th>No</th>
+
+      backdrop-filter: blur(10px);                    <th>Nama</th>
+
+      padding: 8px 16px;                    <th>Bagian</th>
+
+      border-radius: 20px;                    <th>Tanggal</th>
+
+      display: flex;                    <th>Jam Masuk</th>
+
+      align-items: center;                    <th>Jam Pulang</th>
+
+      gap: 8px;                    <th>Total Jam Kerja</th>
+
+      font-size: 0.85rem;                    <th>Aksi</th>
+
+      font-weight: 500;                  </tr>
+
+      z-index: 1060;                </thead>
+
+      transition: all 0.3s ease;                <tbody>
+
+    }                  {% if l > 0 %}
+
+                    {% for i in range(l) %}
+
+    .status-dot {                    <tr>
+
+      width: 8px;                      <td>{{ i+1 }}</td>
+
+      height: 8px;                      <td>{{ names[i] }}</td>
+
+      border-radius: 50%;                      <td>{{ rolls[i] }}</td>
+
+      background: #28a745;                      <td>{{ tanggal[i] }}</td>
+
+      animation: pulse 2s infinite;                      <td>{{ times[i][0] }}</td>
+
+    }                      <td>{{ times[i][1] }}</td>
+
+                      <td>{{ times[i][2] }}</td>
+
+    .status-dot.offline {                      <td>
+
+      background: #dc3545;                        <button class="btn btn-sm btn-danger" onclick="deleteAttendance('{{ names[i] }}', '{{ rolls[i] }}', '{{ tanggal[i] }}')">
+
+    }                          <i class="material-icons" style="font-size: 16px;">delete</i>
+
+                        </button>
+
+    @keyframes pulse {                      </td>
+
+      0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }                    </tr>
+
+      70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }                    {% endfor %}
+
+      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }                  {% else %}
+
+    }                    <tr>
+
+                      <td colspan="8" class="text-center py-4">
+
+    /* Mobile optimizations */                        <i class="material-icons" style="font-size: 48px; color: #ccc;">event_busy</i>
+
+    @media (max-width: 768px) {                        <p class="mb-1 mt-2"><strong>Belum Ada Data Absensi Minggu Ini</strong></p>
+
+      .connection-status {                        <small class="text-muted">
+
+        top: 10px;                          {% if totalreg > 0 %}
+
+        font-size: 0.75rem;                            {{ totalreg }} karyawan terdaftar. Silakan lakukan absensi masuk/pulang untuk menampilkan data.
+
+        padding: 6px 12px;                          {% else %}
+
+      }                            Belum ada karyawan terdaftar. Tambahkan karyawan baru terlebih dahulu.
+
+                          {% endif %}
+
+      .keyboard-shortcuts {                        </small>
+
+        display: none;                      </td>
+
+      }                    </tr>
+
+                  {% endif %}
+
+      .action-grid {                </tbody>
+
+        grid-template-columns: 1fr;              </table>
+
+        gap: 1rem;            </div>
+
+      }          </div>
+
+        </div>
+
+      .glass-header .row {      </div>
+
+        text-align: center;
+
+      }      <div class="col-md-4">
+
+        <div class="card card-modern">
+
+      .header-info {          <div class="card-header card-header-info text-white">
+
+        margin-top: 1rem;            <h5 class="mb-0">
+
+      }              <i class="material-icons align-middle me-2">person_add</i>Tambah Karyawan Baru
+
+    }            </h5>
+
+  </style>          </div>
+
+</body>          <div class="card-body">
+
+</html>            <form id="addEmployeeForm" action='/add' method="POST" enctype="multipart/form-data">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="material-icons align-middle me-2">badge</i>Nama Karyawan*
+                </label>
+                <input type="text" class="form-control form-control-modern" name='newusername' required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">
+                  <i class="material-icons align-middle me-2">business</i>Bagian*
+                </label>
+                <input type="text" class="form-control form-control-modern" name='newuserid' required>
+              </div>
+              <button type="submit" class="btn btn-dark btn-modern w-100">
+                <i class="material-icons align-middle me-2">add</i>Tambah Karyawan
+              </button>
+            </form>
+            <div class="stats-card mt-4">
+              <h6 class="mb-0 text-center">
+                <i class="material-icons align-middle me-2">group</i>Total Karyawan Terdaftar: <strong>{{ totalreg }}</strong>
+              </h6>
+            </div>
+            
+            <!-- Employee Management Section -->
+            <div class="card mt-4">
+              <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                  <i class="material-icons align-middle me-2">manage_accounts</i>Kelola Karyawan
+                </h6>
+              </div>
+              <div class="card-body">
+                <p class="small text-muted mb-3">Hapus karyawan dari sistem (akan menghapus semua data terkait)</p>
+                <div class="row">
+                  <div class="col">
+                    <select class="form-select" id="employeeSelect">
+                      <option value="">Pilih karyawan untuk dihapus...</option>
+                    </select>
+                  </div>
+                  <div class="col-auto">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedEmployee()">
+                      <i class="material-icons align-middle me-1">delete</i>Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Real-time synchronization JavaScript -->
+  <script>
+    let autoRefreshInterval;
+    let isAutoRefreshEnabled = true;
+    
+    // Function to refresh attendance data
+    function refreshAttendanceData() {
+      fetch('/get_attendance_data')
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            updateAttendanceTable(data.data);
+            updateStats(data.data);
+            console.log('Data berhasil diperbarui:', new Date().toLocaleTimeString());
+          } else {
+            console.error('Error refreshing data:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Network error:', error);
+        });
+    }
+    
+    // Function to update attendance table
+    function updateAttendanceTable(data) {
+      const tbody = document.querySelector('#attendanceTable tbody');
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+      
+      for (let i = 0; i < data.names.length; i++) {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${data.names[i]}</td>
+          <td>${data.bagian[i]}</td>
+          <td>${data.tanggal[i]}</td>
+          <td>${data.times[i][0]}</td>
+          <td>${data.times[i][1]}</td>
+          <td>${data.times[i][2]}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${data.names[i]}', '${data.bagian[i]}', '${data.tanggal[i]}')">
+              <i class="material-icons" style="font-size: 16px;">delete</i>
+            </button>
+          </td>
+        `;
+      }
+    }
+    
+    // Function to update statistics
+    function updateStats(data) {
+      const totalRegElement = document.querySelector('.stats-card h6 strong');
+      if (totalRegElement) {
+        totalRegElement.textContent = data.totalreg;
+      }
+      
+      // Update total attendance count
+      const totalAttendanceElement = document.querySelector('#totalAttendance');
+      if (totalAttendanceElement) {
+        totalAttendanceElement.textContent = data.total;
+      }
+    }
+    
+    // Function to delete attendance
+    function deleteAttendance(name, bagian, tanggal) {
+      if (!confirm(`Hapus data absensi ${name} (${bagian}) tanggal ${tanggal}?`)) {
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('bagian', bagian);
+      formData.append('tanggal', tanggal);
+      
+      fetch('/delete_attendance', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert(data.message);
+          refreshAttendanceData(); // Refresh data immediately
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        alert('Network error: ' + error);
+      });
+    }
+    
+    // Function to delete employee with callback
+    function deleteEmployeeWithCallback(name, bagian, callback) {
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('bagian', bagian);
+      
+      fetch('/delete_employee', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert(data.message);
+          console.log('Employee deletion successful');
+          if (callback) callback(true);
+        } else {
+          alert('Error: ' + data.message);
+          console.log('Employee deletion failed:', data.message);
+          if (callback) callback(false);
+        }
+      })
+      .catch(error => {
+        alert('Network error: ' + error);
+        console.log('Network error during deletion:', error);
+        if (callback) callback(false);
+      });
+    }
+    
+    // Function to delete employee (legacy - for compatibility)
+    function deleteEmployee(name, bagian) {
+      if (!confirm(`Hapus karyawan ${name} (${bagian})? Ini akan menghapus SEMUA data absensi karyawan tersebut.`)) {
+        return;
+      }
+      
+      deleteEmployeeWithCallback(name, bagian, function(success) {
+        if (success) {
+          refreshAttendanceData(); // Refresh data immediately
+        }
+      });
+    }
+    
+    // Function to load employees into dropdown
+    function loadEmployeeDropdown() {
+      console.log('Loading employee dropdown...');
+      fetch('/get_employees')
+        .then(response => response.json())
+        .then(data => {
+          console.log('Employee data received:', data);
+          if (data.status === 'success') {
+            const select = document.getElementById('employeeSelect');
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Pilih karyawan untuk dihapus...</option>';
+            
+            // Add employee options
+            if (data.employees && data.employees.length > 0) {
+              data.employees.forEach(employee => {
+                const option = document.createElement('option');
+                option.value = `${employee.name}|${employee.bagian}`;
+                option.textContent = employee.display;
+                select.appendChild(option);
+              });
+              console.log(`Added ${data.employees.length} employees to dropdown`);
+            } else {
+              // Add "no employees" option
+              const option = document.createElement('option');
+              option.value = '';
+              option.textContent = 'Tidak ada karyawan tersedia';
+              option.disabled = true;
+              select.appendChild(option);
+              console.log('No employees found');
+            }
+          } else {
+            console.error('Error in employee data:', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading employees:', error);
+          // Show error in dropdown
+          const select = document.getElementById('employeeSelect');
+          select.innerHTML = '<option value="">Error loading data...</option>';
+        });
+    }
+    
+    // Function to delete selected employee from dropdown
+    function deleteSelectedEmployee() {
+      const select = document.getElementById('employeeSelect');
+      const selectedValue = select.value;
+      
+      if (!selectedValue) {
+        alert('Pilih karyawan yang ingin dihapus!');
+        return;
+      }
+      
+      const [name, bagian] = selectedValue.split('|');
+      
+      if (confirm(`Yakin ingin menghapus karyawan ${name} (${bagian})?\n\nPeringatan: Ini akan menghapus:\n- Data karyawan\n- Semua data absensi\n- Foto wajah\n- Model face recognition akan dilatih ulang`)) {
+        console.log(`Deleting employee: ${name} (${bagian})`);
+        
+        // Show loading state
+        select.innerHTML = '<option value="">Menghapus karyawan...</option>';
+        select.disabled = true;
+        
+        // Call delete function with callback
+        deleteEmployeeWithCallback(name, bagian, function(success) {
+          // Re-enable dropdown
+          select.disabled = false;
+          
+          if (success) {
+            console.log('Employee deleted successfully, reloading dropdown...');
+            // Reload dropdown immediately
+            loadEmployeeDropdown();
+            // Also refresh attendance data to update total count
+            refreshAttendanceData();
+          } else {
+            console.log('Delete failed, reloading dropdown...');
+            // Still reload dropdown in case of error
+            loadEmployeeDropdown();
+          }
+        });
+      }
+    }
+    
+    // Toggle auto-refresh
+    function toggleAutoRefresh() {
+      const button = document.querySelector('#autoRefreshBtn');
+      const status = document.querySelector('#refreshStatus');
+      
+      if (isAutoRefreshEnabled) {
+        clearInterval(autoRefreshInterval);
+        isAutoRefreshEnabled = false;
+        button.textContent = 'Aktifkan Auto-Refresh';
+        button.className = 'btn btn-success btn-modern btn-sm';
+        status.textContent = 'MATI';
+        status.className = 'badge bg-danger';
+      } else {
+        startAutoRefresh();
+        isAutoRefreshEnabled = true;
+        button.textContent = 'Matikan Auto-Refresh';
+        button.className = 'btn btn-warning btn-modern btn-sm';
+        status.textContent = 'AKTIF';
+        status.className = 'badge bg-success';
+      }
+    }
+    
+    // Start auto-refresh
+    function startAutoRefresh() {
+      autoRefreshInterval = setInterval(refreshAttendanceData, 5000); // Refresh every 5 seconds
+    }
+    
+    // Initialize auto-refresh when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Sistem sinkronisasi real-time dimulai');
+      startAutoRefresh();
+      loadEmployeeDropdown(); // Load employee list for deletion dropdown
+      
+      // Reload employee dropdown every 10 seconds to stay synced
+      setInterval(function() {
+        console.log('Periodic employee dropdown reload');
+        loadEmployeeDropdown();
+      }, 10000);
+      
+      // Add event listener for add employee form
+      const addEmployeeForm = document.getElementById('addEmployeeForm');
+      if (addEmployeeForm) {
+        addEmployeeForm.addEventListener('submit', function(e) {
+          console.log('Employee form submitted, will reload dropdown after page refresh');
+          // The dropdown will be reloaded automatically when page reloads after form submission
+        });
+      }
+      
+      // Add refresh status indicator
+      const header = document.querySelector('.header-section');
+      if (header) {
+        const refreshDiv = document.createElement('div');
+        refreshDiv.innerHTML = `
+          <div style="position: absolute; top: 10px; right: 20px; text-align: right;">
+            <div>
+              <span class="badge bg-success" id="refreshStatus">AKTIF</span>
+              <small style="display: block; opacity: 0.8; margin-top: 5px;">Auto-Refresh Database</small>
+            </div>
+            <button class="btn btn-warning btn-modern btn-sm mt-2" id="autoRefreshBtn" onclick="toggleAutoRefresh()">
+              Matikan Auto-Refresh
+            </button>
+            <button class="btn btn-info btn-modern btn-sm mt-1" onclick="refreshAttendanceData()">
+              <i class="material-icons" style="font-size: 14px;">refresh</i> Refresh Manual
+            </button>
+          </div>
+        `;
+        header.appendChild(refreshDiv);
+      }
+    });
+    
+    // Handle visibility change (when user switches tabs)
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        // Page is hidden, reduce refresh frequency
+        if (isAutoRefreshEnabled) {
+          clearInterval(autoRefreshInterval);
+          autoRefreshInterval = setInterval(refreshAttendanceData, 30000); // 30 seconds
+        }
+      } else {
+        // Page is visible, restore normal refresh frequency
+        if (isAutoRefreshEnabled) {
+          clearInterval(autoRefreshInterval);
+          startAutoRefresh();
+          refreshAttendanceData(); // Immediate refresh when returning to tab
+        }
+      }
+    });
+    
+    // Attendance functions with loading and notifications
+    function startAttendance(mode) {
+      const btnId = mode === 'masuk' ? 'btnAbsenMasuk' : 'btnAbsenPulang';
+      const btn = document.getElementById(btnId);
+      const btnText = btn.querySelector('.btn-text');
+      const spinner = btn.querySelector('.spinner-border');
+      
+      // Show loading state
+      btn.disabled = true;
+      btnText.textContent = mode === 'masuk' ? 'Memproses...' : 'Memproses...';
+      spinner.classList.remove('d-none');
+      
+      // Show info notification
+      showNotification('info', 'Membuka Kamera', 
+        `Anda akan diarahkan ke halaman absensi ${mode} dengan kamera web...`);
+      
+      // Redirect to web-based attendance page (not GUI OpenCV)
+      setTimeout(() => {
+        window.location.href = mode === 'masuk' ? '/absen_masuk' : '/absen_pulang';
+      }, 500);
+    }
+    
+    // Notification functions
+    function showNotification(type, title, message) {
+      const notificationArea = document.getElementById('notificationArea');
+      const alert = document.getElementById('alertNotification');
+      const icon = document.getElementById('alertIcon');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertMessage = document.getElementById('alertMessage');
+      
+      // Set notification type
+      alert.className = 'alert alert-dismissible fade show';
+      switch(type) {
+        case 'success':
+          alert.classList.add('alert-success');
+          icon.textContent = 'check_circle';
+          break;
+        case 'error':
+          alert.classList.add('alert-danger');
+          icon.textContent = 'error';
+          break;
+        case 'warning':
+          alert.classList.add('alert-warning');
+          icon.textContent = 'warning';
+          break;
+        default:
+          alert.classList.add('alert-info');
+          icon.textContent = 'info';
+      }
+      
+      // Set content
+      alertTitle.textContent = title;
+      alertMessage.textContent = message;
+      
+      // Show notification
+      notificationArea.style.display = 'block';
+      
+      // Auto hide after 5 seconds for success/info
+      if (type === 'success' || type === 'info') {
+        setTimeout(hideNotification, 5000);
+      }
+    }
+    
+    function hideNotification() {
+      const notificationArea = document.getElementById('notificationArea');
+      notificationArea.style.display = 'none';
+    }
+    
+    // Check for success message from server
+    document.addEventListener('DOMContentLoaded', function() {
+      const messElement = document.querySelector('.alert-success');
+      if (messElement) {
+        const message = messElement.textContent.trim();
+        if (message.includes('Absensi') && message.includes('berhasil')) {
+          showNotification('success', 'Absensi Berhasil!', message);
+          // Refresh data immediately
+          refreshAttendanceData();
+          // Hide server message
+          messElement.style.display = 'none';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

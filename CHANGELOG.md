@@ -1,0 +1,117 @@
+# 📋 Changelog
+
+All notable changes to Smart Absen Face Recognition System will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [Unreleased]
+
+### Planned
+- Dashboard untuk training face model
+- Capture foto langsung dari dashboard
+- Upload foto manual (drag & drop)
+- Model re-training tanpa restart
+- Analytics dashboard
+- Export laporan ke PDF/Excel
+
+---
+
+## [1.0.0] - 2024-12-05
+
+### 🎉 Initial Release
+
+#### Added
+- **QR Code Authentication System**
+  - Generate QR code untuk setiap session
+  - QR code auto-refresh setiap 5 menit
+  - Manual code input sebagai backup
+  - Cross-device sync dengan polling
+
+- **Face Recognition**
+  - Face detection dengan Haar Cascade (OpenCV)
+  - Face recognition dengan KNN Classifier (scikit-learn)
+  - Real-time camera feed
+  - Multi-face detection support
+
+- **Attendance System**
+  - Mode Absen Masuk
+  - Mode Absen Pulang
+  - Timestamp recording
+  - Daily attendance log (CSV)
+  - Database persistence (MySQL)
+
+- **Admin Dashboard**
+  - Admin login system
+  - Employee management (CRUD)
+  - Attendance reports
+  - Role-based access (Admin, Supervisor)
+
+- **User Interface**
+  - Responsive design (Desktop & Mobile)
+  - Two-column layout untuk laptop
+  - Success popup dengan countdown
+  - Tab navigation untuk mode absensi
+
+- **Infrastructure**
+  - Cloudflare Tunnel integration
+  - Public HTTPS access
+  - Startup scripts (`start.sh`, `start_with_tunnel.sh`)
+
+#### Technical Details
+- Python 3.8+ compatible
+- Flask 2.0+ web framework
+- MySQL 8.0+ database
+- OpenCV 4.0+ for face detection
+- scikit-learn for face recognition
+
+---
+
+## [0.5.0] - 2024-11-15
+
+### Added
+- Basic face detection
+- Simple attendance recording
+- Initial database schema
+
+### Changed
+- Improved camera handling
+
+---
+
+## [0.1.0] - 2024-10-20
+
+### Added
+- Project initialization
+- Basic Flask setup
+- Database connection
+- Initial templates
+
+---
+
+## Version History Summary
+
+| Version | Date | Highlights |
+|---------|------|------------|
+| 1.0.0 | Dec 2024 | Full release dengan QR + Face auth |
+| 0.5.0 | Nov 2024 | Basic face recognition |
+| 0.1.0 | Oct 2024 | Initial prototype |
+
+---
+
+## Legend
+
+- 🎉 **Added** - New features
+- 🔄 **Changed** - Changes in existing functionality
+- 🗑️ **Deprecated** - Soon-to-be removed features
+- ❌ **Removed** - Removed features
+- 🐛 **Fixed** - Bug fixes
+- 🔒 **Security** - Security improvements
+
+---
+
+<p align="center">
+  <b>Smart Absen - Kelompok 4</b>
+</p>

@@ -1,0 +1,172 @@
+@startuml ClassDiagram
+!theme cerulean-outline
+
+title Kafebasabasi Face Recognition Attendance System - Class Diagram
+
+package "Database Layer" {
+    class DatabaseManager {
+        -config: dict
+        -connection: Connection
+        +connect(): bool
+        +get_connection(): Connection
+        +execute_query(query: str, params: list): list
+        +close_connection(): void
+    }
+}
+
+package "Model Layer" {
+    class Employee {
+        +id: int
+        +name: string
+        +bagian: string
+        +created_at: datetime
+        +updated_at: datetime
+        --
+        +{static} add_employee(name: str, bagian: str): bool
+        +{static} get_all_employees(): list
+        +{static} get_employee_by_id(id: int): dict
+        +{static} get_employee_by_name_bagian(name: str, bagian: str): dict
+        +{static} delete_employee(id: int): bool
+    }
+
+    class Attendance {
+        +id: int
+        +employee_id: int
+        +tanggal: date
+        +jam_masuk: time
+        +jam_pulang: time
+        +total_jam_kerja: timedelta
+        +status: string
+        +created_at: datetime
+        +updated_at: datetime
+        --
+        +{static} add_or_update_attendance(employee_id: int, tanggal: date, jam_masuk: time, jam_pulang: time): bool
+        +{static} get_attendance_by_employee_date(employee_id: int, tanggal: date): dict
+        +{static} get_today_attendance(): list
+        +{static} get_weekly_attendance(start_date: date, end_date: date): list
+        +{static} calculate_work_hours(jam_masuk: time, jam_pulang: time): timedelta
+        +{static} delete_attendance(employee_id: int, tanggal: date): bool
+    }
+
+    class ActivityLog {
+        +id: int
+        +employee_id: int
+        +activity_type: string
+        +description: string
+        +timestamp: datetime
+        --
+        +{static} add_log(employee_id: int, activity_type: str, description: str): bool
+        +{static} get_recent_logs(limit: int): list
+    }
+}
+
+package "Face Recognition" {
+    class FaceRecognition {
+        -model: KNeighborsClassifier
+        -face_cascade: CascadeClassifier
+        --
+        +capture_face_images(name: str, bagian: str, count: int): list
+        +train_model(): bool
+        +identify_face(image: ndarray): string
+        +load_model(): KNeighborsClassifier
+        +save_model(model: KNeighborsClassifier): bool
+    }
+
+    class CameraManager {
+        -camera_id: int
+        -cap: VideoCapture
+        --
+        +initialize_camera(camera_id: int): bool
+        +capture_frame(): ndarray
+        +release_camera(): void
+        +cleanup(): void
+    }
+}
+
+package "Web Application" {
+    class FlaskApp {
+        +app: Flask
+        +db_manager: DatabaseManager
+        --
+        +run(): void
+        +initialize_routes(): void
+        +handle_attendance(mode: str, camera_id: int): dict
+    }
+
+    class AttendanceController {
+        +mark_attendance(mode: str, camera_id: int): Response
+        +get_attendance_data(): Response
+        +get_cameras(): Response
+        +verify_qr(unit: str): Response
+    }
+
+    class AdminController {
+        +admin_dashboard(): Response
+        +admin_employees(): Response
+        +admin_attendance(): Response
+        +admin_database(): Response
+        +add_employee_with_face(): Response
+        +database_reset(): Response
+    }
+
+    class AuthController {
+        +qr_auth(): Response
+        +generate_qr(): Response
+        +verify_qr_session(): bool
+    }
+}
+
+package "Isolated Process" {
+    class CameraIsolated {
+        +run_isolated_camera(mode: str, camera_id: int): void
+        +identify_face(face_image: ndarray): string
+        +update_attendance_in_db(name: str, mode: str): dict
+        +cleanup_camera_resources(): void
+    }
+}
+
+package "Utilities" {
+    class ResetDatabase {
+        +reset_all_data(): bool
+        +confirm_reset(): bool
+        +cleanup_files(): bool
+    }
+
+    class QRManager {
+        +generate_unit_code(): string
+        +verify_unit_code(code: str): bool
+        +check_expiration(timestamp: datetime): bool
+    }
+}
+
+' Relationships
+DatabaseManager ||--o{ Employee : manages
+DatabaseManager ||--o{ Attendance : manages
+DatabaseManager ||--o{ ActivityLog : manages
+
+Employee ||--o{ Attendance : has
+Employee ||--o{ ActivityLog : has
+
+FaceRecognition --> Employee : recognizes
+CameraManager --> FaceRecognition : provides_images
+
+FlaskApp --> DatabaseManager : uses
+FlaskApp --> AttendanceController : routes_to
+FlaskApp --> AdminController : routes_to
+FlaskApp --> AuthController : routes_to
+
+AttendanceController --> CameraIsolated : spawns
+AttendanceController --> Attendance : updates
+AttendanceController --> QRManager : validates
+
+AdminController --> Employee : manages
+AdminController --> Attendance : views
+AdminController --> ResetDatabase : uses
+
+CameraIsolated --> FaceRecognition : uses
+CameraIsolated --> CameraManager : uses
+CameraIsolated --> Attendance : updates
+
+AuthController --> QRManager : uses
+
+@enduml

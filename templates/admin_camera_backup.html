@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Kamera - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light-bg: #f8f9fa;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        body { background-color: var(--light-bg); }
+        .navbar { background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); }
+        .sidebar { background: white; min-height: calc(100vh - 56px); box-shadow: var(--shadow); }
+        .sidebar .nav-link { color: var(--primary-color); padding: 1rem 1.5rem; border-bottom: 1px solid #dee2e6; }
+        .sidebar .nav-link:hover { background-color: var(--light-bg); color: var(--secondary-color); }
+        .sidebar .nav-link.active { background-color: var(--secondary-color); color: white; border-left: 4px solid var(--primary-color); }
+        .card { border: none; border-radius: 15px; box-shadow: var(--shadow); }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin">
+                <i class="bi bi-camera"></i> Test Kamera
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/admin/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-xl-2 px-0">
+                <div class="sidebar">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="/admin">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                        <a class="nav-link" href="/admin/employees">
+                            <i class="bi bi-people"></i> Kelola Karyawan
+                        </a>
+                        <a class="nav-link" href="/admin/attendance">
+                            <i class="bi bi-calendar-check"></i> Data Absensi
+                        </a>
+                        <a class="nav-link" href="/admin/reports">
+                            <i class="bi bi-file-earmark-text"></i> Laporan
+                        </a>
+                        <a class="nav-link active" href="/admin/camera">
+                            <i class="bi bi-camera"></i> Test Kamera
+                        </a>
+                        <a class="nav-link" href="/admin/database">
+                            <i class="bi bi-database"></i> Database
+                        </a>
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house"></i> Halaman Utama
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 col-xl-10">
+                <div class="container-fluid py-4">
+                    <!-- Header -->
+                    <h2 class="mb-4"><i class="bi bi-camera"></i> Test & Manajemen Kamera</h2>
+
+                    <!-- Current Camera Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Status Kamera</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Kamera Aktif:</strong> <span class="badge bg-success">Camera {{ selected_camera }}</span></p>
+                                    <p><strong>Total Karyawan:</strong> {{ totalreg }} orang</p>
+                                    <p><strong>Status Model:</strong> 
+                                        <span class="badge bg-info">Trained</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0"><i class="bi bi-gear"></i> Pengaturan Kamera</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Pilih Kamera</label>
+                                        <select class="form-select" id="cameraSelect">
+                                            <option value="0" {{ 'selected' if selected_camera == 0 else '' }}>Kamera 0 (Default)</option>
+                                            <option value="1" {{ 'selected' if selected_camera == 1 else '' }}>Kamera 1</option>
+                                            <option value="2" {{ 'selected' if selected_camera == 2 else '' }}>Kamera 2</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="updateCamera()">
+                                        <i class="bi bi-check"></i> Update Kamera
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Camera Test Actions -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-play-circle"></i> Test Kamera</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <button class="btn btn-success w-100" onclick="testCamera()">
+                                        <i class="bi bi-camera"></i> Test Kamera
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-info w-100" onclick="testFaceDetection()">
+                                        <i class="bi bi-person-check"></i> Test Deteksi Wajah
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-warning w-100" onclick="trainModel()">
+                                        <i class="bi bi-cpu"></i> Training Model
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-secondary w-100" onclick="checkModel()">
+                                        <i class="bi bi-file-check"></i> Cek Model
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Petunjuk Penggunaan</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="bi bi-1-circle text-primary"></i> Test Kamera</h6>
+                                    <p class="text-muted">Uji kamera untuk memastikan dapat menangkap gambar dengan baik. Tekan ESC untuk keluar.</p>
+                                    
+                                    <h6><i class="bi bi-2-circle text-primary"></i> Test Deteksi Wajah</h6>
+                                    <p class="text-muted">Uji kemampuan sistem mendeteksi wajah. Pastikan wajah terlihat jelas di kamera.</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="bi bi-3-circle text-primary"></i> Training Model</h6>
+                                    <p class="text-muted">Latih ulang model face recognition jika ada karyawan baru atau akurasi menurun.</p>
+                                    
+                                    <h6><i class="bi bi-4-circle text-primary"></i> Cek Model</h6>
+                                    <p class="text-muted">Periksa status model face recognition dan file yang diperlukan sistem.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateCamera() {
+            const cameraId = document.getElementById('cameraSelect').value;
+            fetch('/select_camera', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `camera_id=${cameraId}`
+            }).then(response => {
+                if (response.ok) {
+                    alert('Kamera berhasil diupdate!');
+                    location.reload();
+                }
+            });
+        }
+
+        function testCamera() {
+            window.location.href = '/test_camera';
+        }
+
+        function testFaceDetection() {
+            alert('Feature Test Face Detection akan segera tersedia!');
+        }
+
+        function trainModel() {
+            if (confirm('Training model akan memakan waktu. Lanjutkan?')) {
+                alert('Feature Training Model akan segera tersedia!');
+            }
+        }
+
+        function checkModel() {
+            alert('Feature Check Model akan segera tersedia!');
+        }
+    </script>
+</body>
+</html>

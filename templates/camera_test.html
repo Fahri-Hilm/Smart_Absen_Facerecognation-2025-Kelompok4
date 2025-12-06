@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #video {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        #log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 Camera Test - Kafebasabasi</h1>
+        
+        <div id="messages"></div>
+        
+        <div style="margin: 20px 0;">
+            <button id="startBtn">Start Camera</button>
+            <button id="stopBtn" disabled>Stop Camera</button>
+            <button id="testBtn">Test Browser Support</button>
+            <button id="permissionBtn">Request Permission</button>
+            <button id="clearLogBtn">Clear Log</button>
+        </div>
+        
+        <video id="video" autoplay muted playsinline style="display: none;"></video>
+        
+        <div style="margin: 20px 0;">
+            <strong>Debug Log:</strong>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const testBtn = document.getElementById('testBtn');
+        const permissionBtn = document.getElementById('permissionBtn');
+        const clearLogBtn = document.getElementById('clearLogBtn');
+        const messagesDiv = document.getElementById('messages');
+        const logDiv = document.getElementById('log');
+        
+        let currentStream = null;
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            console.log(logEntry);
+            logDiv.innerHTML += logEntry + '\n';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (messagesDiv.contains(messageDiv)) {
+                    messagesDiv.removeChild(messageDiv);
+                }
+            }, 8000);
+        }
+        
+        async function requestPermission() {
+            try {
+                log('=== Requesting Camera Permission ===');
+                showMessage('Meminta izin kamera... Klik ALLOW saat ditanya!', 'info');
+                
+                // Try to get camera access (this will trigger permission dialog)
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                log('✅ Permission granted!');
+                
+                // Stop the stream immediately (we just wanted permission)
+                stream.getTracks().forEach(track => track.stop());
+                log('✅ Test stream stopped');
+                
+                showMessage('✅ Izin kamera berhasil diberikan! Sekarang coba "Start Camera"', 'success');
+                
+            } catch (error) {
+                log('❌ Permission request failed: ' + error.name + ' - ' + error.message);
+                
+                if (error.name === 'NotAllowedError') {
+                    showMessage('❌ Izin kamera ditolak. Coba metode manual di bawah.', 'error');
+                    showPermissionHelp();
+                } else {
+                    showMessage('❌ Error: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        function clearLog() {
+            logDiv.innerHTML = '';
+            messagesDiv.innerHTML = '';
+        }
+        
+        function showPermissionHelp() {
+            const helpDiv = document.createElement('div');
+            helpDiv.className = 'info';
+            helpDiv.style.cssText = 'margin: 10px 0; padding: 15px; border-left: 4px solid #007bff;';
+            helpDiv.innerHTML = `
+                <strong>🔧 Cara Memberikan Izin Kamera:</strong><br>
+                <br>
+                <strong>Metode 1 - Address Bar:</strong><br>
+                1. Lihat ikon kamera 📷 di sebelah kiri address bar<br>
+                2. Klik ikon tersebut<br>
+                3. Pilih "Allow" atau "Izinkan"<br>
+                4. Refresh halaman (tekan F5)<br>
+                <br>
+                <strong>Metode 2 - Browser Settings:</strong><br>
+                1. Klik menu browser (⋮ atau ☰)<br>
+                2. Pilih Settings/Pengaturan<br>
+                3. Cari "Privacy" atau "Site Settings"<br>
+                4. Pilih "Camera"<br>
+                5. Tambahkan "localhost" ke daftar yang diizinkan<br>
+                <br>
+                <strong>Metode 3 - Refresh:</strong><br>
+                1. Tekan F5 untuk refresh<br>
+                2. Klik "Allow" saat browser menanyakan izin<br>
+            `;
+            messagesDiv.appendChild(helpDiv);
+        }
+        
+        async function testBrowserSupport() {
+            log('=== Testing Browser Support ===');
+            
+            log('User Agent: ' + navigator.userAgent);
+            log('Protocol: ' + window.location.protocol);
+            log('Host: ' + window.location.host);
+            
+            if (!navigator.mediaDevices) {
+                log('❌ navigator.mediaDevices not supported');
+                showMessage('Browser tidak mendukung MediaDevices API', 'error');
+                return false;
+            }
+            
+            log('✅ navigator.mediaDevices supported');
+            
+            if (!navigator.mediaDevices.getUserMedia) {
+                log('❌ getUserMedia not supported');
+                showMessage('Browser tidak mendukung getUserMedia', 'error');
+                return false;
+            }
+            
+            log('✅ getUserMedia supported');
+            
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                log('Total devices: ' + devices.length);
+                
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                log('Video devices: ' + videoDevices.length);
+                
+                videoDevices.forEach((device, index) => {
+                    log(`Video Device ${index}: ${device.label || 'Unknown'} (${device.deviceId})`);
+                });
+                
+                if (videoDevices.length === 0) {
+                    log('❌ No video devices found');
+                    showMessage('Tidak ada perangkat video yang ditemukan', 'error');
+                    return false;
+                }
+                
+                log('✅ Video devices available');
+                showMessage(`✅ Browser support OK - Found ${videoDevices.length} video device(s)`, 'success');
+                return true;
+                
+            } catch (error) {
+                log('❌ Error enumerating devices: ' + error.message);
+                showMessage('Error mengakses daftar perangkat: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function startCamera() {
+            try {
+                log('=== Starting Camera ===');
+                
+                // Stop existing stream first
+                if (currentStream) {
+                    stopCamera();
+                }
+                
+                // Check permissions first
+                log('Checking camera permissions...');
+                try {
+                    const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+                    log('Permission status: ' + permissionStatus.state);
+                    
+                    if (permissionStatus.state === 'denied') {
+                        throw new Error('Camera permission permanently denied. Please allow in browser settings.');
+                    }
+                } catch (permError) {
+                    log('Permission check failed (might be normal): ' + permError.message);
+                }
+                
+                const constraints = {
+                    video: {
+                        width: { ideal: 640, min: 320 },
+                        height: { ideal: 480, min: 240 },
+                        frameRate: { ideal: 30, min: 15 }
+                    }
+                };
+                
+                log('Requesting camera with constraints: ' + JSON.stringify(constraints));
+                showMessage('Requesting camera access... Please allow when prompted!', 'info');
+                
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                log('✅ Camera stream obtained');
+                
+                video.srcObject = currentStream;
+                video.style.display = 'block';
+                
+                // Wait for video to load
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        log(`✅ Video loaded: ${video.videoWidth}x${video.videoHeight}`);
+                        resolve();
+                    };
+                });
+                
+                // Log track info
+                const videoTrack = currentStream.getVideoTracks()[0];
+                const settings = videoTrack.getSettings();
+                log('Track settings: ' + JSON.stringify(settings, null, 2));
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                showMessage('✅ Kamera berhasil diaktifkan!', 'success');
+                
+            } catch (error) {
+                log('❌ Error starting camera: ' + error.name + ' - ' + error.message);
+                
+                let userMessage = 'Gagal mengaktifkan kamera: ';
+                let instructions = '';
+                
+                switch (error.name) {
+                    case 'NotFoundError':
+                        userMessage += 'Kamera tidak ditemukan';
+                        instructions = 'Pastikan kamera terhubung dan driver terinstall.';
+                        break;
+                    case 'NotAllowedError':
+                        userMessage += 'Akses kamera ditolak';
+                        instructions = 'SOLUSI: Klik ikon kamera 📷 di address bar dan pilih "Allow". Atau buka Settings browser → Privacy → Camera → Allow untuk localhost.';
+                        break;
+                    case 'NotReadableError':
+                        userMessage += 'Kamera sedang digunakan aplikasi lain';
+                        instructions = 'Tutup aplikasi lain yang menggunakan kamera (Zoom, Skype, dll).';
+                        break;
+                    case 'OverconstrainedError':
+                        userMessage += 'Resolusi tidak didukung';
+                        instructions = 'Kamera tidak mendukung resolusi yang diminta.';
+                        break;
+                    case 'SecurityError':
+                        userMessage += 'Koneksi tidak aman';
+                        instructions = 'Gunakan HTTPS atau localhost. Pastikan URL dimulai dengan http://localhost';
+                        break;
+                    default:
+                        userMessage += error.message;
+                        instructions = 'Coba refresh halaman atau gunakan browser lain (Chrome/Firefox).';
+                }
+                
+                showMessage(userMessage, 'error');
+                if (instructions) {
+                    showMessage('💡 ' + instructions, 'info');
+                }
+                
+                // Show permission help for NotAllowedError
+                if (error.name === 'NotAllowedError') {
+                    showPermissionHelp();
+                }
+            }
+        }
+        
+        function stopCamera() {
+            log('=== Stopping Camera ===');
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => {
+                    track.stop();
+                    log('Track stopped: ' + track.kind);
+                });
+                currentStream = null;
+            }
+            
+            video.srcObject = null;
+            video.style.display = 'none';
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            log('✅ Camera stopped');
+            showMessage('Kamera dimatikan', 'info');
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+        testBtn.addEventListener('click', testBrowserSupport);
+        permissionBtn.addEventListener('click', requestPermission);
+        clearLogBtn.addEventListener('click', clearLog);
+        
+        // Initial log
+        log('Camera Test Page Loaded');
+        log('Ready to test camera functionality');
+    </script>
+</body>
+</html>

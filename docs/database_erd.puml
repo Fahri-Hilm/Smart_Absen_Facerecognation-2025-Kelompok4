@@ -1,0 +1,137 @@
+@startuml DatabaseERD
+!theme cerulean-outline
+
+title Kafebasabasi Attendance System - Database Entity Relationship Diagram
+
+!define TABLE entity
+
+entity "employees" as emp {
+  * id : INT <<PK>>
+  --
+  * nama : VARCHAR(100)
+  * bagian : VARCHAR(50)
+  * jabatan : VARCHAR(50)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "attendance" as att {
+  * id : INT <<PK>>
+  --
+  * employee_id : INT <<FK>>
+  * tanggal : DATE
+  jam_masuk : TIME
+  jam_pulang : TIME
+  total_jam_kerja : DECIMAL(4,2)
+  keterangan : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "activity_log" as log {
+  * id : INT <<PK>>
+  --
+  * employee_id : INT <<FK>>
+  * activity_type : VARCHAR(50)
+  * activity_details : TEXT
+  * timestamp : TIMESTAMP
+  ip_address : VARCHAR(45)
+  user_agent : TEXT
+}
+
+entity "admin_users" as admin {
+  * id : INT <<PK>>
+  --
+  * username : VARCHAR(50)
+  * password_hash : VARCHAR(255)
+  * full_name : VARCHAR(100)
+  * email : VARCHAR(100)
+  * role : ENUM('admin', 'super_admin')
+  last_login : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "qr_sessions" as qr {
+  * id : INT <<PK>>
+  --
+  * unit_code : VARCHAR(10)
+  * verification_time : TIMESTAMP
+  * expires_at : TIMESTAMP
+  * is_active : BOOLEAN
+  ip_address : VARCHAR(45)
+  user_agent : TEXT
+}
+
+' Relationships
+emp ||--o{ att : "employee_id"
+emp ||--o{ log : "employee_id"
+
+' Relationship labels
+emp to att : "1 employee can have\nmany attendance records"
+emp to log : "1 employee can have\nmany activity logs"
+
+note top of emp
+  Core employee information
+  - Primary identification for face recognition
+  - Department and position tracking
+end note
+
+note top of att
+  Daily attendance tracking
+  - Automatic total_jam_kerja calculation
+  - Supports partial attendance (masuk only)
+  - UNIQUE constraint on (employee_id, tanggal)
+end note
+
+note bottom of log
+  Activity audit trail
+  - Tracks all system interactions
+  - Security and compliance logging
+end note
+
+note right of admin
+  Administrative access control
+  - Separate from employee system
+  - Role-based permissions
+end note
+
+note left of qr
+  QR code authentication
+  - Session-based verification
+  - Mobile device support
+  - Automatic expiration
+end note
+
+' Database constraints and indexes
+note as constraints
+  **Key Constraints:**
+  - employees.nama + employees.bagian = UNIQUE
+  - attendance(employee_id, tanggal) = UNIQUE
+  - admin_users.username = UNIQUE
+  - admin_users.email = UNIQUE
+  - qr_sessions.unit_code = UNIQUE (active sessions)
+  
+  **Indexes:**
+  - idx_attendance_date ON attendance(tanggal)
+  - idx_attendance_employee_date ON attendance(employee_id, tanggal)
+  - idx_activity_log_timestamp ON activity_log(timestamp)
+  - idx_qr_sessions_expires ON qr_sessions(expires_at)
+  
+  **Triggers:**
+  - auto_calculate_total_jam_kerja ON attendance UPDATE
+  - auto_update_timestamps ON all tables
+end note
+
+' File system relationships (stored outside database)
+folder "File System Storage" as fs {
+  file "static/faces/{employee_id}_{timestamp}.jpg" as faces
+  file "static/face_recognition_model.pkl" as model
+  file "Attendance/Attendance-{year}-W{week}.csv" as exports
+}
+
+emp --> faces : "Face images for\ntraining and recognition"
+att --> exports : "Weekly attendance\nCSV exports"
+model --> emp : "Trained model\nrecognizes employees"
+
+@enduml
