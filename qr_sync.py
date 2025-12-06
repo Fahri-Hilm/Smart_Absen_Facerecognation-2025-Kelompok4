@@ -82,6 +82,22 @@ class QRSyncManager:
             for session_id in expired:
                 del self.sessions[session_id]
         return len(expired)
+    
+    def get_latest_auth(self, unit_code=None):
+        """Get the latest authenticated session for a unit code"""
+        with self.lock:
+            latest = None
+            latest_time = None
+            for session_id, data in self.sessions.items():
+                if data.get('verified', False):
+                    # If unit_code specified, filter by it
+                    if unit_code and data.get('code') != unit_code:
+                        continue
+                    verified_at = data.get('verified_at', data.get('timestamp'))
+                    if latest_time is None or verified_at > latest_time:
+                        latest = data
+                        latest_time = verified_at
+            return latest
 
 
 # Global instance

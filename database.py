@@ -74,14 +74,13 @@ class DatabaseManager:
                     nik VARCHAR(16) UNIQUE,
                     email VARCHAR(100) UNIQUE,
                     phone VARCHAR(20),
-                    gender VARCHAR(20),
+                    gender ENUM('L','P'),
                     address TEXT,
-                    position VARCHAR(100),
-                    status VARCHAR(20) DEFAULT 'aktif',
+                    position VARCHAR(50),
+                    status ENUM('aktif','tidak_aktif','cuti') DEFAULT 'aktif',
                     hire_date DATE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    UNIQUE KEY unique_employee (name, bagian)
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 """
                 
