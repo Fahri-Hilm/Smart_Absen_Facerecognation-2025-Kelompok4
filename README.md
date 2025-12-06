@@ -1,248 +1,494 @@
-# 🎯 Smart Absen# 🎯 Smart Absen - Face Recognition Attendance System# 🎯 Smart Absen - Face Recognition Attendance System
+# 🎯 Smart Absen - Face Recognition Attendance System# 🎯 Smart Absen# 🎯 Smart Absen - Face Recognition Attendance System# 🎯 Smart Absen - Face Recognition Attendance System
 
 
 
-**Sistem Absensi Pintar dengan Face Recognition & QR Code**
+```
 
+╔══════════════════════════════════════════════════════════════════════════════╗
 
+║  Sistem Absensi Pintar dengan Face Recognition & QR Code Authentication      ║**Sistem Absensi Pintar dengan Face Recognition & QR Code**
+
+║  Kelompok 4 - Software Project 2025                                          ║
+
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+```
 
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)> Sistem Absensi Pintar berbasis Face Recognition & QR Code Authentication**Sistem Absensi Pintar dengan Face Recognition & QR Code Authentication**
 
-[![Flask](https://img.shields.io/badge/Flask-2.0+-000000?logo=flask)](https://flask.palletsprojects.com)
+[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)
+
+[![Flask](https://img.shields.io/badge/Flask-2.0+-000000?logo=flask)](https://flask.palletsprojects.com)[![Flask](https://img.shields.io/badge/Flask-2.0+-000000?logo=flask)](https://flask.palletsprojects.com)
 
 [![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)](https://mysql.com)
 
-[![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-5C3EE8?logo=opencv)](https://opencv.org)
-
-[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)Kelompok 4 - Software Project 2025
-
----
-
-[![Flask](https://img.shields.io/badge/Flask-2.0+-000000?logo=flask)](https://flask.palletsprojects.com)
-
-## ⚡ Quick Start
-
-[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)](https://mysql.com)![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-
-```bash
-
-# 1. Clone repository[![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-5C3EE8?logo=opencv)](https://opencv.org)![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)
-
-git clone https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4.git
-
-cd Smart_Absen_Facerecognation-2025-Kelompok4[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)![MySQL](https://img.shields.io/badge/MySQL-8.0+-orange.svg)
+[![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-5C3EE8?logo=opencv)](https://opencv.org)[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)](https://mysql.com)
 
 
 
-# 2. Setup environment![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-red.svg)
+---[![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-5C3EE8?logo=opencv)](https://opencv.org)
 
-python -m venv .venv
+
+
+## 📋 Daftar Isi[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)Kelompok 4 - Software Project 2025
+
+
+
+```---
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+
+│  01. Quick Start ............................................. [ ⚡ ]        │[![Flask](https://img.shields.io/badge/Flask-2.0+-000000?logo=flask)](https://flask.palletsprojects.com)
+
+│  02. Fitur Utama ............................................. [ ✨ ]        │
+
+│  03. Alur Penggunaan ......................................... [ 🔄 ]        │## ⚡ Quick Start
+
+│  04. Tech Stack .............................................. [ 🛠️ ]        │
+
+│  05. Struktur Project ........................................ [ 📁 ]        │[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)](https://mysql.com)![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+
+│  06. Konfigurasi ............................................. [ ⚙️ ]        │
+
+│  07. Dokumentasi ............................................. [ 📖 ]        │```bash
+
+│  08. Requirements ............................................ [ 💻 ]        │
+
+│  09. Tim Pengembang .......................................... [ 👥 ]        │# 1. Clone repository[![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-5C3EE8?logo=opencv)](https://opencv.org)![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)
+
+└──────────────────────────────────────────────────────────────────────────────┘
+
+```git clone https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4.git
+
+
+
+---cd Smart_Absen_Facerecognation-2025-Kelompok4[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)![MySQL](https://img.shields.io/badge/MySQL-8.0+-orange.svg)
+
+
+
+## ⚡ 01. Quick Start
+
+
+
+```bash# 2. Setup environment![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-red.svg)
+
+# ┌─────────────────────────────────────────────────────────────────────────────
+
+# │ INSTALASIpython -m venv .venv
+
+# └─────────────────────────────────────────────────────────────────────────────
 
 source .venv/bin/activate      # Linux/Mac---
 
-# .venv\Scripts\activate       # Windows
+# Clone repository
+
+git clone https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4.git# .venv\Scripts\activate       # Windows
+
+cd Smart_Absen_Facerecognation-2025-Kelompok4
 
 ---
 
-# 3. Install dependencies
+# Setup virtual environment
 
-pip install -r requirements.txt## ⚡ Quick Start
+python -m venv .venv# 3. Install dependencies
+
+source .venv/bin/activate      # Linux/Mac
+
+# .venv\Scripts\activate       # Windowspip install -r requirements.txt## ⚡ Quick Start
 
 
+
+# Install dependencies
+
+pip install -r requirements.txt
 
 # 4. Setup database (MySQL harus running)## 📚 Dokumentasi
 
-mysql -u root -e "CREATE DATABASE absensi_karyawan_db;"
+# Setup database (MySQL harus running)
 
-```bash
+mysql -u root -e "CREATE DATABASE absensi_karyawan_db;"mysql -u root -e "CREATE DATABASE absensi_karyawan_db;"
 
-# 5. Run aplikasi
 
-python app.py# Clone & Setup| Dokumen | Deskripsi |
+
+# Jalankan aplikasi```bash
+
+python app.py
+
+```# 5. Run aplikasi
+
+
+
+```python app.py# Clone & Setup| Dokumen | Deskripsi |
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+
+│  🌐 AKSES: http://localhost:5001                                            │```
+
+└─────────────────────────────────────────────────────────────────────────────┘
+
+```git clone https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4.git|---------|-----------|
+
+
+
+---**Akses:** http://localhost:5001
+
+
+
+## ✨ 02. Fitur Utamacd Smart_Absen_Facerecognation-2025-Kelompok4| [README.md](README.md) | Overview dan quick start (dokumen ini) |
+
+
+
+```---
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+
+│  FITUR                    │  DESKRIPSI                                      │python -m venv .venv && source .venv/bin/activate| [INSTALLATION.md](INSTALLATION.md) | Panduan instalasi lengkap step-by-step |
+
+├───────────────────────────┼─────────────────────────────────────────────────┤
+
+│  🔐 QR Authentication     │  Scan QR untuk akses (auto-refresh 10 menit)    │## ✨ Fitur
+
+│  👤 Face Recognition      │  Identifikasi wajah dengan KNN Classifier       │
+
+│  ⏰ Absensi Masuk/Pulang  │  Dual mode dengan tracking jam kerja            │pip install -r requirements.txt| [USAGE.md](USAGE.md) | Panduan penggunaan sistem |
+
+│  📊 Admin Dashboard       │  Kelola karyawan, laporan & data absensi        │
+
+│  📱 Responsive Design     │  Optimal di laptop & mobile                     │| Fitur | Deskripsi |
+
+│  🌐 Cloudflare Tunnel     │  Public HTTPS access                            │
+
+└───────────────────────────┴─────────────────────────────────────────────────┘|:------|:----------|| [API.md](docs/API_DOCUMENTATION.md) | Dokumentasi API endpoints |
 
 ```
-
-git clone https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4.git|---------|-----------|
-
-**Akses:** http://localhost:5001
-
-cd Smart_Absen_Facerecognation-2025-Kelompok4| [README.md](README.md) | Overview dan quick start (dokumen ini) |
-
----
-
-python -m venv .venv && source .venv/bin/activate| [INSTALLATION.md](INSTALLATION.md) | Panduan instalasi lengkap step-by-step |
-
-## ✨ Fitur
-
-pip install -r requirements.txt| [USAGE.md](USAGE.md) | Panduan penggunaan sistem |
-
-| Fitur | Deskripsi |
-
-|:------|:----------|| [API.md](docs/API_DOCUMENTATION.md) | Dokumentasi API endpoints |
 
 | 🔐 QR Authentication | Scan QR untuk akses, auto-refresh tiap 10 menit |
 
+---
+
 | 👤 Face Recognition | Identifikasi wajah dengan KNN Classifier |# Database (MySQL harus running)| [CONTRIBUTING.md](CONTRIBUTING.md) | Panduan kontribusi |
+
+## 🔄 03. Alur Penggunaan
 
 | ⏰ Absensi Masuk/Pulang | Dual mode dengan tracking jam kerja |
 
-| 📊 Admin Dashboard | Kelola karyawan, laporan & data |mysql -u root -e "CREATE DATABASE absensi_karyawan_db;"| [CHANGELOG.md](CHANGELOG.md) | Riwayat perubahan |
+```
 
-| 📱 Responsive | Optimal di laptop & mobile |
+┌─────────────────────────────────────────────────────────────────────────────┐| 📊 Admin Dashboard | Kelola karyawan, laporan & data |mysql -u root -e "CREATE DATABASE absensi_karyawan_db;"| [CHANGELOG.md](CHANGELOG.md) | Riwayat perubahan |
 
-| 🌐 Cloudflare Tunnel | Public HTTPS access |
+│                           FLOW ABSENSI                                      │
 
+├─────────────────────────────────────────────────────────────────────────────┤| 📱 Responsive | Optimal di laptop & mobile |
 
+│                                                                             │
 
----# Run---
+│   ┌──────────┐      ┌──────────┐      ┌──────────┐      ┌──────────┐       │| 🌐 Cloudflare Tunnel | Public HTTPS access |
 
+│   │    1     │      │    2     │      │    3     │      │    4     │       │
 
+│   │  LAPTOP  │ ───► │    HP    │ ───► │  LAPTOP  │ ───► │   DONE   │       │
 
-## 🔄 Cara Kerjapython app.py
+│   │  /auth   │      │ Scan QR  │      │Face Scan │      │ Sukses!  │       │
 
+│   └──────────┘      └──────────┘      └──────────┘      └──────────┘       │---# Run---
 
+│       │                  │                 │                 │              │
+
+│       ▼                  ▼                 ▼                 ▼              │
+
+│   QR Code &          Verify            Absensi           Data              │
+
+│   Kode Input         Access            Wajah            Tersimpan          │## 🔄 Cara Kerjapython app.py
+
+│                                                                             │
+
+└─────────────────────────────────────────────────────────────────────────────┘
+
+```
 
 ``````## 📋 Table of Contents
 
+---
+
 [1. LAPTOP]      [2. HP]        [3. LAPTOP]      [4. DONE]
+
+## 🛠️ 04. Tech Stack
 
    /auth    -->  Scan QR   -->  Face Scan   -->  Tersimpan🌐 Akses: **http://localhost:5001**
 
-  QR Code        Verify         Absensi          Database
+```
 
-```1. [Overview](#overview)
+┌─────────────────────────────────────────────────────────────────────────────┐  QR Code        Verify         Absensi          Database
 
+│  LAYER              │  TEKNOLOGI                                            │
 
+├─────────────────────┼───────────────────────────────────────────────────────┤```1. [Overview](#overview)
 
-------2. [Features](#features)
+│  Backend            │  Flask • PyMySQL • OpenCV • scikit-learn              │
 
+│  Frontend           │  HTML5 • CSS3 • JavaScript • Bootstrap 5              │
 
+│  Database           │  MySQL 8.0+                                           │
+
+│  Machine Learning   │  Haar Cascade (detection) • KNN (recognition)         │------2. [Features](#features)
+
+│  Infrastructure     │  Cloudflare Tunnel (HTTPS)                            │
+
+└─────────────────────┴───────────────────────────────────────────────────────┘
+
+```
 
 ## 🛠️ Tech Stack3. [System Requirements](#system-requirements)
 
+---
 
+
+
+## 📁 05. Struktur Project
 
 **Backend:** Flask • PyMySQL • OpenCV • scikit-learn  ## 🎯 Fitur Utama4. [Quick Start](#quick-start)
 
-**Frontend:** HTML5 • CSS3 • JavaScript • Bootstrap 5  
-
-**Database:** MySQL 8.0+  5. [Project Structure](#project-structure)
-
-**ML:** Haar Cascade (detection) • KNN (recognition)
-
-| Fitur | Deskripsi |6. [Technology Stack](#technology-stack)
-
----
-
-|-------|-----------|7. [Roadmap](#roadmap)
-
-## 📁 Struktur
-
-| 🔐 **QR Authentication** | Scan QR untuk akses (auto-refresh setiap 10 menit) |8. [Team](#team)
-
 ```
 
-├── app.py              # Main Flask app| 👤 **Face Recognition** | Deteksi & identifikasi wajah dengan KNN Classifier |
+┌─────────────────────────────────────────────────────────────────────────────┐**Frontend:** HTML5 • CSS3 • JavaScript • Bootstrap 5  
 
-├── config.py           # Konfigurasi
+│  Smart_Absen/                                                               │
 
-├── database.py         # Database handler| ⏰ **Absensi Masuk/Pulang** | Dual mode dengan tracking jam kerja |---
+├─────────────────────────────────────────────────────────────────────────────┤**Database:** MySQL 8.0+  5. [Project Structure](#project-structure)
 
-├── models.py           # Data models
+│  ├── app.py                 # Main Flask application                        │
 
-├── qr_sync.py          # QR sync manager| 📊 **Admin Dashboard** | Kelola karyawan, laporan & data absensi |
+│  ├── config.py              # Konfigurasi database & app                    │**ML:** Haar Cascade (detection) • KNN (recognition)
 
-├── camera_lock.py      # Camera lock
+│  ├── database.py            # Database handler                              │
 
-├── requirements.txt    # Dependencies| 📱 **Responsive** | Optimal di laptop & mobile |## Overview
+│  ├── models.py              # Data models                                   │| Fitur | Deskripsi |6. [Technology Stack](#technology-stack)
 
-├── assets/             # ML models
+│  ├── qr_sync.py             # QR cross-device sync manager                  │
 
-├── static/             # CSS, JS| 🌐 **Cloudflare Tunnel** | Public HTTPS access |
+│  ├── camera_lock.py         # Camera lock manager                           │---
 
-├── templates/          # HTML
+│  ├── requirements.txt       # Python dependencies                           │
+
+│  ├── start.sh               # Startup script                                │|-------|-----------|7. [Roadmap](#roadmap)
+
+│  │                                                                          │
+
+│  ├── assets/                # ML model files                                │## 📁 Struktur
+
+│  │   ├── haarcascade_frontalface_default.xml                                │
+
+│  │   └── model_knn.pkl                                                      │| 🔐 **QR Authentication** | Scan QR untuk akses (auto-refresh setiap 10 menit) |8. [Team](#team)
+
+│  │                                                                          │
+
+│  ├── static/                # Frontend assets                               │```
+
+│  │   ├── css/                                                               │
+
+│  │   ├── js/                                                                │├── app.py              # Main Flask app| 👤 **Face Recognition** | Deteksi & identifikasi wajah dengan KNN Classifier |
+
+│  │   └── images/                                                            │
+
+│  │                                                                          │├── config.py           # Konfigurasi
+
+│  ├── templates/             # HTML templates                                │
+
+│  │   ├── qr_auth.html                                                       │├── database.py         # Database handler| ⏰ **Absensi Masuk/Pulang** | Dual mode dengan tracking jam kerja |---
+
+│  │   ├── web_attendance.html                                                │
+
+│  │   └── admin_*.html                                                       │├── models.py           # Data models
+
+│  │                                                                          │
+
+│  └── Attendance/            # CSV attendance logs                           │├── qr_sync.py          # QR sync manager| 📊 **Admin Dashboard** | Kelola karyawan, laporan & data absensi |
+
+└─────────────────────────────────────────────────────────────────────────────┘
+
+```├── camera_lock.py      # Camera lock
+
+
+
+---├── requirements.txt    # Dependencies| 📱 **Responsive** | Optimal di laptop & mobile |## Overview
+
+
+
+## ⚙️ 06. Konfigurasi├── assets/             # ML models
+
+
+
+```python├── static/             # CSS, JS| 🌐 **Cloudflare Tunnel** | Public HTTPS access |
+
+# ┌─────────────────────────────────────────────────────────────────────────────
+
+# │ config.py - Edit sesuai environment Anda├── templates/          # HTML
+
+# └─────────────────────────────────────────────────────────────────────────────
 
 └── Attendance/         # CSV logs### Apa itu Smart Absen?
 
+DB_CONFIG = {
+
+    'host': '127.0.0.1',```
+
+    'user': 'root',
+
+    'password': '',              # Sesuaikan password MySQL---
+
+    'db': 'absensi_karyawan_db'
+
+}---
+
+
+
+# QR Code Settings**Smart Absen** adalah sistem absensi berbasis web yang mengkombinasikan:
+
+QR_VALIDITY_MINUTES = 10         # QR refresh setiap 10 menit
+
+```## ⚙️ Konfigurasi
+
+
+
+---## 🔄 Alur Penggunaan- **QR Code Authentication** - Untuk verifikasi akses
+
+
+
+## 📖 07. DokumentasiEdit `config.py`:
+
+
+
+```- **Face Recognition** - Untuk identifikasi karyawan
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+
+│  DOKUMEN                         │  DESKRIPSI                               │```python
+
+├──────────────────────────────────┼──────────────────────────────────────────┤
+
+│  📄 INSTALLATION.md              │  Panduan instalasi lengkap               │DB_CONFIG = {```- **Real-time Processing** - Absensi langsung tercatat
+
+│  📄 USAGE.md                     │  Panduan penggunaan sistem               │
+
+│  📄 docs/API_DOCUMENTATION.md    │  REST API endpoints                      │    'host': '127.0.0.1',
+
+│  📄 CONTRIBUTING.md              │  Panduan kontribusi                      │
+
+│  📄 CHANGELOG.md                 │  Riwayat perubahan                       │    'user': 'root',┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+
+└──────────────────────────────────┴──────────────────────────────────────────┘
+
+```    'password': '',
+
+
+
+---    'db': 'absensi_karyawan_db'│  1. LAPTOP  │───▶│   2. HP     │───▶│  3. LAPTOP  │───▶│  4. DONE    │### Mengapa Smart Absen?
+
+
+
+## 💻 08. System Requirements}
+
+
+
+``````│   /auth     │    │  Scan QR    │    │  Face Scan  │    │  Tersimpan  │
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+
+│  KOMPONEN           │  MINIMUM                                              │
+
+├─────────────────────┼───────────────────────────────────────────────────────┤
+
+│  Operating System   │  Windows 10 / Ubuntu 20.04 / macOS                    │---│ QR + Code   │    │  Verify     │    │  Absensi    │    │  Database   │| Masalah Tradisional | Solusi Smart Absen |
+
+│  Python             │  3.8 atau lebih tinggi                                │
+
+│  MySQL              │  8.0 atau lebih tinggi                                │
+
+│  RAM                │  4 GB                                                 │
+
+│  Webcam             │  720p resolution                                      │## 📖 Dokumentasi└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘|---------------------|-------------------|
+
+│  Browser            │  Chrome / Firefox / Edge (terbaru)                    │
+
+└─────────────────────┴───────────────────────────────────────────────────────┘
+
 ```
-
----
-
----
-
-**Smart Absen** adalah sistem absensi berbasis web yang mengkombinasikan:
-
-## ⚙️ Konfigurasi
-
-## 🔄 Alur Penggunaan- **QR Code Authentication** - Untuk verifikasi akses
-
-Edit `config.py`:
-
-- **Face Recognition** - Untuk identifikasi karyawan
-
-```python
-
-DB_CONFIG = {```- **Real-time Processing** - Absensi langsung tercatat
-
-    'host': '127.0.0.1',
-
-    'user': 'root',┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-
-    'password': '',
-
-    'db': 'absensi_karyawan_db'│  1. LAPTOP  │───▶│   2. HP     │───▶│  3. LAPTOP  │───▶│  4. DONE    │### Mengapa Smart Absen?
-
-}
-
-```│   /auth     │    │  Scan QR    │    │  Face Scan  │    │  Tersimpan  │
-
-
-
----│ QR + Code   │    │  Verify     │    │  Absensi    │    │  Database   │| Masalah Tradisional | Solusi Smart Absen |
-
-
-
-## 📖 Dokumentasi└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘|---------------------|-------------------|
-
-
 
 - [INSTALLATION.md](INSTALLATION.md) — Panduan instalasi lengkap```| Absensi manual bisa dipalsukan | Face recognition memastikan kehadiran asli |
 
+---
+
 - [USAGE.md](USAGE.md) — Panduan penggunaan
+
+## 👥 09. Tim Pengembang
 
 - [API Documentation](docs/API_DOCUMENTATION.md) — REST API| Antrian panjang saat absen | Proses cepat < 5 detik |
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) — Panduan kontribusi
+```
 
-- [CHANGELOG.md](CHANGELOG.md) — Riwayat perubahan---| Data tersebar di berbagai tempat | Centralized database |
+╔═════════════════════════════════════════════════════════════════════════════╗- [CONTRIBUTING.md](CONTRIBUTING.md) — Panduan kontribusi
+
+║                     KELOMPOK 4 - SOFTWARE PROJECT 2025                      ║
+
+╠═════════════════════════════════════════════════════════════════════════════╣- [CHANGELOG.md](CHANGELOG.md) — Riwayat perubahan---| Data tersebar di berbagai tempat | Centralized database |
+
+║  NAMA                        │  ROLE                                        ║
+
+╠──────────────────────────────┼──────────────────────────────────────────────╣
+
+║  Fahri Hilmi                 │  Lead Developer                              ║
+
+╚══════════════════════════════╧══════════════════════════════════════════════╝---| Sulit diakses remote | Cloud-ready dengan Cloudflare Tunnel |
+
+```
 
 
 
----| Sulit diakses remote | Cloud-ready dengan Cloudflare Tunnel |
-
-
+---
 
 ## 💻 Requirements## 🛠️ Tech Stack
 
+## 📜 License
 
 
-| Komponen | Versi |### Demo Flow
 
-|:---------|:------|
+```
+
+┌─────────────────────────────────────────────────────────────────────────────┐| Komponen | Versi |### Demo Flow
+
+│  MIT License © 2025 Kelompok 4 - Software Project                           │
+
+└─────────────────────────────────────────────────────────────────────────────┘|:---------|:------|
+
+```
 
 | OS | Windows 10 / Ubuntu 20.04 / macOS || Layer | Teknologi |
 
+---
+
 | Python | 3.8+ |
+
+<div align="center">
 
 | MySQL | 8.0+ ||-------|-----------|```
 
-| RAM | 4 GB |
+```
 
-| Camera | 720p || **Backend** | Flask, PyMySQL, OpenCV, scikit-learn |STEP 1           STEP 2           STEP 3           STEP 4
+┌─────────────────────────────────────────────────────────────────────────────┐| RAM | 4 GB |
 
+│  ⭐ Star this repo  •  🐛 Report Bug  •  💡 Request Feature                 │
 
+│                                                                             │| Camera | 720p || **Backend** | Flask, PyMySQL, OpenCV, scikit-learn |STEP 1           STEP 2           STEP 3           STEP 4
+
+│  https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4   │
+
+└─────────────────────────────────────────────────────────────────────────────┘
+
+```
 
 ---| **Frontend** | HTML5, CSS3, JavaScript, Bootstrap 5 |[LAPTOP]  --->   [HP]     --->   [LAPTOP]  --->   [SUKSES]
+
+</div>
 
 
 
