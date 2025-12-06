@@ -10,6 +10,10 @@
 [![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-5C3EE8?logo=opencv)](https://opencv.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+[![GitHub Stars](https://img.shields.io/github/stars/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4?style=social)](https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4?style=social)](https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4)](https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4/issues)
+
 **Kelompok 4 - Software Project 2025**
 
 [Quick Start](#-quick-start) • [Features](#-features) • [Documentation](#-dokumentasi) • [Team](#-tim-pengembang)
