@@ -4,7 +4,90 @@ QR Sync Manager - Handles cross-device synchronization for QR code authenticatio
 
 import threading
 import time
+import json
+import os
 from datetime import datetime, timedelta
+
+# File untuk menyimpan device-employee associations (persistent)
+DEVICE_DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'device_registry.json')
+
+class DeviceRegistry:
+    """
+    Menyimpan asosiasi antara device ID dengan employee.
+    Data disimpan ke file JSON agar persistent.
+    """
+    
+    def __init__(self):
+        self.devices = {}  # {device_id: {employee_id, employee_name, nik, last_seen, ...}}
+        self.lock = threading.Lock()
+        self._load_from_file()
+    
+    def _load_from_file(self):
+        """Load device data from JSON file"""
+        try:
+            if os.path.exists(DEVICE_DATA_FILE):
+                with open(DEVICE_DATA_FILE, 'r') as f:
+                    self.devices = json.load(f)
+                print(f"[DeviceRegistry] Loaded {len(self.devices)} registered devices")
+        except Exception as e:
+            print(f"[DeviceRegistry] Error loading device data: {e}")
+            self.devices = {}
+    
+    def _save_to_file(self):
+        """Save device data to JSON file"""
+        try:
+            os.makedirs(os.path.dirname(DEVICE_DATA_FILE), exist_ok=True)
+            with open(DEVICE_DATA_FILE, 'w') as f:
+                json.dump(self.devices, f, indent=2, default=str)
+        except Exception as e:
+            print(f"[DeviceRegistry] Error saving device data: {e}")
+    
+    def register_device(self, device_id, employee_id, employee_name, nik=None):
+        """Register a device with an employee"""
+        with self.lock:
+            self.devices[device_id] = {
+                'employee_id': employee_id,
+                'employee_name': employee_name,
+                'nik': nik,
+                'registered_at': datetime.now().isoformat(),
+                'last_seen': datetime.now().isoformat()
+            }
+            self._save_to_file()
+            print(f"[DeviceRegistry] Device {device_id[:8]}... registered to {employee_name}")
+            return True
+    
+    def get_employee_by_device(self, device_id):
+        """Get employee info by device ID"""
+        with self.lock:
+            if device_id in self.devices:
+                # Update last seen
+                self.devices[device_id]['last_seen'] = datetime.now().isoformat()
+                self._save_to_file()
+                return self.devices[device_id]
+            return None
+    
+    def unregister_device(self, device_id):
+        """Remove device registration"""
+        with self.lock:
+            if device_id in self.devices:
+                del self.devices[device_id]
+                self._save_to_file()
+                return True
+            return False
+    
+    def get_devices_by_employee(self, employee_id):
+        """Get all devices registered to an employee"""
+        with self.lock:
+            return [
+                {'device_id': did, **data}
+                for did, data in self.devices.items()
+                if data.get('employee_id') == employee_id
+            ]
+
+
+# Global device registry instance
+device_registry = DeviceRegistry()
+
 
 class QRSyncManager:
     """
@@ -91,23 +174,50 @@ class QRSyncManager:
             for session_id, data in self.sessions.items():
                 if data.get('verified', False):
                     # If unit_code specified, filter by it
-                    if unit_code and data.get('code') != unit_code:
+                    if unit_code and data.get('code') != unit_code.upper():
                         continue
                     verified_at = data.get('verified_at', data.get('timestamp'))
                     if latest_time is None or verified_at > latest_time:
-                        latest = data
+                        latest = data.copy()
+                        latest['unit_code'] = data.get('code')  # Add unit_code field for compatibility
                         latest_time = verified_at
             return latest
     
-    def verify_qr_auth(self, code, device_info=None):
+    def verify_qr_auth(self, code, device_info=None, employee_info=None, device_id=None):
         """Verify QR auth by code (called when mobile scans QR)"""
         with self.lock:
-            # Find session by code
+            code_upper = code.upper()
+            # Find existing session by code
+            found = False
             for session_id, data in self.sessions.items():
-                if data.get('code') == code.upper():
+                if data.get('code') == code_upper:
                     self.sessions[session_id]['verified'] = True
                     self.sessions[session_id]['verified_at'] = datetime.now()
                     self.sessions[session_id]['device_info'] = device_info
+                    self.sessions[session_id]['employee_info'] = employee_info
+                    self.sessions[session_id]['device_id'] = device_id
+                    found = True
+                    break
+            
+            # If no session found, create one
+            if not found:
+                session_id = f"mobile_{code_upper}_{datetime.now().timestamp()}"
+                self.sessions[session_id] = {
+                    'verified': True,
+                    'timestamp': datetime.now(),
+                    'verified_at': datetime.now(),
+                    'code': code_upper,
+                    'device_info': device_info,
+                    'employee_info': employee_info,
+                    'device_id': device_id
+                }
+            return True
+
+    def is_authenticated(self, unit_code):
+        """Check if a unit code has been authenticated"""
+        with self.lock:
+            for session_id, data in self.sessions.items():
+                if data.get('code') == unit_code.upper() and data.get('verified', False):
                     return True
         return False
 

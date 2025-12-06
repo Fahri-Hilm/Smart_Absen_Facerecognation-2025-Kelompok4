@@ -44,6 +44,18 @@ class Employee:
             return None
     
     @staticmethod
+    def get_employee_by_nik(nik):
+        """Mendapatkan data karyawan berdasarkan NIK"""
+        try:
+            db = get_db_manager()
+            query = "SELECT * FROM employees WHERE nik = %s"
+            result = db.execute_query(query, (nik,))
+            return result[0] if result else None
+        except Exception as e:
+            logger.error(f"Gagal mendapatkan data karyawan by NIK: {e}")
+            return None
+    
+    @staticmethod
     def get_all_employees():
         """Mendapatkan semua data karyawan"""
         try:

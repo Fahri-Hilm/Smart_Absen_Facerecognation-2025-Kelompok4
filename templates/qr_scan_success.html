@@ -80,6 +80,19 @@
             margin-bottom: 15px;
         }
         
+        .welcome-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            animation: fadeIn 0.5s ease-out 0.3s both;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .success-message {
             font-size: 18px;
             color: #555;
@@ -91,6 +104,26 @@
             font-size: 14px;
             color: #888;
             margin-bottom: 25px;
+        }
+        
+        .employee-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            animation: fadeIn 0.5s ease-out 0.5s both;
+        }
+        
+        .employee-badge .name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .employee-badge .nik {
+            font-size: 12px;
+            opacity: 0.9;
         }
         
         .laptop-icon {
@@ -168,6 +201,28 @@
             <i class="fas fa-check checkmark-animation"></i>
         </div>
         
+        {% if employee_info %}
+        <!-- Device dikenali - tampilkan pesan selamat datang -->
+        <h1 class="success-title">
+            <i class="fas fa-hand-sparkles me-2"></i>
+            Selamat Datang!
+        </h1>
+        
+        <div class="employee-badge">
+            <div class="name">
+                <i class="fas fa-user-circle me-1"></i>
+                {{ employee_info.employee_name }}
+            </div>
+            {% if employee_info.nik %}
+            <div class="nik">NIK: {{ employee_info.nik }}</div>
+            {% endif %}
+        </div>
+        
+        <p class="success-message">
+            HP Anda dikenali! 📱✨
+        </p>
+        {% else %}
+        <!-- Device belum dikenali -->
         <h1 class="success-title">
             <i class="fas fa-unlock-alt me-2"></i>
             Kunci Terbuka!
@@ -176,6 +231,7 @@
         <p class="success-message">
             QR Code berhasil di-scan!
         </p>
+        {% endif %}
         
         <p class="success-detail">
             Laptop akan otomatis tersinkronisasi untuk melanjutkan proses absensi.
@@ -205,11 +261,70 @@
     </div>
 
     <script>
-        // Auto play success sound (optional)
+        // 🎵 Play success sound when page loads
+        function playSuccessSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create a pleasant "ding-ding" sound
+                const playTone = (freq, startTime, duration) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    
+                    gain.gain.setValueAtTime(0.3, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                };
+                
+                const now = audioContext.currentTime;
+                // Play two-tone success chime
+                playTone(880, now, 0.15);        // A5
+                playTone(1108.73, now + 0.15, 0.15); // C#6
+                playTone(1318.51, now + 0.3, 0.3);  // E6 (longer)
+                
+                console.log('🎵 QR Success sound played');
+            } catch (e) {
+                console.log('Audio not supported:', e);
+            }
+        }
+        
+        // Play sound on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure audio context is ready
+            setTimeout(playSuccessSound, 100);
+        });
+        
+        // Also try to play on user interaction (for browsers that block autoplay)
+        document.body.addEventListener('click', function() {
+            playSuccessSound();
+        }, { once: true });
+
+        // Generate or get device ID
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('absenn_device_id');
+            if (!deviceId) {
+                deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('absenn_device_id', deviceId);
+            }
+            return deviceId;
+        }
+        
+        // Store device ID for future use
+        const deviceId = getDeviceId();
+        console.log('Device ID:', deviceId);
+        
+        // Vibrate on mobile if supported
         try {
-            // Vibrate on mobile if supported
             if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100]);
+                navigator.vibrate([100, 50, 100, 50, 100]);
             }
         } catch (e) {
             console.log('Vibration not supported');
@@ -218,6 +333,11 @@
         // Log for debugging
         console.log('QR Scan success - HP used as key');
         console.log('Laptop should auto-redirect via polling');
+        {% if employee_info %}
+        console.log('Employee recognized:', '{{ employee_info.employee_name }}');
+        {% else %}
+        console.log('Device not registered yet - will register after first successful attendance');
+        {% endif %}
     </script>
 </body>
 </html>

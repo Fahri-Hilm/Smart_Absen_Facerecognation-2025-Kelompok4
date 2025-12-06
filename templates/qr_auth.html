@@ -599,6 +599,7 @@
                         </button>
                     </form>
                 </div>
+                </div>
             </div>
         </div>
     </div>
@@ -762,17 +763,17 @@
             document.getElementById('syncModal').classList.add('show');
 
             setTimeout(() => {
-                acceptQRSync(syncData.session_id);
+                acceptQRSync(syncData.session_id, syncData.timestamp);
             }, 1500);
         }
 
-        function acceptQRSync(sessionId) {
-            console.log('✅ Accepting QR sync for session:', sessionId);
+        function acceptQRSync(sessionId, timestamp) {
+            console.log('✅ Accepting QR sync for session:', sessionId, 'timestamp:', timestamp);
             
             fetch('/api/accept_qr_sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_id: sessionId })
+                body: JSON.stringify({ session_id: sessionId, timestamp: timestamp })
             })
             .then(response => response.json())
             .then(data => {

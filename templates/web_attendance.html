@@ -403,6 +403,85 @@
 
         .success-countdown { color: #888; font-size: 0.9rem; }
 
+        /* Employee Welcome Banner Styles */
+        .employee-welcome-banner {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-bottom: 3px solid #28a745;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.5s ease;
+        }
+
+        .employee-welcome-banner.guest-mode {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border-bottom: 3px solid #ffc107;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .welcome-content i {
+            font-size: 2.5rem;
+            color: #28a745;
+        }
+
+        .employee-welcome-banner.guest-mode .welcome-content i {
+            color: #856404;
+        }
+
+        .welcome-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .greeting-label {
+            font-size: 0.85rem;
+            color: #155724;
+            font-weight: 500;
+        }
+
+        .employee-welcome-banner.guest-mode .greeting-label {
+            color: #856404;
+        }
+
+        .employee-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #155724;
+        }
+
+        .employee-welcome-banner.guest-mode .employee-name {
+            color: #856404;
+            font-size: 1.1rem;
+        }
+
+        .welcome-badge {
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .welcome-badge.guest {
+            background: #ffc107;
+            color: #856404;
+        }
+
         .security-warning {
             display: none;
             background: #fff3cd;
@@ -466,6 +545,35 @@
                 <div class="date" id="currentDate">Memuat...</div>
             </div>
         </div>
+        
+        <!-- Employee Welcome Banner -->
+        {% if employee_info %}
+        <div class="employee-welcome-banner">
+            <div class="welcome-content">
+                <i class="bi bi-person-check-fill"></i>
+                <div class="welcome-text">
+                    <span class="greeting-label">Selamat Datang,</span>
+                    <span class="employee-name">{{ employee_info.employee_name }}</span>
+                </div>
+            </div>
+            <div class="welcome-badge">
+                <i class="bi bi-shield-check"></i> Device Terdaftar
+            </div>
+        </div>
+        {% else %}
+        <div class="employee-welcome-banner guest-mode">
+            <div class="welcome-content">
+                <i class="bi bi-person-fill-exclamation"></i>
+                <div class="welcome-text">
+                    <span class="greeting-label">Halo!</span>
+                    <span class="employee-name">Device belum terdaftar</span>
+                </div>
+            </div>
+            <div class="welcome-badge guest">
+                <i class="bi bi-info-circle"></i> Absen pertama untuk registrasi
+            </div>
+        </div>
+        {% endif %}
 
         <div class="attendance-body">
             <div class="camera-section">
@@ -712,6 +820,9 @@
             const icon = document.getElementById('successIcon');
             const title = document.getElementById('successTitle');
             
+            // 🎵 Play success sound
+            playSuccessSound();
+            
             icon.classList.remove('masuk', 'pulang');
             icon.classList.add(mode);
             title.classList.remove('masuk', 'pulang');
@@ -732,6 +843,9 @@
 
             if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
 
+            // Clear QR session FIRST to prevent auto-redirect back
+            clearQRSession();
+
             let countdown = 5;
             const countdownEl = document.getElementById('countdown');
             const interval = setInterval(() => {
@@ -742,6 +856,83 @@
                     window.location.href = '/auth';
                 }
             }, 1000);
+        }
+
+        // Clear QR session to prevent auto-redirect after attendance
+        async function clearQRSession() {
+            try {
+                const response = await fetch('/api/clear_qr_session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                console.log('🧹 QR session cleared:', result);
+            } catch (error) {
+                console.error('Error clearing QR session:', error);
+            }
+        }
+
+        // 🎵 Sound Effects using Web Audio API
+        function playSuccessSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create a pleasant "ding" sound
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                // Main tone
+                oscillator1.type = 'sine';
+                oscillator1.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+                oscillator1.frequency.setValueAtTime(1108.73, audioContext.currentTime + 0.1); // C#6
+                
+                // Harmony
+                oscillator2.type = 'sine';
+                oscillator2.frequency.setValueAtTime(1318.51, audioContext.currentTime); // E6
+                oscillator2.frequency.setValueAtTime(1760, audioContext.currentTime + 0.1); // A6
+                
+                // Volume envelope
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator1.connect(gainNode);
+                oscillator2.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator1.start(audioContext.currentTime);
+                oscillator2.start(audioContext.currentTime);
+                oscillator1.stop(audioContext.currentTime + 0.5);
+                oscillator2.stop(audioContext.currentTime + 0.5);
+                
+                console.log('🎵 Success sound played');
+            } catch (e) {
+                console.log('Audio not supported:', e);
+            }
+        }
+        
+        // Play error sound
+        function playErrorSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(150, audioContext.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.log('Audio not supported:', e);
+            }
         }
     </script>
 </body>

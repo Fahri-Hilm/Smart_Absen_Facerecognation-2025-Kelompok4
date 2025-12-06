@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi QR - Absenn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        
+        .verify-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+            }
+        }
+        
+        .loading-icon i {
+            font-size: 50px;
+            color: white;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .verify-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .verify-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .unit-code {
+            background: #f0f2ff;
+            color: #667eea;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+            font-family: monospace;
+            font-size: 18px;
+            margin: 15px 0;
+        }
+        
+        .welcome-message {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .welcome-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .welcome-message .name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .welcome-message .nik {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="loading-icon" id="loadingIcon">
+            <i class="fas fa-sync-alt"></i>
+        </div>
+        
+        <h1 class="verify-title" id="title">
+            <i class="fas fa-qrcode me-2"></i>
+            Memverifikasi...
+        </h1>
+        
+        <p class="verify-message" id="message">
+            Sedang menghubungkan dengan sistem absensi
+        </p>
+        
+        <div class="unit-code">
+            <i class="fas fa-key me-1"></i> {{ unit_code }}
+        </div>
+        
+        <div class="welcome-message" id="welcomeMessage">
+            <div class="name" id="employeeName"></div>
+            <div class="nik" id="employeeNik"></div>
+        </div>
+    </div>
+
+    <script>
+        // Generate or get device ID
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('absenn_device_id');
+            if (!deviceId) {
+                // Generate unique device ID
+                deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('absenn_device_id', deviceId);
+                console.log('New device ID generated:', deviceId);
+            } else {
+                console.log('Existing device ID:', deviceId);
+            }
+            return deviceId;
+        }
+        
+        // Check if device is registered
+        async function checkDevice(deviceId) {
+            try {
+                const response = await fetch('/api/device/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ device_id: deviceId })
+                });
+                return await response.json();
+            } catch (e) {
+                console.error('Error checking device:', e);
+                return { success: false, registered: false };
+            }
+        }
+        
+        // Main verification flow
+        async function verifyAndRedirect() {
+            const deviceId = getDeviceId();
+            const unitCode = '{{ unit_code }}';
+            
+            // Check if device is registered
+            const deviceCheck = await checkDevice(deviceId);
+            
+            if (deviceCheck.success && deviceCheck.registered) {
+                // Device recognized! Show welcome message
+                document.getElementById('title').innerHTML = '<i class="fas fa-hand-sparkles me-2"></i>Selamat Datang!';
+                document.getElementById('message').textContent = 'Perangkat Anda dikenali';
+                document.getElementById('loadingIcon').innerHTML = '<i class="fas fa-check" style="animation: none;"></i>';
+                document.getElementById('loadingIcon').style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                
+                const welcomeMsg = document.getElementById('welcomeMessage');
+                document.getElementById('employeeName').textContent = deviceCheck.employee.employee_name;
+                if (deviceCheck.employee.nik) {
+                    document.getElementById('employeeNik').textContent = 'NIK: ' + deviceCheck.employee.nik;
+                }
+                welcomeMsg.classList.add('show');
+                
+                // Vibrate to indicate recognition
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100, 50, 100]);
+                }
+                
+                // Wait a moment to show the welcome, then redirect
+                setTimeout(() => {
+                    window.location.href = '/verify?unit=' + unitCode + '&device_id=' + deviceId;
+                }, 1500);
+            } else {
+                // Device not registered - redirect immediately
+                document.getElementById('message').textContent = 'Menghubungkan...';
+                
+                setTimeout(() => {
+                    window.location.href = '/verify?unit=' + unitCode + '&device_id=' + deviceId;
+                }, 500);
+            }
+        }
+        
+        // Start verification on load
+        document.addEventListener('DOMContentLoaded', verifyAndRedirect);
+    </script>
+</body>
+</html>

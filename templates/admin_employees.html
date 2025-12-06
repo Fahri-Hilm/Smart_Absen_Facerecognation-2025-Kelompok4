@@ -641,11 +641,11 @@
                     <form id="editEmployeeForm">
                         <input type="hidden" id="editEmployeeId">
                         <div class="mb-3">
-                            <label for="editName" class="form-label">Nama Lengkap</label>
+                            <label for="editName" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="editName" required>
                         </div>
                         <div class="mb-3">
-                            <label for="editBagian" class="form-label">Bagian/Posisi</label>
+                            <label for="editBagian" class="form-label">Bagian/Posisi <span class="text-danger">*</span></label>
                             <select class="form-control" id="editBagian" required>
                                 <option value="Barista">Barista</option>
                                 <option value="Kasir">Kasir</option>
@@ -653,6 +653,18 @@
                                 <option value="Supervisor">Supervisor</option>
                                 <option value="Manager">Manager</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editNik" class="form-label">NIK</label>
+                            <input type="text" class="form-control" id="editNik" placeholder="Nomor Induk Karyawan">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" placeholder="email@example.com">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTelepon" class="form-label">Telepon</label>
+                            <input type="text" class="form-control" id="editTelepon" placeholder="08xxxxxxxxxx">
                         </div>
                     </form>
                 </div>
@@ -696,33 +708,188 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let editModal, deleteModal;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            editModal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
+            deleteModal = new bootstrap.Modal(document.getElementById('deleteEmployeeModal'));
+        });
+
         function editEmployee(id, name, bagian) {
-            document.getElementById('editEmployeeId').value = id;
-            document.getElementById('editName').value = name;
-            document.getElementById('editBagian').value = bagian;
-            new bootstrap.Modal(document.getElementById('editEmployeeModal')).show();
+            // Fetch full employee data from API
+            fetch(`/api/employee/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const emp = data.employee;
+                        document.getElementById('editEmployeeId').value = emp.id;
+                        document.getElementById('editName').value = emp.name;
+                        document.getElementById('editBagian').value = emp.bagian;
+                        
+                        // Set additional fields if exist
+                        const nikField = document.getElementById('editNik');
+                        const emailField = document.getElementById('editEmail');
+                        const teleponField = document.getElementById('editTelepon');
+                        
+                        if (nikField) nikField.value = emp.nik || '';
+                        if (emailField) emailField.value = emp.email || '';
+                        if (teleponField) teleponField.value = emp.telepon || '';
+                        
+                        editModal.show();
+                    } else {
+                        showAlert('danger', 'Gagal mengambil data karyawan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Fallback: use provided data
+                    document.getElementById('editEmployeeId').value = id;
+                    document.getElementById('editName').value = name;
+                    document.getElementById('editBagian').value = bagian;
+                    editModal.show();
+                });
         }
 
         function viewEmployeeDetails(id) {
-            // Show employee details in a modal or navigate to detail page
-            alert('Fitur detail karyawan akan ditampilkan segera');
-            // TODO: Implement employee details modal/page
+            fetch(`/api/employee/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const emp = data.employee;
+                        alert(`Detail Karyawan:\n\nNama: ${emp.name}\nBagian: ${emp.bagian}\nNIK: ${emp.nik || '-'}\nEmail: ${emp.email || '-'}\nTelepon: ${emp.telepon || '-'}\nTanggal Bergabung: ${emp.tanggal_bergabung || '-'}`);
+                    } else {
+                        showAlert('danger', 'Gagal mengambil data karyawan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Terjadi kesalahan');
+                });
         }
 
         function deleteEmployee(id, name) {
             document.getElementById('deleteEmployeeId').value = id;
             document.getElementById('deleteEmployeeName').textContent = name;
-            new bootstrap.Modal(document.getElementById('deleteEmployeeModal')).show();
+            deleteModal.show();
         }
 
         function saveEmployee() {
-            // Implementation for saving employee changes
-            alert('Fitur edit akan diimplementasikan');
+            const id = document.getElementById('editEmployeeId').value;
+            const name = document.getElementById('editName').value;
+            const bagian = document.getElementById('editBagian').value;
+            
+            // Get additional fields if exist
+            const nikField = document.getElementById('editNik');
+            const emailField = document.getElementById('editEmail');
+            const teleponField = document.getElementById('editTelepon');
+            
+            const data = {
+                id: parseInt(id),
+                name: name,
+                bagian: bagian,
+                nik: nikField ? nikField.value : '',
+                email: emailField ? emailField.value : '',
+                telepon: teleponField ? teleponField.value : ''
+            };
+            
+            // Show loading
+            const saveBtn = document.querySelector('#editEmployeeModal .btn-primary');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyimpan...';
+            saveBtn.disabled = true;
+            
+            fetch('/api/employee/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                
+                if (result.success) {
+                    editModal.hide();
+                    showAlert('success', result.message);
+                    // Reload halaman untuk refresh data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showAlert('danger', result.message || 'Gagal mengupdate karyawan');
+                }
+            })
+            .catch(error => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                console.error('Error:', error);
+                showAlert('danger', 'Terjadi kesalahan saat menyimpan data');
+            });
         }
 
         function confirmDeleteEmployee() {
-            // Implementation for deleting employee
-            alert('Fitur hapus akan diimplementasikan');
+            const id = document.getElementById('deleteEmployeeId').value;
+            const name = document.getElementById('deleteEmployeeName').textContent;
+            
+            // Show loading
+            const deleteBtn = document.querySelector('#deleteEmployeeModal .btn-danger');
+            const originalText = deleteBtn.innerHTML;
+            deleteBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menghapus...';
+            deleteBtn.disabled = true;
+            
+            fetch('/api/employee/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: parseInt(id) })
+            })
+            .then(response => response.json())
+            .then(result => {
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.disabled = false;
+                
+                if (result.success) {
+                    deleteModal.hide();
+                    showAlert('success', result.message);
+                    // Reload halaman untuk refresh data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showAlert('danger', result.message || 'Gagal menghapus karyawan');
+                }
+            })
+            .catch(error => {
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.disabled = false;
+                console.error('Error:', error);
+                showAlert('danger', 'Terjadi kesalahan saat menghapus data');
+            });
+        }
+        
+        // Show alert notification
+        function showAlert(type, message) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert-floating');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-floating`;
+            alertDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+            alertDiv.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
         }
 
         // ==================== FILTERING FUNCTIONALITY ====================

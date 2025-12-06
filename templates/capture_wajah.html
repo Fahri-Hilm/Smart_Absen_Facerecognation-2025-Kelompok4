@@ -208,8 +208,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 200px;
-            height: 250px;
+            width: 280px;
+            height: 350px;
             border: 3px dashed rgba(255, 255, 255, 0.6);
             border-radius: 50%;
             box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.3);
@@ -718,7 +718,7 @@
                         <div class="progress-header">
                             <strong>📊 Progress</strong>
                             <div class="progress-badge">
-                                <span id="photoCount">0</span>/40
+                                <span id="photoCount">0</span>/10
                             </div>
                         </div>
                         <div class="progress-bar-container">
@@ -740,7 +740,7 @@
                     <!-- Action Buttons -->
                     <div class="action-buttons">
                         <button class="btn-action btn-save" id="saveBtn" disabled>
-                            <i class="bi bi-check2-circle"></i> ✅ Simpan Training (40+)
+                            <i class="bi bi-check2-circle"></i> ✅ Selesai & Simpan (min 5 foto)
                         </button>
                         <button class="btn-action btn-reset" id="resetBtn" style="display: none;">
                             <i class="bi bi-arrow-clockwise"></i> Reset Semua
@@ -1136,14 +1136,23 @@
 
         // Save Training Photos
         document.getElementById('saveBtn').addEventListener('click', async function() {
-            if (captureState.photos.length < 40) {
-                showAlert(`❌ Minimal 40 foto diperlukan (saat ini: ${captureState.photos.length}/40)`, 'danger');
+            // Validasi employee_id
+            if (!captureState.employeeId) {
+                showAlert('❌ Error: Employee ID tidak ditemukan! Kembali ke form dan coba lagi.', 'danger');
+                console.error('Missing employee_id - URL params:', window.location.search);
+                return;
+            }
+            
+            if (captureState.photos.length < INSIGHTFACE_MIN_PHOTOS) {
+                showAlert(`❌ Minimal ${INSIGHTFACE_MIN_PHOTOS} foto diperlukan (saat ini: ${captureState.photos.length}/${INSIGHTFACE_MIN_PHOTOS})`, 'danger');
                 return;
             }
 
             const btn = this;
             btn.disabled = true;
-            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyimpan...';
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyimpan & Training...';
+            
+            console.log('Saving photos - employeeId:', captureState.employeeId, 'photos count:', captureState.photos.length);
 
             try {
                 // Save training photos
@@ -1159,41 +1168,57 @@
                 });
 
                 const result = await response.json();
+                console.log('Save response:', result);
                 
                 if (response.ok) {
-                    // Notifikasi sukses yang lebih prominent
-                    showAlert(`✅ ${captureState.photos.length} foto training berhasil disimpan!\n${result.message || 'Karyawan siap untuk sistem absensi!'}`, 'success');
+                    btn.innerHTML = '<i class="bi bi-cpu"></i> Training Model...';
                     
-                    // Tampilkan success message yang lebih detail
-                    const successMsg = document.createElement('div');
-                    successMsg.className = 'alert alert-success alert-dismissible fade show';
-                    successMsg.innerHTML = `
-                        <strong>🎉 Berhasil Ditambahkan!</strong>
-                        <br>Karyawan telah berhasil ditambahkan dengan ${captureState.photos.length} foto training.
-                        <br>Data sudah tersimpan di database dan siap digunakan untuk sistem absensi.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    document.body.insertBefore(successMsg, document.body.firstChild);
-                    successMsg.style.position = 'fixed';
-                    successMsg.style.top = '20px';
-                    successMsg.style.right = '20px';
-                    successMsg.style.width = '400px';
-                    successMsg.style.zIndex = '9999';
+                    // Trigger training model
+                    const trainResponse = await fetch('/api/train_model', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     
-                    // Redirect ke employee list setelah 3 detik
-                    setTimeout(() => {
-                        window.location.href = '/admin/employees';
-                    }, 3000);
+                    const trainResult = await trainResponse.json();
+                    
+                    if (trainResponse.ok) {
+                        // Notifikasi sukses
+                        showAlert(`✅ ${captureState.photos.length} foto berhasil disimpan & model ditraining!`, 'success');
+                        
+                        // Tampilkan success message
+                        const successMsg = document.createElement('div');
+                        successMsg.className = 'alert alert-success';
+                        successMsg.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; z-index: 9999; text-align: center; padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);';
+                        successMsg.innerHTML = `
+                            <h4 style="margin-bottom: 0.5rem;">🎉 Berhasil!</h4>
+                            <p style="margin: 0;">${captureState.photos.length} foto training disimpan.<br>Model InsightFace sudah ditraining.</p>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">Kembali ke form data karyawan...</p>
+                        `;
+                        document.body.appendChild(successMsg);
+                        
+                        // Redirect ke form tambah karyawan setelah 2 detik
+                        setTimeout(() => {
+                            window.location.href = '/admin/employees';
+                        }, 2000);
+                    } else {
+                        // Foto tersimpan tapi training gagal
+                        showAlert(`⚠️ Foto tersimpan tapi training gagal: ${trainResult.error || 'Unknown error'}`, 'warning');
+                        setTimeout(() => {
+                            window.location.href = '/admin/employees';
+                        }, 3000);
+                    }
                 } else {
                     const errMsg = result.error || 'Gagal menyimpan foto training';
                     showAlert(`❌ ${errMsg}`, 'danger');
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-check2-circle"></i> ✅ Simpan Training (40+)';
+                    btn.innerHTML = '<i class="bi bi-check2-circle"></i> ✅ Selesai & Simpan (min 5 foto)';
                 }
             } catch (err) {
                 showAlert('❌ Error: ' + err.message, 'danger');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-check2-circle"></i> ✅ Simpan Training (40+)';
+                btn.innerHTML = '<i class="bi bi-check2-circle"></i> ✅ Selesai & Simpan (min 5 foto)';
             }
         });
 
@@ -1221,6 +1246,19 @@
             captureState.employeeId = params.get('employee_id');
             captureState.employeeName = params.get('name') || '-';
             captureState.employeeDept = params.get('dept') || '-';
+
+            // Validasi: employee_id wajib ada
+            if (!captureState.employeeId) {
+                showAlert('❌ Error: Halaman ini harus diakses dari form tambah karyawan!', 'danger');
+                document.getElementById('saveBtn').disabled = true;
+                document.getElementById('autoCaptureBtn').disabled = true;
+                setTimeout(() => {
+                    window.location.href = '/admin/employees/add';
+                }, 3000);
+                return;
+            }
+            
+            console.log('Employee info loaded:', captureState);
 
             document.getElementById('employeeName').textContent = captureState.employeeName;
             document.getElementById('employeeDept').textContent = captureState.employeeDept;

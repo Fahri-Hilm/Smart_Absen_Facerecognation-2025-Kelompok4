@@ -29,7 +29,7 @@ import atexit
 from database import get_db_manager
 from models import Employee, Attendance, ActivityLog
 from config import get_app_config
-from qr_sync import qr_sync_manager, start_cleanup_thread
+from qr_sync import qr_sync_manager, start_cleanup_thread, device_registry
 import logging
 
 # Setup logging FIRST (before importing InsightFace)
@@ -62,13 +62,22 @@ app.secret_key = app_config['secret_key']
 QR_VALIDITY_MINUTES = 10  # QR code berlaku 10 menit
 current_unit_code = None
 qr_code_generated_time = None
+qr_refresh_counter = 0  # Counter untuk force refresh
 
-def generate_unit_code():
+def generate_unit_code(force_new=False):
     """Generate kode unit yang unik berdasarkan waktu"""
+    global qr_refresh_counter
     current_time = datetime.now()
-    # Buat kode berdasarkan slot 10 menit
-    time_slot = int(current_time.timestamp() // (QR_VALIDITY_MINUTES * 60))
-    secret_base = f"KAFEBASABASI-{time_slot}"
+    
+    if force_new:
+        # Jika force refresh, gunakan counter untuk membuat kode berbeda
+        qr_refresh_counter += 1
+        secret_base = f"KAFEBASABASI-{current_time.timestamp()}-{qr_refresh_counter}"
+    else:
+        # Buat kode berdasarkan slot 10 menit
+        time_slot = int(current_time.timestamp() // (QR_VALIDITY_MINUTES * 60))
+        secret_base = f"KAFEBASABASI-{time_slot}"
+    
     return hashlib.md5(secret_base.encode()).hexdigest()[:8].upper()
 
 def get_current_unit_code():
@@ -92,7 +101,8 @@ def generate_qr_code():
     """Generate QR code untuk authentication"""
     unit_code = get_current_unit_code()
     base_url = request.host_url.rstrip('/')
-    qr_url = f"{base_url}/verify?unit={unit_code}"
+    # QR mengarah ke halaman mobile_verify yang akan menambahkan device_id
+    qr_url = f"{base_url}/mobile_verify?unit={unit_code}"
     
     qr = qrcode.QRCode(
         version=1,
@@ -232,12 +242,72 @@ def identify_face(facearray):
         # Resize to optimal size for ArcFace feature extraction
         face_bgr = cv2.resize(face_bgr, (160, 160), interpolation=cv2.INTER_CUBIC)
         
-        name, confidence = identify_face_insightface(face_bgr, threshold=0.45)
-        logger.info(f"✅ InsightFace result: {name} ({confidence:.1f}%)")
-        return [name], confidence
+        nik_or_name, confidence = identify_face_insightface(face_bgr, threshold=0.45)
+        
+        # NIK to Name lookup - jika hasil adalah NIK (angka), cari nama dari database
+        final_name = nik_or_name
+        if nik_or_name != "Unknown" and nik_or_name.isdigit():
+            # Ini adalah NIK, cari nama karyawan dari database
+            try:
+                employee = Employee.get_employee_by_nik(nik_or_name)
+                if employee:
+                    final_name = employee.get('name', nik_or_name)
+                    logger.info(f"📋 NIK {nik_or_name} -> Nama: {final_name}")
+            except Exception as lookup_err:
+                logger.warning(f"⚠️ NIK lookup failed: {lookup_err}")
+                final_name = nik_or_name
+        
+        logger.info(f"✅ InsightFace result: {final_name} ({confidence:.1f}%)")
+        return [final_name], confidence
         
     except Exception as e:
         logger.error(f"❌ InsightFace recognition failed: {e}")
+        return ['Unknown'], 0.0
+
+def identify_face_insightface_wrapper(face_bgr):
+    """
+    Wrapper untuk InsightFace recognition yang menerima gambar BGR langsung
+    
+    Args:
+        face_bgr: BGR color image (OpenCV format)
+    
+    Returns:
+        Tuple of (prediction_list, confidence_score)
+    """
+    if not USE_INSIGHTFACE:
+        logger.error("InsightFace tidak tersedia!")
+        return ['Unknown'], 0.0
+    
+    try:
+        logger.info("🔍 Face Recognition dengan InsightFace/ArcFace (BGR mode)")
+        
+        # Ensure user packages are prioritized
+        import sys
+        user_packages = '/home/fj/.local/lib/python3.12/site-packages'
+        if user_packages not in sys.path:
+            sys.path.insert(0, user_packages)
+        
+        # Call InsightFace directly with BGR image
+        nik_or_name, confidence = identify_face_insightface(face_bgr, threshold=0.45)
+        
+        # NIK to Name lookup
+        final_name = nik_or_name
+        if nik_or_name != "Unknown" and nik_or_name.isdigit():
+            try:
+                employee = Employee.get_employee_by_nik(nik_or_name)
+                if employee:
+                    final_name = employee.get('name', nik_or_name)
+                    logger.info(f"📋 NIK {nik_or_name} -> Nama: {final_name}")
+            except Exception as lookup_err:
+                logger.warning(f"⚠️ NIK lookup failed: {lookup_err}")
+        
+        logger.info(f"✅ InsightFace BGR result: {final_name} ({confidence:.1f}%)")
+        return [final_name], confidence
+        
+    except Exception as e:
+        logger.error(f"❌ InsightFace BGR recognition failed: {e}")
+        import traceback
+        traceback.print_exc()
         return ['Unknown'], 0.0
 
 def train_model():
@@ -251,6 +321,13 @@ def train_model():
     
     try:
         logger.info("🚀 Training InsightFace/ArcFace model (99%+ accuracy)...")
+        
+        # Ensure user packages are prioritized (fix matplotlib/mpl_toolkits conflict)
+        import sys
+        user_packages = '/home/fj/.local/lib/python3.12/site-packages'
+        if user_packages not in sys.path:
+            sys.path.insert(0, user_packages)
+        
         success = train_insightface_model()
         
         if success:
@@ -265,6 +342,8 @@ def train_model():
             
     except Exception as e:
         logger.error(f"❌ Training error: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def capture_employee_face_gui(name, bagian):
@@ -518,27 +597,50 @@ def qr_auth():
 def qr_sync_status():
     """API untuk cek status QR sync real-time - untuk auto-redirect laptop saat HP scan QR"""
     try:
-        latest_auth = qr_sync_manager.get_latest_auth()
         current_unit = get_current_unit_code()  # QR code yang sedang ditampilkan di laptop
+        latest_auth = qr_sync_manager.get_latest_auth(current_unit)
+        
+        # Check if attendance was just completed (session cleared)
+        attendance_completed = session.get('attendance_completed', False)
+        if attendance_completed:
+            # Clear the flag and don't trigger sync
+            session.pop('attendance_completed', None)
+            logger.info("🛑 Attendance just completed, skipping sync check")
+            return jsonify({
+                'success': True,
+                'has_pending_sync': False,
+                'status': 'attendance_completed',
+                'message': 'Absensi selesai, menunggu scan QR baru...'
+            })
         
         if latest_auth:
             # Check if the scanned QR matches current displayed QR
-            scanned_unit = latest_auth['unit_code']
+            scanned_unit = latest_auth.get('unit_code') or latest_auth.get('code')
             session_verified_unit = session.get('verified_unit_code')
+            last_sync_time = session.get('last_sync_time')
+            
+            # Get timestamp of the scan
+            scan_timestamp = latest_auth.get('verified_at') or latest_auth.get('timestamp')
+            scan_time_str = scan_timestamp.isoformat() if scan_timestamp else None
             
             # Ada pending sync jika:
             # 1. Unit code yang di-scan sama dengan yang ditampilkan di laptop
-            # 2. Session laptop belum ter-verify dengan unit code tersebut
-            if scanned_unit == current_unit and session_verified_unit != scanned_unit:
+            # 2. DAN salah satu kondisi:
+            #    a. Session laptop belum ter-verify dengan unit code tersebut
+            #    b. ATAU ada scan baru (timestamp berbeda dari last_sync_time)
+            is_new_scan = scan_time_str and scan_time_str != last_sync_time
+            is_not_verified = session_verified_unit != scanned_unit
+            
+            if scanned_unit == current_unit and (is_not_verified or is_new_scan):
                 # New authentication detected from mobile!
-                logger.info(f"🔓 Pending QR sync detected: {scanned_unit} from {latest_auth['device_info']}")
+                logger.info(f"🔓 Pending QR sync detected: {scanned_unit} (new_scan={is_new_scan}, not_verified={is_not_verified})")
                 return jsonify({
                     'success': True,
                     'has_pending_sync': True,
                     'session_id': scanned_unit,
                     'unit_code': scanned_unit,
-                    'timestamp': latest_auth['timestamp'],
-                    'device_info': latest_auth['device_info'],
+                    'timestamp': scan_time_str,
+                    'device_info': latest_auth.get('device_info'),
                     'message': 'QR scan berhasil dari perangkat mobile!'
                 })
             else:
@@ -565,6 +667,35 @@ def qr_sync_status():
             'message': str(e)
         })
 
+@app.route('/api/clear_qr_session', methods=['POST'])
+def clear_qr_session():
+    """Clear QR session setelah absensi berhasil - mencegah auto-redirect kembali"""
+    try:
+        # Clear session verification
+        session.pop('qr_verified', None)
+        session.pop('qr_verified_time', None)
+        verified_unit = session.pop('verified_unit_code', None)
+        session.pop('last_sync_time', None)
+        
+        # Set flag bahwa attendance baru selesai
+        session['attendance_completed'] = True
+        
+        # Clear dari qr_sync_manager juga
+        if verified_unit:
+            qr_sync_manager.remove_session(verified_unit)
+            logger.info(f"🧹 Cleared QR session: {verified_unit}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'QR session cleared successfully'
+        })
+    except Exception as e:
+        logger.error(f"Error clearing QR session: {e}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        })
+
 @app.route('/api/accept_qr_sync', methods=['POST'])
 def accept_qr_sync():
     """Accept QR sync from mobile and update laptop session - auto redirect laptop ke halaman absen"""
@@ -573,8 +704,10 @@ def accept_qr_sync():
         if request.is_json:
             data = request.get_json()
             unit_code = data.get('session_id') or data.get('unit_code')
+            sync_timestamp = data.get('timestamp')
         else:
             unit_code = request.form.get('unit_code') or request.form.get('session_id')
+            sync_timestamp = request.form.get('timestamp')
         
         logger.info(f"🔐 Accept QR sync request for unit: {unit_code}")
         
@@ -583,15 +716,17 @@ def accept_qr_sync():
             session['qr_verified'] = True
             session['qr_verified_time'] = datetime.now().isoformat()
             session['verified_unit_code'] = unit_code
+            # Simpan timestamp sync terakhir untuk deteksi scan baru
+            session['last_sync_time'] = sync_timestamp or datetime.now().isoformat()
             
             logger.info(f"✅ QR sync accepted! Laptop session verified with unit: {unit_code}")
             
-            # Redirect ke halaman absensi masuk (bukan home)
+            # Redirect ke halaman absensi (web_attendance untuk flow baru)
             return jsonify({
                 'success': True,
                 'status': 'success',
                 'message': 'QR sync berhasil! Mengarahkan ke halaman absensi...',
-                'redirect_url': url_for('absen_masuk')
+                'redirect_url': url_for('web_attendance')
             })
         else:
             logger.warning(f"❌ QR sync rejected - invalid or expired unit: {unit_code}")
@@ -613,21 +748,18 @@ def accept_qr_sync():
 def refresh_qr():
     """Endpoint untuk refresh QR code via AJAX - dipanggil otomatis setiap 10 menit"""
     try:
-        # Force regenerate QR code
+        # Force regenerate QR code dengan kode baru
         global current_unit_code, qr_code_generated_time
-        current_unit_code = None
-        qr_code_generated_time = None
+        
+        # Generate kode baru dengan force_new=True
+        current_unit_code = generate_unit_code(force_new=True)
+        qr_code_generated_time = datetime.now()
         
         qr_image, qr_url = generate_qr_code()
-        unit_code = get_current_unit_code()
+        unit_code = current_unit_code
         
-        # Hitung sisa waktu berlaku  
-        current_time = datetime.now()
-        if qr_code_generated_time:
-            elapsed_seconds = int((current_time - qr_code_generated_time).total_seconds())
-            remaining_seconds = max(0, (QR_VALIDITY_MINUTES * 60) - elapsed_seconds)
-        else:
-            remaining_seconds = QR_VALIDITY_MINUTES * 60
+        # Reset waktu tersisa ke 10 menit
+        remaining_seconds = QR_VALIDITY_MINUTES * 60
         
         logger.info(f"🔄 QR code refreshed: {unit_code}")
         
@@ -666,10 +798,76 @@ def qr_info():
         logger.error(f"Error getting QR info: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/device/register', methods=['POST'])
+def register_device():
+    """Register device dengan employee setelah absen berhasil"""
+    try:
+        data = request.get_json()
+        device_id = data.get('device_id')
+        employee_id = data.get('employee_id')
+        employee_name = data.get('employee_name')
+        nik = data.get('nik')
+        
+        if not device_id or not employee_id:
+            return jsonify({'success': False, 'message': 'device_id dan employee_id diperlukan'}), 400
+        
+        device_registry.register_device(device_id, employee_id, employee_name, nik)
+        
+        logger.info(f"📱 Device registered: {device_id[:8]}... -> {employee_name}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'Device terdaftar untuk {employee_name}'
+        })
+    except Exception as e:
+        logger.error(f"Error registering device: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/device/check', methods=['POST'])
+def check_device():
+    """Check if device is registered and get employee info"""
+    try:
+        data = request.get_json()
+        device_id = data.get('device_id')
+        
+        if not device_id:
+            return jsonify({'success': False, 'registered': False, 'message': 'device_id diperlukan'}), 400
+        
+        employee_info = device_registry.get_employee_by_device(device_id)
+        
+        if employee_info:
+            return jsonify({
+                'success': True,
+                'registered': True,
+                'employee': employee_info
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'registered': False,
+                'message': 'Device belum terdaftar'
+            })
+    except Exception as e:
+        logger.error(f"Error checking device: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/mobile_verify')
+def mobile_verify():
+    """Halaman perantara untuk HP - mengambil device_id lalu redirect ke verify"""
+    unit_code = request.args.get('unit', '').strip().upper()
+    
+    if not unit_code:
+        flash('Kode unit tidak ditemukan.', 'error')
+        return redirect(url_for('qr_auth'))
+    
+    # Render halaman yang akan mengambil device_id dan redirect
+    return render_template('mobile_verify.html', unit_code=unit_code)
+
 @app.route('/verify')
 def verify_qr():
     """Verifikasi QR code dan redirect ke halaman utama dengan real-time sync"""
-    provided_unit = request.args.get('unit', '')
+    provided_unit = request.args.get('unit', '').strip().upper()
+    device_id = request.args.get('device_id', '').strip()
     
     if not provided_unit:
         flash('Kode unit tidak ditemukan. Silakan scan QR code yang valid.', 'error')
@@ -686,16 +884,25 @@ def verify_qr():
         is_mobile = any(mobile in user_agent for mobile in ['android', 'iphone', 'ipad', 'mobile', 'webos', 'blackberry'])
         device_info = 'mobile' if is_mobile else 'desktop'
         
-        # Notify sync system about successful authentication
-        qr_sync_manager.verify_qr_auth(provided_unit, device_info)
+        # Check if device is registered to an employee
+        employee_info = None
+        if device_id:
+            employee_info = device_registry.get_employee_by_device(device_id)
+            if employee_info:
+                logger.info(f"📱 Recognized device: {device_id[:8]}... belongs to {employee_info['employee_name']}")
+        
+        # Notify sync system about successful authentication (include employee_info and device_id)
+        qr_sync_manager.verify_qr_auth(provided_unit, device_info, employee_info, device_id)
         
         logger.info(f"QR verification successful with unit code: {provided_unit} from {device_info}")
         
         if is_mobile:
-            # HP hanya sebagai kunci - tampilkan halaman sukses, tidak redirect ke absen
-            # Laptop akan otomatis ter-redirect via polling di halaman QR
+            # HP hanya sebagai kunci - tampilkan halaman sukses dengan info pegawai jika dikenali
             logger.info(f"Mobile device used as key - showing success page only")
-            return render_template('qr_scan_success.html', unit_code=provided_unit)
+            return render_template('qr_scan_success.html', 
+                                   unit_code=provided_unit,
+                                   employee_info=employee_info,
+                                   device_id=device_id)
         else:
             # Desktop/Laptop - redirect langsung ke halaman absensi baru
             logger.info(f"Desktop device - redirecting to web_attendance page")
@@ -1191,25 +1398,58 @@ def capture_wajah_page():
         flash('Gagal memuat halaman capture wajah', 'error')
         return redirect('/admin/employees')
 
+@app.route('/api/train_model', methods=['POST'])
+@admin_required
+def api_train_model():
+    """API endpoint untuk training model InsightFace"""
+    try:
+        logger.info("🚀 API: Training InsightFace model...")
+        success = train_model()
+        
+        if success:
+            return jsonify({
+                'status': 'success',
+                'message': '✅ Model InsightFace berhasil ditraining!'
+            }), 200
+        else:
+            return jsonify({
+                'status': 'error',
+                'error': 'Training gagal - tidak ada data wajah yang valid'
+            }), 400
+            
+    except Exception as e:
+        logger.error(f"Error in api_train_model: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': f'Error: {str(e)}'
+        }), 500
+
 @app.route('/api/save_training_photos', methods=['POST'])
 @admin_required
 def save_training_photos():
     """API untuk menyimpan training photos dari capture page"""
     try:
         data = request.get_json()
+        logger.info(f"[SAVE_PHOTOS] Received data keys: {data.keys() if data else 'None'}")
+        
         employee_id = data.get('employee_id')
         photos = data.get('photos', [])  # Array of base64 images
         
+        logger.info(f"[SAVE_PHOTOS] employee_id={employee_id}, photos_count={len(photos)}")
+        
         if not employee_id or not photos:
+            logger.warning(f"[SAVE_PHOTOS] Missing data - employee_id: {employee_id}, photos: {len(photos)}")
             return jsonify({
                 'status': 'error',
                 'error': 'employee_id dan photos harus ada'
             }), 400
         
-        if len(photos) < 40:
+        # InsightFace hanya butuh minimal 5 foto
+        if len(photos) < 5:
+            logger.warning(f"[SAVE_PHOTOS] Not enough photos: {len(photos)}/5")
             return jsonify({
                 'status': 'error',
-                'error': f'Minimal 40 foto diperlukan (saat ini: {len(photos)})'
+                'error': f'Minimal 5 foto diperlukan untuk InsightFace (saat ini: {len(photos)})'
             }), 400
         
         # Get employee data
@@ -2382,12 +2622,32 @@ def absen_pulang():
     session['attendance_mode'] = 'pulang'
     return redirect(url_for('web_attendance'))
 
+@app.route('/direct_attendance')
+def direct_attendance():
+    """Direct access to attendance page - bypass QR for localhost"""
+    # Set session as verified for localhost access
+    session['qr_verified'] = True
+    session['qr_verified_time'] = datetime.now().isoformat()
+    session['verified_unit_code'] = 'LOCALHOST'
+    
+    logger.info("Direct attendance access - bypassing QR verification")
+    return render_template('web_attendance.html', mode='masuk')
+
 @app.route('/web_attendance')
 @qr_verification_required
 def web_attendance():
     """Halaman absensi berbasis web camera (untuk laptop dan mobile)"""
     mode = session.get('attendance_mode', 'masuk')
-    return render_template('web_attendance.html', mode=mode)
+    
+    # Get employee info from QR sync (based on mobile device that scanned QR)
+    unit_code = session.get('verified_unit_code')
+    employee_info = None
+    if unit_code:
+        latest_auth = qr_sync_manager.get_latest_auth(unit_code)
+        if latest_auth:
+            employee_info = latest_auth.get('employee_info')
+    
+    return render_template('web_attendance.html', mode=mode, employee_info=employee_info)
 
 @app.route('/absen_ajax', methods=['POST'])
 def absen_ajax():
@@ -2537,8 +2797,9 @@ def mark_attendance_mobile():
         mode = request.form.get('mode', 'masuk')
         image_data = request.form.get('image_data')
         source = request.form.get('source', 'mobile')
+        device_id = request.form.get('device_id', '')  # Device ID dari HP
         
-        logger.info(f"Mobile attendance request: mode={mode}, source={source}")
+        logger.info(f"Mobile attendance request: mode={mode}, source={source}, device_id={device_id[:8] if device_id else 'none'}...")
         
         if not image_data:
             return jsonify({
@@ -2579,13 +2840,13 @@ def mark_attendance_mobile():
                         })
                     
                     # Check if face recognition model exists
-                    if 'face_recognition_model.pkl' not in os.listdir('static'):
+                    if 'face_recognition_model.pkl' not in os.listdir('static') and 'face_embeddings.pkl' not in os.listdir('static'):
                         return jsonify({
                             'status': 'error',
-                            'message': 'Model pengenalan wajah belum dilatih. Hubungi administrator.'
+                            'message': '❌ Karyawan Tidak Dikenal'
                         })
                     
-                    # Extract faces from the frame
+                    # Extract faces from the frame (for validation only)
                     faces = extract_faces(frame)
                     
                     if len(faces) == 0:
@@ -2594,49 +2855,53 @@ def mark_attendance_mobile():
                             'message': 'Wajah tidak terdeteksi. Pastikan pencahayaan cukup dan wajah terlihat jelas.'
                         })
                     
-                    # Process the first detected face with MOBILE PREPROCESSING
-                    (x, y, w, h) = faces[0]
-                    face_region = frame[y:y+h, x:x+w]
+                    # INSIGHTFACE: Kirim FULL FRAME, bukan crop!
+                    # InsightFace akan detect dan extract embedding sendiri
+                    # Resize frame ke ukuran yang cukup besar untuk detection
+                    frame_resized = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_CUBIC)
                     
-                    # CRITICAL: Mobile preprocessing to match training format
-                    # Convert to grayscale (same as training)
-                    if len(face_region.shape) > 2:
-                        gray_face = cv2.cvtColor(face_region, cv2.COLOR_BGR2GRAY)
-                    else:
-                        gray_face = face_region.copy()
+                    logger.info(f"Mobile frame for InsightFace: shape={frame_resized.shape}")
                     
-                    # Apply mobile enhancements
-                    gray_face = cv2.equalizeHist(gray_face)  # Improve contrast
-                    gray_face = cv2.bilateralFilter(gray_face, 9, 75, 75)  # Noise reduction
-                    
-                    # Resize to exact training format (50x50 grayscale)
-                    face_resized = cv2.resize(gray_face, (50, 50), interpolation=cv2.INTER_CUBIC)
-                    
-                    # Flatten to 1D array (2500 features) to match training
-                    face_flattened = face_resized.flatten()
-                    
-                    logger.info(f"Mobile face processed: shape={face_flattened.shape} (should be (2500,))")
-                    
-                    # Identify the face with confidence
-                    identified_users, confidence = identify_face(face_flattened)
+                    # Identify the face with InsightFace (pass full frame)
+                    identified_users, confidence = identify_face_insightface_wrapper(frame_resized)
                     user = identified_users[0]
                     
                     if user == 'Unknown':
                         return jsonify({
                             'status': 'error',
-                            'message': f'Wajah tidak dikenali (confidence: {confidence:.1f}%). Pastikan Anda sudah terdaftar dan pencahayaan cukup baik.'
+                            'message': '❌ Karyawan Tidak Dikenal'
                         })
                     
                     # Update attendance
                     result = update_attendance(user, mode)
                     
                     if result.get('success', False):
+                        # Register device dengan employee jika device_id ada
+                        if device_id:
+                            # Get employee info untuk register device
+                            employees = Employee.get_all_employees()
+                            employee = None
+                            for emp in employees:
+                                if emp.get('name') == user:
+                                    employee = emp
+                                    break
+                            
+                            if employee:
+                                device_registry.register_device(
+                                    device_id, 
+                                    employee['id'], 
+                                    employee['name'],
+                                    employee.get('nik')
+                                )
+                                logger.info(f"📱 Device {device_id[:8]}... registered to {user}")
+                        
                         return jsonify({
                             'status': 'success',
                             'message': f'✅ Absensi {mode} berhasil untuk {user}!',
                             'user': user,
                             'mode': mode,
-                            'time': datetime.now().strftime('%H:%M:%S')
+                            'time': datetime.now().strftime('%H:%M:%S'),
+                            'device_registered': bool(device_id)
                         })
                     else:
                         return jsonify({
@@ -2689,9 +2954,9 @@ def run_attendance_ajax(mode='masuk', camera_id=None):
             if not cap.isOpened():
                 return {'status': 'error', 'message': 'Kamera tidak tersedia'}
 
-        if 'face_recognition_model.pkl' not in os.listdir('static'):
+        if 'face_recognition_model.pkl' not in os.listdir('static') and 'face_embeddings.pkl' not in os.listdir('static'):
             cap.release()
-            return {'status': 'error', 'message': 'Model belum dilatih. Tambahkan wajah dulu.'}
+            return {'status': 'error', 'message': '❌ Karyawan Tidak Dikenal'}
 
         recognition_success = False
         success_user = ""
@@ -2740,7 +3005,7 @@ def run_attendance_ajax(mode='masuk', camera_id=None):
         else:
             return {
                 'status': 'error',
-                'message': 'Wajah tidak terdeteksi. Silakan coba lagi.'
+                'message': '❌ Karyawan Tidak Dikenal'
             }
             
     except Exception as e:
@@ -2769,10 +3034,10 @@ def run_attendance(mode='masuk'):
     # Set buffer size untuk mengurangi latency
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     
-    if 'face_recognition_model.pkl' not in os.listdir('static'):
+    if 'face_recognition_model.pkl' not in os.listdir('static') and 'face_embeddings.pkl' not in os.listdir('static'):
         print(f"[ERROR] Model tidak ditemukan untuk mode {mode}")
         cap.release()
-        return render_template('home.html', mess="Model belum dilatih. Tambahkan wajah dulu.",
+        return render_template('home.html', mess="❌ Karyawan Tidak Dikenal",
             names=[], rolls=[], tanggal=[], times=[], l=0,
             totalreg=totalreg(), datetoday2=datetoday2,
             date_range_week=date_range_week, tanggal_hari_ini=tanggal_hari_ini,
@@ -3016,13 +3281,28 @@ def run_attendance_with_camera(mode, camera_id):
 def update_attendance(name, mode='masuk'):
     """Update attendance menggunakan database"""
     try:
-        username = name.split('_')[0]
-        userbagian = name.split('_')[1]
+        # Handle different name formats
+        if '_' in name:
+            # Old format: name_bagian
+            username = name.split('_')[0]
+            userbagian = name.split('_')[1]
+            employee = Employee.get_employee_by_name_bagian(username, userbagian)
+        else:
+            # New format: just name (from InsightFace)
+            username = name
+            userbagian = None
+            # Search by name only
+            employees = Employee.get_all_employees()
+            employee = None
+            for emp in employees:
+                if emp.get('name') == username:
+                    employee = emp
+                    userbagian = emp.get('bagian', 'Unknown')
+                    break
+        
         current_time = datetime.now().time()
         today = date.today()
         
-        # Dapatkan employee
-        employee = Employee.get_employee_by_name_bagian(username, userbagian)
         if not employee:
             # Jika employee belum ada, tambahkan dulu
             if Employee.add_employee(username, userbagian):
@@ -3056,6 +3336,41 @@ def update_attendance(name, mode='masuk'):
             # Log aktivitas
             ActivityLog.add_log(employee['id'], activity_type, f"Absensi {mode} berhasil")
             logger.info(f"Attendance updated: {username} - {mode} at {current_time}")
+            
+            # AUTO-REGISTER DEVICE: Setelah absensi berhasil, daftarkan device HP yang scan QR
+            try:
+                # Get device_id dari qr_sync session
+                unit_code = session.get('verified_unit_code')
+                if unit_code:
+                    latest_auth = qr_sync_manager.get_latest_auth(unit_code)
+                    if latest_auth:
+                        device_id = latest_auth.get('device_id')
+                        existing_employee_info = latest_auth.get('employee_info')
+                        
+                        # Hanya register jika device belum terdaftar ke siapapun
+                        if device_id and not existing_employee_info:
+                            device_registry.register_device(
+                                device_id,
+                                employee['id'],
+                                employee['name'],
+                                employee.get('nik')
+                            )
+                            logger.info(f"📱 AUTO-REGISTER: Device {device_id[:8]}... -> {employee['name']}")
+                            
+                            # Update sync manager dengan employee_info baru
+                            qr_sync_manager.verify_qr_auth(
+                                unit_code, 
+                                latest_auth.get('device_info'),
+                                {
+                                    'employee_id': employee['id'],
+                                    'employee_name': employee['name'],
+                                    'nik': employee.get('nik')
+                                },
+                                device_id
+                            )
+            except Exception as reg_error:
+                logger.warning(f"Device auto-registration failed (non-critical): {reg_error}")
+            
             return {'success': True, 'message': f'Absensi {mode} berhasil dicatat'}
         else:
             logger.error(f"Gagal update attendance: {username} - {mode}")
@@ -3108,6 +3423,140 @@ def get_employees():
     except Exception as e:
         logger.error(f"Error getting employees: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/api/employee/update', methods=['POST'])
+def api_update_employee():
+    """API untuk update data karyawan"""
+    try:
+        data = request.get_json()
+        employee_id = data.get('id')
+        new_name = data.get('name')
+        new_bagian = data.get('bagian')
+        new_nik = data.get('nik', '')
+        new_email = data.get('email', '')
+        new_telepon = data.get('telepon', '')
+        
+        if not employee_id or not new_name or not new_bagian:
+            return jsonify({'success': False, 'message': 'ID, nama, dan bagian harus diisi'})
+        
+        db = get_db_manager()
+        
+        # Get old employee data untuk rename folder
+        result = db.execute_query("SELECT * FROM karyawan WHERE id = %s", (employee_id,))
+        if not result or len(result) == 0:
+            return jsonify({'success': False, 'message': 'Karyawan tidak ditemukan'})
+        
+        old_employee = result[0]
+        old_name = old_employee['nama']
+        old_bagian = old_employee['bagian']
+        
+        # Update database
+        update_query = """
+            UPDATE karyawan 
+            SET nama = %s, bagian = %s, nik = %s, email = %s, telepon = %s
+            WHERE id = %s
+        """
+        db.execute_query(update_query, (new_name, new_bagian, new_nik, new_email, new_telepon, employee_id))
+        
+        # Rename folder foto jika nama/bagian berubah
+        if old_name != new_name or old_bagian != new_bagian:
+            old_folder = f"static/faces/{old_name}_{old_bagian}"
+            new_folder = f"static/faces/{new_name}_{new_bagian}"
+            if os.path.exists(old_folder):
+                os.rename(old_folder, new_folder)
+                logger.info(f"Renamed folder: {old_folder} -> {new_folder}")
+            
+            # Train ulang model karena nama berubah
+            train_model()
+        
+        logger.info(f"Employee updated: ID {employee_id}, {old_name} -> {new_name}")
+        return jsonify({
+            'success': True, 
+            'message': f'Data karyawan {new_name} berhasil diupdate'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error updating employee: {e}")
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/employee/delete', methods=['POST'])
+def api_delete_employee():
+    """API untuk menghapus karyawan berdasarkan ID"""
+    try:
+        data = request.get_json()
+        employee_id = data.get('id')
+        
+        if not employee_id:
+            return jsonify({'success': False, 'message': 'ID karyawan harus diisi'})
+        
+        db = get_db_manager()
+        
+        # Get employee data
+        result = db.execute_query("SELECT * FROM karyawan WHERE id = %s", (employee_id,))
+        if not result or len(result) == 0:
+            return jsonify({'success': False, 'message': 'Karyawan tidak ditemukan'})
+        
+        employee = result[0]
+        emp_name = employee['nama']
+        emp_bagian = employee['bagian']
+        
+        # Hapus data absensi terkait
+        db.execute_query("DELETE FROM absensi WHERE id_karyawan = %s", (employee_id,))
+        
+        # Hapus karyawan
+        db.execute_query("DELETE FROM karyawan WHERE id = %s", (employee_id,))
+        
+        # Hapus folder foto
+        face_folder = f"static/faces/{emp_name}_{emp_bagian}"
+        if os.path.exists(face_folder):
+            shutil.rmtree(face_folder)
+            logger.info(f"Deleted face folder: {face_folder}")
+        
+        # Hapus foto profil jika ada
+        photo_path = f"static/employee_photos/{employee_id}.jpg"
+        if os.path.exists(photo_path):
+            os.remove(photo_path)
+        
+        # Train ulang model
+        train_model()
+        
+        logger.info(f"Employee deleted: ID {employee_id}, {emp_name} ({emp_bagian})")
+        return jsonify({
+            'success': True, 
+            'message': f'Karyawan {emp_name} berhasil dihapus'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error deleting employee: {e}")
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/employee/<int:employee_id>', methods=['GET'])
+def api_get_employee(employee_id):
+    """API untuk mendapatkan detail karyawan berdasarkan ID"""
+    try:
+        db = get_db_manager()
+        result = db.execute_query("SELECT * FROM karyawan WHERE id = %s", (employee_id,))
+        
+        if not result or len(result) == 0:
+            return jsonify({'success': False, 'message': 'Karyawan tidak ditemukan'})
+        
+        employee = result[0]
+        return jsonify({
+            'success': True,
+            'employee': {
+                'id': employee['id'],
+                'name': employee['nama'],
+                'bagian': employee['bagian'],
+                'nik': employee.get('nik', ''),
+                'email': employee.get('email', ''),
+                'telepon': employee.get('telepon', ''),
+                'tanggal_bergabung': str(employee.get('tanggal_bergabung', ''))
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting employee: {e}")
+        return jsonify({'success': False, 'message': str(e)})
 
 @app.route('/delete_employee', methods=['POST'])
 def delete_employee():
