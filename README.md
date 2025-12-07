@@ -9,17 +9,27 @@ Aplikasi web Flask untuk absensi otomatis via kamera webcam dengan sinkronisasi 
 
 ## 📸 Screenshots & Demo
 
-### Face Recognition - Absensi Wajah
-![Face Recognition](https://i.imgur.com/3yTqzba.png)
-*Deteksi wajah otomatis dengan akurasi 99%+ menggunakan InsightFace*
-
-### QR Code Sync
-![QR Sync](https://i.imgur.com/AQsO5Q6.png)
-*Sinkronisasi absensi cross-device via QR code unik*
-
-### Dashboard Admin
-![Dashboard Admin](https://i.imgur.com/MBgDed4.png)
-*Manajemen karyawan dan laporan absensi*
+<table>
+  <tr>
+    <td width="50%">
+      <h3 align="center">Face Recognition - Absensi Wajah</h3>
+      <img src="https://i.imgur.com/3yTqzba.png" alt="Face Recognition" width="100%"/>
+      <p align="center"><em>Deteksi wajah otomatis dengan akurasi 99%+ menggunakan InsightFace</em></p>
+    </td>
+    <td width="50%">
+      <h3 align="center">QR Code Sync</h3>
+      <img src="https://i.imgur.com/AQsO5Q6.png" alt="QR Sync" width="100%"/>
+      <p align="center"><em>Sinkronisasi absensi cross-device via QR code unik</em></p>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <h3 align="center">Dashboard Admin</h3>
+      <img src="https://i.imgur.com/MBgDed4.png" alt="Dashboard Admin" width="100%"/>
+      <p align="center"><em>Manajemen karyawan dan laporan absensi</em></p>
+    </td>
+  </tr>
+</table>
 
 ---
 
