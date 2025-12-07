@@ -150,12 +150,21 @@ MAX_FACES=1
 
 ## 🌐 Deployment
 
-### Docker (Recommended)
+### Docker (Recommended) 🐳
 
 ```bash
-docker build -t smart-absen .
-docker run -p 5001:5001 --env-file .env smart-absen
+# Local development
+docker-compose up -d
+
+# Production (pull from GHCR)
+docker pull ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
+docker run -d -p 5001:5001 --env-file .env \
+  -v $(pwd)/logs:/app/logs \
+  -v $(pwd)/face_data:/app/face_data \
+  ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
 ```
+
+**Docker Hub:** `ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4`
 
 ### VPS/Cloud
 
@@ -164,7 +173,7 @@ docker run -p 5001:5001 --env-file .env smart-absen
 3. `gunicorn app:app -w 4 -b 0.0.0.0:5001`
 4. PM2/Nginx untuk production
 
-Detail lengkap: [INSTALLATION.md](INSTALLATION.md)
+**Detail lengkap:** [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) | [INSTALLATION.md](INSTALLATION.md)
 
 ---
 

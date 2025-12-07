@@ -47,6 +47,10 @@ Attendance/*.csv
 *_backup.*
 *_old.*
 
+# Docker
+docker-compose.override.yml
+.dockerignore.local
+
 # OS
 .DS_Store
 Thumbs.db

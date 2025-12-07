@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+.venv
+venv
+env
+
+# Environment
+.env
+.env.local
+
+# Logs
+logs/*.log
+
+# Data (will be mounted as volumes)
+face_data/*
+Attendance/*.csv
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.bak
+*.backup
