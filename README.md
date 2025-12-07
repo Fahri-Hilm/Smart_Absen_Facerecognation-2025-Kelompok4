@@ -3,7 +3,26 @@
 Sistem absensi pintar berbasis pengenalan wajah dengan akurasi 99%+ menggunakan InsightFace/ArcFace.  
 Aplikasi web Flask untuk absensi otomatis via kamera webcam dengan sinkronisasi QR code cross-device dan database MySQL.
 
-**Version:** 2.0 | **Status:** Production Ready ✅ | **Security Score:** 9/10 🛡️
+**Version:** 2.1 | **Status:** Production Ready ✅ | **Security Score:** 9/10 🛡️
+
+---
+
+## 🌐 Live Demo
+
+**Demo URL:** [Coming Soon - Deploy to VPS Kampus]
+
+Setelah deploy ke VPS kampus, demo akan tersedia di sini dengan:
+- ✅ Full face recognition functionality
+- ✅ QR sync cross-device
+- ✅ Real-time dashboard
+- ✅ Admin panel access
+
+**Quick Deploy:**
+```bash
+docker pull ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
+docker run -d -p 5001:5001 --env-file .env \
+  ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
+```
 
 ---
 
@@ -15,7 +34,7 @@ Aplikasi web Flask untuk absensi otomatis via kamera webcam dengan sinkronisasi 
 - **Real-time Dashboard**: Lihat status absensi live
 - **CSV Export**: Log absensi dalam format Excel
 - **Security**: Environment variables, input validation, error handling
-- **Modular Code**: Separated JavaScript, standardized API responses
+- **Docker Ready**: One-command deployment with CI/CD
 - **Cloudflare Tunnel**: Akses HTTPS aman tanpa port forwarding
 
 ---
