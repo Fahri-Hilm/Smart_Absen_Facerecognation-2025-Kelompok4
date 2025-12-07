@@ -7,22 +7,23 @@ Aplikasi web Flask untuk absensi otomatis via kamera webcam dengan sinkronisasi 
 
 ---
 
-## 🌐 Live Demo
+## 📸 Screenshots & Demo
 
-**Demo URL:** [Coming Soon - Deploy to VPS Kampus]
+### Dashboard Utama
+![Dashboard](https://i.imgur.com/PLACEHOLDER1.png)
+*Real-time attendance monitoring dengan statistik lengkap*
 
-Setelah deploy ke VPS kampus, demo akan tersedia di sini dengan:
-- ✅ Full face recognition functionality
-- ✅ QR sync cross-device
-- ✅ Real-time dashboard
-- ✅ Admin panel access
+### Face Recognition
+![Face Recognition](https://i.imgur.com/PLACEHOLDER2.png)
+*Deteksi wajah otomatis dengan akurasi 99%+ menggunakan InsightFace*
 
-**Quick Deploy:**
-```bash
-docker pull ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
-docker run -d -p 5001:5001 --env-file .env \
-  ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
-```
+### QR Code Sync
+![QR Sync](https://i.imgur.com/PLACEHOLDER3.png)
+*Sinkronisasi absensi cross-device via QR code unik*
+
+### Admin Panel
+![Admin Panel](https://i.imgur.com/PLACEHOLDER4.png)
+*Manajemen karyawan dan laporan absensi*
 
 ---
 
