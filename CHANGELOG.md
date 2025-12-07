@@ -10,11 +10,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Dashboard untuk training face model
-- Upload foto manual (drag & drop)
-- Model re-training tanpa restart
-- Analytics dashboard
-- Export laporan ke PDF/Excel
+- Unit tests dengan pytest
+- Database indexing optimization
+- Rate limiting implementation
+- Dashboard analytics
+- PWA support
+- Dark mode
+
+---
+
+## [2.1.0] - 2025-12-07
+
+### 🐳 Docker Deployment Support
+
+#### Added - DevOps 🚀
+- **Dockerfile**: Multi-stage build untuk optimized image size (~800MB)
+- **Docker Compose**: Local development dengan MySQL container
+- **GitHub Actions**: Automated Docker build & push ke GHCR
+- **Deploy Script**: One-command deployment (`deploy.sh`)
+- **Docker Documentation**: 
+  - `DOCKER_DEPLOYMENT.md` - Complete deployment guide
+  - `DOCKER_QUICKSTART.md` - Quick reference commands
+- **.dockerignore**: Exclude unnecessary files dari Docker image
+
+#### Changed - Deployment 📦
+- **Image Registry**: GitHub Container Registry (GHCR)
+- **Image URL**: `ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest`
+- **Deployment Method**: Docker-first approach (recommended)
+- **Installation Guide**: Updated dengan Docker quick start
+
+#### Technical Details
+- **Base Image**: `python:3.10-slim` (Debian bookworm)
+- **OpenCV Dependencies**: `libglib2.0-0`, `libsm6`, `libxext6`, `libxrender-dev`, `libgomp1`
+- **Health Check**: Built-in Docker health check setiap 30s
+- **Auto-restart**: Container restart policy `unless-stopped`
+- **Volume Persistence**: `logs/`, `face_data/`, `Attendance/`
+
+#### Benefits
+- ✅ Platform-independent deployment
+- ✅ Isolated environment (no dependency conflicts)
+- ✅ Easy rollback (docker run previous version)
+- ✅ Resource control (CPU/memory limits)
+- ✅ Automated CI/CD pipeline
+- ✅ 30-second updates (docker pull + restart)
 
 ---
 

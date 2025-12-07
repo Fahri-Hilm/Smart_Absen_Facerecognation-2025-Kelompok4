@@ -2,25 +2,148 @@
 
 > Panduan instalasi lengkap Smart Absen Face Recognition System
 
+**Version:** 2.1 | **Last Updated:** 2025-12-07
+
+---
+
+## 🚀 Quick Start (Choose One)
+
+### Option A: Docker (Recommended) 🐳
+
+**Fastest way to get started - No Python/MySQL setup needed!**
+
+```bash
+# Pull & run
+docker pull ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
+docker run -d -p 5001:5001 --env-file .env \
+  ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
+```
+
+**Full Docker Guide:** [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+
+---
+
+### Option B: Manual Installation
+
+Traditional Python + MySQL setup (for development or non-Docker environments)
+
 ---
 
 ## 📋 Table of Contents
 
-1. [Prerequisites](#-prerequisites)
-2. [Step 1: Clone Repository](#step-1-clone-repository)
-3. [Step 2: Setup Python Environment](#step-2-setup-python-environment)
-4. [Step 3: Install Dependencies](#step-3-install-dependencies)
-5. [Step 4: Setup MySQL Database](#step-4-setup-mysql-database)
-6. [Step 5: Configure Application](#step-5-configure-application)
-7. [Step 6: Initialize Database](#step-6-initialize-database)
-8. [Step 7: Run Application](#step-7-run-application)
-9. [Step 8: Verify Installation](#step-8-verify-installation)
-10. [Optional: Setup Cloudflare Tunnel](#optional-setup-cloudflare-tunnel)
-11. [Troubleshooting](#-troubleshooting)
+### Docker Installation
+1. [Docker Prerequisites](#docker-prerequisites)
+2. [Docker Quick Start](#docker-quick-start)
+3. [Docker with MySQL](#docker-with-mysql)
+
+### Manual Installation
+4. [Manual Prerequisites](#manual-prerequisites)
+5. [Step 1: Clone Repository](#step-1-clone-repository)
+6. [Step 2: Setup Python Environment](#step-2-setup-python-environment)
+7. [Step 3: Install Dependencies](#step-3-install-dependencies)
+8. [Step 4: Setup MySQL Database](#step-4-setup-mysql-database)
+9. [Step 5: Configure Application](#step-5-configure-application)
+10. [Step 6: Initialize Database](#step-6-initialize-database)
+11. [Step 7: Run Application](#step-7-run-application)
+12. [Step 8: Verify Installation](#step-8-verify-installation)
+
+### Additional Setup
+13. [Optional: Setup Cloudflare Tunnel](#optional-setup-cloudflare-tunnel)
+14. [Troubleshooting](#-troubleshooting)
 
 ---
 
-## 📋 Prerequisites
+## 🐳 Docker Installation
+
+### Docker Prerequisites
+
+| # | Requirement | Cara Cek | Status |
+|---|-------------|----------|--------|
+| 1 | Docker 20.10+ | `docker --version` | ☐ |
+| 2 | Docker Compose (optional) | `docker-compose --version` | ☐ |
+
+**Install Docker:**
+
+```bash
+# Linux (Ubuntu/Debian)
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Verify
+docker --version
+```
+
+---
+
+### Docker Quick Start
+
+```bash
+# 1. Create .env file
+cat > .env << 'EOF'
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=smart_absen
+SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+FLASK_ENV=production
+PORT=5001
+EOF
+
+# 2. Pull image
+docker pull ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
+
+# 3. Run container
+docker run -d \
+  --name smart-absen \
+  -p 5001:5001 \
+  --env-file .env \
+  -v $(pwd)/logs:/app/logs \
+  -v $(pwd)/face_data:/app/face_data \
+  --restart unless-stopped \
+  ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
+
+# 4. Verify
+docker ps
+docker logs -f smart-absen
+curl http://localhost:5001/health
+```
+
+**Access:** http://localhost:5001
+
+---
+
+### Docker with MySQL
+
+Use Docker Compose for complete stack (app + database):
+
+```bash
+# 1. Clone repository
+git clone https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4.git
+cd Smart_Absen_Facerecognation-2025-Kelompok4
+
+# 2. Create .env
+cp .env.example .env
+nano .env  # Edit credentials
+
+# 3. Start services
+docker-compose up -d
+
+# 4. Check status
+docker-compose ps
+docker-compose logs -f app
+```
+
+**Full Docker Documentation:** [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+
+---
+
+## 🔧 Manual Installation
+
+### Manual Prerequisites
+
+---
+
+## 📋 Manual Prerequisites
 
 ### Checklist Sebelum Instalasi
 
