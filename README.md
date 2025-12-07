@@ -262,7 +262,7 @@ MIT License - lihat [LICENSE](LICENSE)
 ## 👥 Tim Pengembang
 
 **Kelompok 4 - Software Project 2025**  
-Fahri Hilmi - Lead Developer
+Fahri Juru - Lead Developer
 
 ---
 
