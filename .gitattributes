@@ -1,0 +1,12 @@
+# Override GitHub language detection
+*.py linguist-detectable=true
+*.html linguist-detectable=false
+*.css linguist-detectable=false
+*.js linguist-vendored=false
+
+# Mark static files as documentation
+static/* linguist-documentation
+templates/* linguist-documentation
+
+# Ensure Python is primary language
+*.py linguist-language=Python
