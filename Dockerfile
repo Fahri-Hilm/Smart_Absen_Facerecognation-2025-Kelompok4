@@ -1,12 +1,10 @@
 # Multi-stage build for smaller image size
 FROM python:3.10-slim AS builder
 
-# Install system dependencies
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
-    libgl1 \
-    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -17,10 +15,14 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 # Final stage
 FROM python:3.10-slim
 
-# Install runtime dependencies only
+# Install OpenCV runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
     libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libgthread-2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python packages from builder
