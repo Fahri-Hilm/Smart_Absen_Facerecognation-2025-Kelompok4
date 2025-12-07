@@ -2,24 +2,28 @@
 # Database configuration for employee attendance system
 
 import os
+from dotenv import load_dotenv
 
-# Konfigurasi Database MariaDB (Devilbox default settings)
+# Load environment variables
+load_dotenv()
+
+# Konfigurasi Database MariaDB (with environment variables)
 DATABASE_CONFIG = {
-    'host': '127.0.0.1',  # Devilbox host
-    'port': 3306,
-    'user': 'root',
-    'password': '',  # Devilbox default: no password for root
-    'database': 'absensi_karyawan_db',  # Nama database baru
+    'host': os.getenv('DB_HOST', '127.0.0.1'),
+    'port': int(os.getenv('DB_PORT', 3306)),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', ''),
+    'database': os.getenv('DB_NAME', 'absensi_karyawan_db'),
     'charset': 'utf8mb4',
     'autocommit': True
 }
 
 # Konfigurasi aplikasi
 APP_CONFIG = {
-    'secret_key': 'absensi-karyawan-secret-key-2025',
-    'debug': True,
-    'host': '0.0.0.0',  # Ubah ke 0.0.0.0 agar bisa diakses dari jaringan lokal
-    'port': 5001
+    'secret_key': os.getenv('SECRET_KEY', 'dev-key-change-in-production'),
+    'debug': os.getenv('FLASK_DEBUG', 'True') == 'True',
+    'host': os.getenv('FLASK_HOST', '0.0.0.0'),
+    'port': int(os.getenv('FLASK_PORT', 5001))
 }
 
 # Konfigurasi face recognition

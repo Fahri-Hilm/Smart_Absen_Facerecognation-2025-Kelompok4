@@ -792,6 +792,12 @@
             .then(data => {
                 console.log('🎉 QR sync response:', data);
                 if (data.success && data.redirect_url) {
+                    // STOP POLLING BEFORE REDIRECT
+                    if (qrSyncInterval) {
+                        clearInterval(qrSyncInterval);
+                        qrSyncInterval = null;
+                        console.log('🛑 Polling stopped before redirect');
+                    }
                     window.location.href = data.redirect_url;
                 } else {
                     document.getElementById('syncModal').classList.remove('show');
@@ -815,6 +821,24 @@
             }
             
             setTimeout(startQRSyncMonitoring, 1000);
+        });
+
+        // CLEANUP: Stop polling when page is about to unload
+        window.addEventListener('beforeunload', () => {
+            if (qrSyncInterval) {
+                clearInterval(qrSyncInterval);
+                qrSyncInterval = null;
+                console.log('🧹 Polling cleaned up on page unload');
+            }
+        });
+
+        // CLEANUP: Stop polling when page loses visibility (tab switch, minimize)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && qrSyncInterval) {
+                clearInterval(qrSyncInterval);
+                qrSyncInterval = null;
+                console.log('🧹 Polling stopped - page hidden');
+            }
         });
     </script>
 </body>

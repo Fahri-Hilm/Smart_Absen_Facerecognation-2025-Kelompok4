@@ -577,15 +577,6 @@
                                 </label>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="enableLivenessDetection" checked>
-                                <label class="form-check-label" for="enableLivenessDetection">
-                                    Deteksi Wajah Hidup (Anti-Spoofing)
-                                </label>
-                            </div>
-                        </div>
                     </form>
                 </div>
             </div>
@@ -800,8 +791,7 @@
                 faceRecognition: {
                     threshold: document.getElementById('recognitionThreshold').value,
                     maxDistance: document.getElementById('maxFaceDistance').value,
-                    saveUnrecognized: document.getElementById('saveUnrecognizedFaces').checked,
-                    livenessDetection: document.getElementById('enableLivenessDetection').checked
+                    saveUnrecognized: document.getElementById('saveUnrecognizedFaces').checked
                 },
                 notifications: {
                     email: document.getElementById('emailNotifications').checked,
@@ -853,7 +843,7 @@
                 // Reset checkboxes
                 const checkboxes = [
                     'monday', 'tuesday', 'wednesday', 'thursday', 'friday',
-                    'logActivities', 'autoBackup', 'enableLivenessDetection',
+                    'logActivities', 'autoBackup',
                     'emailNotifications', 'attendanceAlerts', 'systemAlerts'
                 ];
                 

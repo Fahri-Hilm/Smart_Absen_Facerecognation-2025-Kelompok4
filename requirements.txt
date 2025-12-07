@@ -4,8 +4,14 @@
 # Web Framework
 Flask==2.3.3
 
+# Security & Environment
+python-dotenv==1.0.0
+Flask-WTF==1.2.1
+Flask-Limiter==3.5.0
+
 # Database
 PyMySQL==1.1.2
+DBUtils==3.0.3
 
 # Computer Vision & Face Recognition
 opencv-python==4.8.0.76

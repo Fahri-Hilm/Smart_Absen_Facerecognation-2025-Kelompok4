@@ -1,36 +1,22 @@
-# Smart Absen Face Recognition - Kelompok 4
-
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+dist/
+build/
 
-# Virtual environments
-.env
-.venv
-env/
+# Virtual Environment
 venv/
+.venv/
+env/
 ENV/
-env.bak/
-venv.bak/
+
+# Environment Variables
+.env
+.env.local
 
 # IDE
 .vscode/
@@ -39,46 +25,41 @@ venv.bak/
 *.swo
 *~
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Logs
+logs/
+*.log
 
 # Database
 *.db
 *.sqlite3
 
-# Logs
-*.log
-logs/
+# Face Data (sensitive)
+static/faces/*/
+static/face_embeddings.pkl
+static/employee_photos/
 
-# Temporary files
-*.tmp
-*.temp
-
-# Attendance CSV (generated at runtime)
+# Attendance Data
 Attendance/*.csv
-data/Attendance/*.csv
 
-# Flask
-instance/
-.webassets-cache
-
-# Backup files
-*.bak
+# Backup Files
 *.backup
+*.bak
+*_backup.*
+*_old.*
 
-# Windows
-desktop.ini
-$RECYCLE.BIN/
+# OS
+.DS_Store
+Thumbs.db
 
-# PlantUML JAR files
-*.jar
-plantuml.jar
+# Temporary
+tmp/
+temp/
+*.tmp
 
-# Generated diagram images (optional - keep PNG files for documentation)
-# docs/*.png
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation builds
+docs/_build/

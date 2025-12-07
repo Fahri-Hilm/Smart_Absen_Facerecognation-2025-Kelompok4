@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} - Admin Kafebasabasi{% endblock %}
+
+{% block nav_items %}
+<li class="nav-item">
+    <a class="nav-link" href="/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/"><i class="bi bi-house-door"></i> Kembali ke Home</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/admin/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h5><i class="bi bi-gear-fill"></i> Admin Panel</h5>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="/admin/dashboard" class="{% if active_page == 'dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a></li>
+            <li><a href="/admin/employees" class="{% if active_page == 'employees' %}active{% endif %}">
+                <i class="bi bi-people-fill"></i> Kelola Karyawan
+            </a></li>
+            <li><a href="/admin/attendance" class="{% if active_page == 'attendance' %}active{% endif %}">
+                <i class="bi bi-calendar-check"></i> Data Absensi
+            </a></li>
+            <li><a href="/admin/reports" class="{% if active_page == 'reports' %}active{% endif %}">
+                <i class="bi bi-file-earmark-bar-graph"></i> Laporan
+            </a></li>
+            <li><a href="/admin/settings" class="{% if active_page == 'settings' %}active{% endif %}">
+                <i class="bi bi-gear"></i> Pengaturan
+            </a></li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="page-header">
+                <h1 class="page-title">{{ page_title }}</h1>
+                {% if page_subtitle %}
+                <p class="page-subtitle">{{ page_subtitle }}</p>
+                {% endif %}
+            </div>
+            
+            {% block admin_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-layout {
+    display: flex;
+    min-height: calc(100vh - 76px);
+}
+
+.sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, var(--coffee-dark), var(--coffee-medium));
+    box-shadow: 4px 0 20px var(--shadow-md);
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 76px);
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 2px solid rgba(218, 165, 32, 0.3);
+}
+
+.sidebar-header h5 {
+    color: var(--warm-white);
+    margin: 0;
+    font-weight: 600;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 1rem 0;
+    margin: 0;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    color: rgba(253, 246, 227, 0.9);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    border-left: 3px solid transparent;
+}
+
+.sidebar-menu li a:hover,
+.sidebar-menu li a.active {
+    background: rgba(218, 165, 32, 0.2);
+    border-left-color: var(--accent-gold);
+    color: var(--warm-white);
+}
+
+.sidebar-menu li a i {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    color: var(--coffee-dark);
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: var(--coffee-medium);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .admin-layout {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+}
+</style>
+{% endblock %}

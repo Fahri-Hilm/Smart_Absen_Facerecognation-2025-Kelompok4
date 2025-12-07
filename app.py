@@ -634,6 +634,19 @@ def qr_sync_status():
             scan_timestamp = latest_auth.get('verified_at') or latest_auth.get('timestamp')
             scan_time_str = scan_timestamp.isoformat() if scan_timestamp else None
             
+            # IMPORTANT: Check if this session was already consumed
+            consumed_session = session.get('qr_session_consumed')
+            current_session_key = f"{scanned_unit}_{scan_time_str}"
+            
+            if consumed_session == current_session_key:
+                logger.info(f"⏭️ Skipping already consumed QR session: {current_session_key}")
+                return jsonify({
+                    'success': True,
+                    'has_pending_sync': False,
+                    'status': 'already_used',
+                    'message': 'QR session sudah digunakan'
+                })
+            
             # Ada pending sync jika:
             # 1. Unit code yang di-scan sama dengan yang ditampilkan di laptop
             # 2. DAN salah satu kondisi:
@@ -687,6 +700,7 @@ def clear_qr_session():
         session.pop('qr_verified_time', None)
         verified_unit = session.pop('verified_unit_code', None)
         session.pop('last_sync_time', None)
+        session.pop('qr_session_consumed', None)  # Clear consumed flag untuk scan baru
         
         # Set timestamp saat attendance selesai (untuk grace period)
         session['attendance_completed_time'] = datetime.now().isoformat()
@@ -729,6 +743,8 @@ def accept_qr_sync():
             session['verified_unit_code'] = unit_code
             # Simpan timestamp sync terakhir untuk deteksi scan baru
             session['last_sync_time'] = sync_timestamp or datetime.now().isoformat()
+            # IMPORTANT: Mark this session as consumed to prevent re-detection
+            session['qr_session_consumed'] = f"{unit_code}_{sync_timestamp}"
             
             logger.info(f"✅ QR sync accepted! Laptop session verified with unit: {unit_code}")
             
@@ -4027,6 +4043,67 @@ def signal_handler(sig, frame):
     
     print('👋 Goodbye!')
     sys.exit(0)
+
+# ======================== ERROR HANDLERS ========================
+
+@app.errorhandler(404)
+def not_found(error):
+    """Handle 404 errors"""
+    if request.path.startswith('/api/'):
+        from helpers import api_response
+        return api_response(False, 'Endpoint not found', status_code=404)
+    return render_template('error.html', 
+                         error_code=404,
+                         error_message='Page not found'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Handle 500 errors"""
+    logger.error(f"Internal error: {error}")
+    if request.path.startswith('/api/'):
+        from helpers import api_response
+        return api_response(False, 'Internal server error', status_code=500)
+    return render_template('error.html',
+                         error_code=500,
+                         error_message='Internal server error'), 500
+
+@app.errorhandler(403)
+def forbidden(error):
+    """Handle 403 errors"""
+    if request.path.startswith('/api/'):
+        from helpers import api_response
+        return api_response(False, 'Forbidden', status_code=403)
+    return render_template('error.html',
+                         error_code=403,
+                         error_message='Access forbidden'), 403
+
+# ======================== LOGGING SETUP ========================
+
+def setup_logging():
+    """Setup file logging with rotation"""
+    from logging.handlers import RotatingFileHandler
+    import os
+    
+    # Create logs directory if not exists
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    
+    # Setup file handler
+    file_handler = RotatingFileHandler(
+        'logs/app.log', 
+        maxBytes=10000000,  # 10MB
+        backupCount=3
+    )
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+    ))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+    app.logger.setLevel(logging.INFO)
+    app.logger.info('Smart Absen logging started')
+
+# Initialize logging
+setup_logging()
 
 if __name__ == '__main__':
     # Setup signal handler for graceful shutdown

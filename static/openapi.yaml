@@ -1,0 +1,536 @@
+openapi: 3.0.3
+info:
+  title: Smart Absen API
+  description: |
+    API untuk sistem absensi karyawan dengan Face Recognition & QR Code Authentication.
+    
+    ## Authentication
+    Beberapa endpoint memerlukan QR verification atau admin authentication.
+    
+    ## Rate Limiting
+    - Public endpoints: 100 requests/minute
+    - Authenticated endpoints: 1000 requests/minute
+  version: 2.0.0
+  contact:
+    name: Kelompok 4 - Software Project
+    email: support@smartabsen.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5001
+    description: Development server
+  - url: https://your-tunnel-url.trycloudflare.com
+    description: Production server (Cloudflare Tunnel)
+
+tags:
+  - name: QR Authentication
+    description: QR code generation and verification
+  - name: Attendance
+    description: Attendance marking and retrieval
+  - name: Employees
+    description: Employee management
+  - name: Admin
+    description: Admin operations
+  - name: System
+    description: System health and monitoring
+
+paths:
+  # ==================== QR AUTHENTICATION ====================
+  /auth:
+    get:
+      tags:
+        - QR Authentication
+      summary: Get QR authentication page
+      description: Menampilkan halaman dengan QR code untuk scan dari HP
+      responses:
+        '200':
+          description: QR page rendered successfully
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /verify:
+    get:
+      tags:
+        - QR Authentication
+      summary: Verify QR code (manual input)
+      description: Verifikasi kode QR yang diinput manual dari HP
+      parameters:
+        - name: unit
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "ABC12345"
+          description: Unit code dari QR
+      responses:
+        '200':
+          description: Verification successful, redirect to attendance page
+        '400':
+          description: Invalid or expired code
+
+  /api/qr_sync_status:
+    get:
+      tags:
+        - QR Authentication
+      summary: Check QR sync status
+      description: Polling endpoint untuk cek apakah HP sudah scan QR (auto-redirect laptop)
+      responses:
+        '200':
+          description: Sync status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  has_pending_sync:
+                    type: boolean
+                  session_id:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/accept_qr_sync:
+    post:
+      tags:
+        - QR Authentication
+      summary: Accept QR sync from mobile
+      description: Laptop menerima verifikasi dari HP dan redirect ke halaman absensi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Sync accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  redirect_url:
+                    type: string
+
+  /api/refresh_qr:
+    get:
+      tags:
+        - QR Authentication
+      summary: Refresh QR code
+      description: Generate QR code baru (dipanggil otomatis setiap 10 menit)
+      responses:
+        '200':
+          description: New QR code generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  qr_image:
+                    type: string
+                    description: Base64 encoded QR image
+                  unit_code:
+                    type: string
+                  remaining_seconds:
+                    type: integer
+
+  /api/clear_qr_session:
+    post:
+      tags:
+        - QR Authentication
+      summary: Clear QR session
+      description: Clear session setelah absensi berhasil (mencegah auto-redirect)
+      responses:
+        '200':
+          description: Session cleared
+
+  # ==================== ATTENDANCE ====================
+  /web_attendance:
+    get:
+      tags:
+        - Attendance
+      summary: Web attendance page
+      description: Halaman absensi dengan face recognition via webcam
+      responses:
+        '200':
+          description: Attendance page rendered
+        '403':
+          description: QR verification required
+
+  /mark_attendance_mobile:
+    post:
+      tags:
+        - Attendance
+      summary: Mark attendance from mobile
+      description: Submit absensi dari HP dengan capture foto wajah
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [masuk, pulang]
+                image_data:
+                  type: string
+                  description: Base64 encoded image
+                device_id:
+                  type: string
+      responses:
+        '200':
+          description: Attendance marked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceResponse'
+        '400':
+          description: Face not detected or unknown employee
+
+  /api/get_attendance_data:
+    get:
+      tags:
+        - Attendance
+      summary: Get attendance data
+      description: Retrieve attendance records dengan filter
+      parameters:
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: employee_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Attendance data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Attendance'
+
+  # ==================== EMPLOYEES ====================
+  /api/employees:
+    get:
+      tags:
+        - Employees
+      summary: Get all employees
+      description: Retrieve list semua karyawan
+      responses:
+        '200':
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+
+    post:
+      tags:
+        - Employees
+      summary: Add new employee
+      description: Tambah karyawan baru dengan foto training
+      security:
+        - adminAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                nik:
+                  type: string
+                name:
+                  type: string
+                position:
+                  type: string
+                department:
+                  type: string
+                photos:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Employee added successfully
+        '400':
+          description: Validation error
+
+  /api/employees/{id}:
+    get:
+      tags:
+        - Employees
+      summary: Get employee by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employee details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        '404':
+          description: Employee not found
+
+    put:
+      tags:
+        - Employees
+      summary: Update employee
+      security:
+        - adminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdate'
+      responses:
+        '200':
+          description: Employee updated
+        '404':
+          description: Employee not found
+
+    delete:
+      tags:
+        - Employees
+      summary: Delete employee
+      security:
+        - adminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employee deleted
+        '404':
+          description: Employee not found
+
+  # ==================== ADMIN ====================
+  /admin/login:
+    get:
+      tags:
+        - Admin
+      summary: Admin login page
+      responses:
+        '200':
+          description: Login page rendered
+
+    post:
+      tags:
+        - Admin
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '302':
+          description: Redirect to dashboard
+        '401':
+          description: Invalid credentials
+
+  /admin/dashboard:
+    get:
+      tags:
+        - Admin
+      summary: Admin dashboard
+      security:
+        - adminAuth: []
+      responses:
+        '200':
+          description: Dashboard rendered
+
+  /admin/employees:
+    get:
+      tags:
+        - Admin
+      summary: Employee management page
+      security:
+        - adminAuth: []
+      responses:
+        '200':
+          description: Employee list page
+
+  /admin/attendance:
+    get:
+      tags:
+        - Admin
+      summary: Attendance reports page
+      security:
+        - adminAuth: []
+      responses:
+        '200':
+          description: Attendance reports page
+
+  /api/train_model:
+    post:
+      tags:
+        - Admin
+      summary: Train face recognition model
+      description: Re-train InsightFace model dengan data terbaru
+      security:
+        - adminAuth: []
+      responses:
+        '200':
+          description: Model trained successfully
+        '400':
+          description: No training data available
+
+  # ==================== SYSTEM ====================
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check system health (database, model availability)
+      responses:
+        '200':
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  database:
+                    type: string
+                    example: connected
+                  model:
+                    type: string
+                    enum: [available, missing]
+                  version:
+                    type: string
+
+# ==================== COMPONENTS ====================
+components:
+  schemas:
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+        nik:
+          type: string
+        name:
+          type: string
+        position:
+          type: string
+        department:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        position:
+          type: string
+        department:
+          type: string
+
+    Attendance:
+      type: object
+      properties:
+        id:
+          type: integer
+        employee_id:
+          type: integer
+        employee_name:
+          type: string
+        date:
+          type: string
+          format: date
+        time_in:
+          type: string
+          format: time
+        time_out:
+          type: string
+          format: time
+        status:
+          type: string
+          enum: [hadir, telat, izin, sakit, alpha]
+
+    AttendanceResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, error]
+        message:
+          type: string
+        employee_name:
+          type: string
+        time:
+          type: string
+          format: time
+
+  securitySchemes:
+    adminAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Admin session cookie
