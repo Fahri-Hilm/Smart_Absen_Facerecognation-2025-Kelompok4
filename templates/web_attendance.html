@@ -819,6 +819,7 @@
                 });
 
                 const result = await response.json();
+                console.log('Attendance result:', result); // Debug log
 
                 if (result.status === 'success') {
                     let employeeName = result.employee_name || 'Karyawan';
@@ -829,8 +830,14 @@
                     showSuccessPopup(currentMode, employeeName);
                 } else if (result.status === 'warning') {
                     // Duplicate attendance - show warning toast
-                    toast.warning(result.message, 5000);
+                    console.log('Showing warning toast:', result.message); // Debug log
+                    if (typeof toast !== 'undefined') {
+                        toast.warning(result.message, 5000);
+                    } else {
+                        alert('⚠️ ' + result.message);
+                    }
                 } else {
+                    console.log('Showing error toast:', result.message); // Debug log
                     showStatus('❌ ' + result.message, 'error');
                 }
 
@@ -846,14 +853,20 @@
 
         function showStatus(message, type) {
             // Use toast notifications instead of status area
-            if (type === 'success') {
-                toast.success(message);
-            } else if (type === 'error') {
-                toast.error(message);
-            } else if (type === 'warning') {
-                toast.warning(message);
+            if (typeof toast !== 'undefined') {
+                if (type === 'success') {
+                    toast.success(message);
+                } else if (type === 'error') {
+                    toast.error(message);
+                } else if (type === 'warning') {
+                    toast.warning(message);
+                } else {
+                    toast.info(message);
+                }
             } else {
-                toast.info(message);
+                // Fallback if toast not loaded
+                console.error('Toast not loaded!');
+                alert(message);
             }
         }
 
