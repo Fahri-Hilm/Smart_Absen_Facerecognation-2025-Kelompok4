@@ -545,35 +545,6 @@
                 <div class="date" id="currentDate">Memuat...</div>
             </div>
         </div>
-        
-        <!-- Employee Welcome Banner -->
-        {% if employee_info %}
-        <div class="employee-welcome-banner">
-            <div class="welcome-content">
-                <i class="bi bi-person-check-fill"></i>
-                <div class="welcome-text">
-                    <span class="greeting-label">Selamat Datang,</span>
-                    <span class="employee-name">{{ employee_info.employee_name }}</span>
-                </div>
-            </div>
-            <div class="welcome-badge">
-                <i class="bi bi-shield-check"></i> Device Terdaftar
-            </div>
-        </div>
-        {% else %}
-        <div class="employee-welcome-banner guest-mode">
-            <div class="welcome-content">
-                <i class="bi bi-person-fill-exclamation"></i>
-                <div class="welcome-text">
-                    <span class="greeting-label">Halo!</span>
-                    <span class="employee-name">Device belum terdaftar</span>
-                </div>
-            </div>
-            <div class="welcome-badge guest">
-                <i class="bi bi-info-circle"></i> Absen pertama untuk registrasi
-            </div>
-        </div>
-        {% endif %}
 
         <div class="attendance-body">
             <div class="camera-section">
