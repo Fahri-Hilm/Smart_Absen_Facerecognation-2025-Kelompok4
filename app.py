@@ -29,7 +29,7 @@ import atexit
 from database import get_db_manager
 from models import Employee, Attendance, ActivityLog
 from config import get_app_config
-from qr_sync import qr_sync_manager, start_cleanup_thread, device_registry
+from qr_sync import qr_sync_manager, start_cleanup_thread
 import logging
 
 # Setup logging FIRST (before importing InsightFace)
@@ -841,59 +841,6 @@ def qr_info():
         logger.error(f"Error getting QR info: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/device/register', methods=['POST'])
-def register_device():
-    """Register device dengan employee setelah absen berhasil"""
-    try:
-        data = request.get_json()
-        device_id = data.get('device_id')
-        employee_id = data.get('employee_id')
-        employee_name = data.get('employee_name')
-        nik = data.get('nik')
-        
-        if not device_id or not employee_id:
-            return jsonify({'success': False, 'message': 'device_id dan employee_id diperlukan'}), 400
-        
-        device_registry.register_device(device_id, employee_id, employee_name, nik)
-        
-        logger.info(f"📱 Device registered: {device_id[:8]}... -> {employee_name}")
-        
-        return jsonify({
-            'success': True,
-            'message': f'Device terdaftar untuk {employee_name}'
-        })
-    except Exception as e:
-        logger.error(f"Error registering device: {e}")
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/device/check', methods=['POST'])
-def check_device():
-    """Check if device is registered and get employee info"""
-    try:
-        data = request.get_json()
-        device_id = data.get('device_id')
-        
-        if not device_id:
-            return jsonify({'success': False, 'registered': False, 'message': 'device_id diperlukan'}), 400
-        
-        employee_info = device_registry.get_employee_by_device(device_id)
-        
-        if employee_info:
-            return jsonify({
-                'success': True,
-                'registered': True,
-                'employee': employee_info
-            })
-        else:
-            return jsonify({
-                'success': True,
-                'registered': False,
-                'message': 'Device belum terdaftar'
-            })
-    except Exception as e:
-        logger.error(f"Error checking device: {e}")
-        return jsonify({'success': False, 'message': str(e)}), 500
-
 @app.route('/mobile_verify')
 def mobile_verify():
     """Halaman perantara untuk HP - mengambil device_id lalu redirect ke verify"""
@@ -910,7 +857,6 @@ def mobile_verify():
 def verify_qr():
     """Verifikasi QR code dan redirect ke halaman utama dengan real-time sync"""
     provided_unit = request.args.get('unit', '').strip().upper()
-    device_id = request.args.get('device_id', '').strip()
     
     if not provided_unit:
         flash('Kode unit tidak ditemukan. Silakan scan QR code yang valid.', 'error')
@@ -927,25 +873,16 @@ def verify_qr():
         is_mobile = any(mobile in user_agent for mobile in ['android', 'iphone', 'ipad', 'mobile', 'webos', 'blackberry'])
         device_info = 'mobile' if is_mobile else 'desktop'
         
-        # Check if device is registered to an employee
-        employee_info = None
-        if device_id:
-            employee_info = device_registry.get_employee_by_device(device_id)
-            if employee_info:
-                logger.info(f"📱 Recognized device: {device_id[:8]}... belongs to {employee_info['employee_name']}")
-        
-        # Notify sync system about successful authentication (include employee_info and device_id)
-        qr_sync_manager.verify_qr_auth(provided_unit, device_info, employee_info, device_id)
+        # Notify sync system about successful authentication
+        qr_sync_manager.verify_qr_auth(provided_unit, device_info, None, None)
         
         logger.info(f"QR verification successful with unit code: {provided_unit} from {device_info}")
         
         if is_mobile:
-            # HP hanya sebagai kunci - tampilkan halaman sukses dengan info pegawai jika dikenali
+            # HP hanya sebagai kunci - tampilkan halaman sukses
             logger.info(f"Mobile device used as key - showing success page only")
             return render_template('qr_scan_success.html', 
-                                   unit_code=provided_unit,
-                                   employee_info=employee_info,
-                                   device_id=device_id)
+                                   unit_code=provided_unit)
         else:
             # Desktop/Laptop - redirect langsung ke halaman absensi baru
             logger.info(f"Desktop device - redirecting to web_attendance page")
@@ -2840,9 +2777,8 @@ def mark_attendance_mobile():
         mode = request.form.get('mode', 'masuk')
         image_data = request.form.get('image_data')
         source = request.form.get('source', 'mobile')
-        device_id = request.form.get('device_id', '')  # Device ID dari HP
         
-        logger.info(f"Mobile attendance request: mode={mode}, source={source}, device_id={device_id[:8] if device_id else 'none'}...")
+        logger.info(f"Mobile attendance request: mode={mode}, source={source}")
         
         if not image_data:
             return jsonify({
@@ -2919,25 +2855,6 @@ def mark_attendance_mobile():
                     result = update_attendance(user, mode)
                     
                     if result.get('success', False):
-                        # Register device dengan employee jika device_id ada
-                        if device_id:
-                            # Get employee info untuk register device
-                            employees = Employee.get_all_employees()
-                            employee = None
-                            for emp in employees:
-                                if emp.get('name') == user:
-                                    employee = emp
-                                    break
-                            
-                            if employee:
-                                device_registry.register_device(
-                                    device_id, 
-                                    employee['id'], 
-                                    employee['name'],
-                                    employee.get('nik')
-                                )
-                                logger.info(f"📱 Device {device_id[:8]}... registered to {user}")
-                        
                         # IMPORTANT: Mark session as consumed to prevent auto-redirect
                         unit_code = session.get('verified_unit_code')
                         scan_time = session.get('last_sync_time')
@@ -2954,8 +2871,7 @@ def mark_attendance_mobile():
                             'message': f'✅ Absensi {mode} berhasil untuk {user}!',
                             'user': user,
                             'mode': mode,
-                            'time': datetime.now().strftime('%H:%M:%S'),
-                            'device_registered': bool(device_id)
+                            'time': datetime.now().strftime('%H:%M:%S')
                         })
                     else:
                         return jsonify({
@@ -3402,40 +3318,6 @@ def update_attendance(name, mode='masuk'):
             # Log aktivitas
             ActivityLog.add_log(employee['id'], activity_type, f"Absensi {mode} berhasil")
             logger.info(f"Attendance updated: {username} - {mode} at {current_time}")
-            
-            # AUTO-REGISTER DEVICE: Setelah absensi berhasil, daftarkan device HP yang scan QR
-            try:
-                # Get device_id dari qr_sync session
-                unit_code = session.get('verified_unit_code')
-                if unit_code:
-                    latest_auth = qr_sync_manager.get_latest_auth(unit_code)
-                    if latest_auth:
-                        device_id = latest_auth.get('device_id')
-                        existing_employee_info = latest_auth.get('employee_info')
-                        
-                        # Hanya register jika device belum terdaftar ke siapapun
-                        if device_id and not existing_employee_info:
-                            device_registry.register_device(
-                                device_id,
-                                employee['id'],
-                                employee['name'],
-                                employee.get('nik')
-                            )
-                            logger.info(f"📱 AUTO-REGISTER: Device {device_id[:8]}... -> {employee['name']}")
-                            
-                            # Update sync manager dengan employee_info baru
-                            qr_sync_manager.verify_qr_auth(
-                                unit_code, 
-                                latest_auth.get('device_info'),
-                                {
-                                    'employee_id': employee['id'],
-                                    'employee_name': employee['name'],
-                                    'nik': employee.get('nik')
-                                },
-                                device_id
-                            )
-            except Exception as reg_error:
-                logger.warning(f"Device auto-registration failed (non-critical): {reg_error}")
             
             return {'success': True, 'message': f'Absensi {mode} berhasil dicatat'}
         else:
