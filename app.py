@@ -33,8 +33,10 @@ from qr_sync import qr_sync_manager, start_cleanup_thread
 import logging
 
 # Setup logging FIRST (before importing InsightFace)
-logging.basicConfig(level=logging.INFO)
+log_level = logging.WARNING if os.getenv('FLASK_ENV') == 'production' else logging.INFO
+logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
+logger.info(f"🔧 Logging level: {logging.getLevelName(log_level)}")
 
 # InsightFace for better accuracy (99%+)
 USE_INSIGHTFACE = False
@@ -57,6 +59,14 @@ app = Flask(__name__)
 # Load app configuration
 app_config = get_app_config()
 app.secret_key = app_config['secret_key']
+
+# Enable response compression for performance
+try:
+    from flask_compress import Compress
+    Compress(app)
+    logger.info("🗜️ Response compression enabled")
+except ImportError:
+    logger.warning("⚠️ Flask-Compress not available. Install: pip install flask-compress")
 
 # Setup Swagger UI for API documentation
 try:
@@ -105,11 +115,21 @@ def get_current_unit_code():
     
     return current_unit_code
 
+# QR Code cache for performance
+_qr_cache = {'code': None, 'image': None, 'url': None, 'timestamp': None}
+
 def generate_qr_code():
-    """Generate QR code untuk authentication"""
+    """Generate QR code untuk authentication - with caching"""
+    global _qr_cache
+    
     unit_code = get_current_unit_code()
+    
+    # Return cached QR if same code (performance optimization)
+    if _qr_cache['code'] == unit_code and _qr_cache['image']:
+        logger.debug(f"Using cached QR code for: {unit_code}")
+        return _qr_cache['image'], _qr_cache['url']
+    
     base_url = request.host_url.rstrip('/')
-    # QR mengarah ke halaman mobile_verify yang akan menambahkan device_id
     qr_url = f"{base_url}/mobile_verify?unit={unit_code}"
     
     qr = qrcode.QRCode(
@@ -128,6 +148,15 @@ def generate_qr_code():
     buffered = BytesIO()
     img.save(buffered, "PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
+    
+    # Cache the result
+    _qr_cache = {
+        'code': unit_code,
+        'image': img_str,
+        'url': qr_url,
+        'timestamp': datetime.now()
+    }
+    logger.debug(f"Generated and cached new QR code: {unit_code}")
     
     return img_str, qr_url
 

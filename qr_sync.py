@@ -99,7 +99,7 @@ class QRSyncManager:
     def __init__(self):
         self.sessions = {}  # {session_id: {verified: bool, timestamp: datetime, ...}}
         self.lock = threading.Lock()
-        self.cleanup_interval = 300  # 5 minutes
+        self.cleanup_interval = 180  # Optimized: 5 minutes → 3 minutes
         
     def create_session(self, session_id, code=None):
         """Create a new QR session"""

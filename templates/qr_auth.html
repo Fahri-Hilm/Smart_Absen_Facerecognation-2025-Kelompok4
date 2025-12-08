@@ -731,7 +731,7 @@
             if (qrSyncInterval) clearInterval(qrSyncInterval);
             
             document.getElementById('syncStatus').classList.add('show');
-            qrSyncInterval = setInterval(checkQRSyncStatus, 5000);
+            qrSyncInterval = setInterval(checkQRSyncStatus, 10000); // Optimized: 5s → 10s
             console.log('📡 QR sync monitoring started');
         }
 
@@ -843,10 +843,18 @@
 
         // CLEANUP: Stop polling when page loses visibility (tab switch, minimize)
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden && qrSyncInterval) {
-                clearInterval(qrSyncInterval);
-                qrSyncInterval = null;
-                console.log('🧹 Polling stopped - page hidden');
+            if (document.hidden) {
+                if (qrSyncInterval) {
+                    clearInterval(qrSyncInterval);
+                    qrSyncInterval = null;
+                    console.log('🧹 Polling paused - page hidden');
+                }
+            } else {
+                // Resume polling when tab becomes visible
+                if (!qrSyncInterval) {
+                    startQRSyncMonitoring();
+                    console.log('▶️ Polling resumed - page visible');
+                }
             }
         });
     </script>

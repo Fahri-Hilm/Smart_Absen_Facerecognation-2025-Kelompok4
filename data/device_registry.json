@@ -12,5 +12,26 @@
     "nik": "2376458765883745",
     "registered_at": "2025-12-06T20:47:42.208876",
     "last_seen": "2025-12-06T20:48:39.159078"
+  },
+  "dev_1765109271276_b9lwgy3ek": {
+    "employee_id": 6,
+    "employee_name": "Dado",
+    "nik": "8475867485094857",
+    "registered_at": "2025-12-07T19:11:16.883943",
+    "last_seen": "2025-12-07T19:11:16.883956"
+  },
+  "dev_1765181257122_8isdd5mzq": {
+    "employee_id": 2,
+    "employee_name": "Fahri Juru",
+    "nik": "2376458765883745",
+    "registered_at": "2025-12-08T15:07:59.525276",
+    "last_seen": "2025-12-08T15:07:59.525297"
+  },
+  "dev_1765181945217_jd68xo9ot": {
+    "employee_id": 2,
+    "employee_name": "Fahri Juru",
+    "nik": "2376458765883745",
+    "registered_at": "2025-12-08T15:19:25.971453",
+    "last_seen": "2025-12-08T15:19:25.971465"
   }
 }

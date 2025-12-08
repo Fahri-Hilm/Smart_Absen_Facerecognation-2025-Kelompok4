@@ -3,6 +3,7 @@
 
 # Web Framework
 Flask==2.3.3
+Flask-Compress==1.14  # Response compression for performance
 
 # Security & Environment
 python-dotenv==1.0.0
@@ -11,7 +12,7 @@ Flask-Limiter==3.5.0
 
 # Database
 PyMySQL==1.1.2
-DBUtils==3.0.3
+DBUtils==3.0.3  # Connection pooling
 
 # Computer Vision & Face Recognition
 opencv-python==4.8.0.76
