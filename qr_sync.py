@@ -154,6 +154,17 @@ class QRSyncManager:
             if session_id in self.sessions:
                 del self.sessions[session_id]
     
+    def clear_unit_code_sessions(self, unit_code):
+        """Remove ALL sessions associated with a unit code"""
+        with self.lock:
+            to_remove = []
+            for session_id, data in self.sessions.items():
+                if data.get('code') == unit_code.upper():
+                    to_remove.append(session_id)
+            for session_id in to_remove:
+                del self.sessions[session_id]
+            return len(to_remove)
+    
     def cleanup_old_sessions(self):
         """Remove sessions older than cleanup_interval"""
         with self.lock:

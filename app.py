@@ -581,20 +581,21 @@ def extract_attendance():
 def qr_auth():
     """Halaman QR authentication - halaman pertama yang dilihat user"""
     try:
-        # Clear old consumed sessions when user returns to QR page
-        # This allows fresh QR scans after attendance is completed
-        old_consumed = session.get('qr_session_consumed')
-        if old_consumed:
-            logger.info(f"🧹 Clearing old consumed session on QR page load: {old_consumed}")
-            session.pop('qr_session_consumed', None)
+        # AGGRESSIVE CLEANUP: Clear ALL QR-related session data when returning to QR page
+        old_verified_unit = session.get('verified_unit_code')
         
-        # Also clear attendance completed time if it's been more than 60 seconds
-        attendance_completed_time = session.get('attendance_completed_time')
-        if attendance_completed_time:
-            time_since_completion = (datetime.now() - datetime.fromisoformat(attendance_completed_time)).total_seconds()
-            if time_since_completion > 60:
-                logger.info(f"🧹 Clearing old attendance_completed_time ({time_since_completion:.1f}s ago)")
-                session.pop('attendance_completed_time', None)
+        # Clear all QR session data
+        session.pop('qr_verified', None)
+        session.pop('qr_verified_time', None)
+        session.pop('verified_unit_code', None)
+        session.pop('last_sync_time', None)
+        session.pop('qr_session_consumed', None)
+        session.pop('attendance_completed_time', None)
+        
+        # Remove ALL sessions for this unit code from qr_sync_manager
+        if old_verified_unit:
+            cleared = qr_sync_manager.clear_unit_code_sessions(old_verified_unit)
+            logger.info(f"🧹 Cleared {cleared} QR sessions for unit: {old_verified_unit}")
         
         qr_image, qr_url = generate_qr_code()
         unit_code = get_current_unit_code()
@@ -720,10 +721,10 @@ def clear_qr_session():
         # Set timestamp saat attendance selesai (untuk grace period)
         session['attendance_completed_time'] = datetime.now().isoformat()
         
-        # Clear dari qr_sync_manager juga
+        # Clear ALL sessions for this unit code from qr_sync_manager
         if verified_unit:
-            qr_sync_manager.remove_session(verified_unit)
-            logger.info(f"🧹 Cleared QR session: {verified_unit}")
+            cleared = qr_sync_manager.clear_unit_code_sessions(verified_unit)
+            logger.info(f"🧹 Cleared {cleared} QR sessions for unit: {verified_unit}")
         
         return jsonify({
             'success': True,
