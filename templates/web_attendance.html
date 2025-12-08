@@ -827,6 +827,9 @@
                         if (match) employeeName = match[1];
                     }
                     showSuccessPopup(currentMode, employeeName);
+                } else if (result.status === 'warning') {
+                    // Duplicate attendance - show warning toast
+                    toast.warning(result.message, 5000);
                 } else {
                     showStatus('❌ ' + result.message, 'error');
                 }
