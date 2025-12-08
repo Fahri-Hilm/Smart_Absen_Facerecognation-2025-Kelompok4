@@ -581,6 +581,21 @@ def extract_attendance():
 def qr_auth():
     """Halaman QR authentication - halaman pertama yang dilihat user"""
     try:
+        # Clear old consumed sessions when user returns to QR page
+        # This allows fresh QR scans after attendance is completed
+        old_consumed = session.get('qr_session_consumed')
+        if old_consumed:
+            logger.info(f"🧹 Clearing old consumed session on QR page load: {old_consumed}")
+            session.pop('qr_session_consumed', None)
+        
+        # Also clear attendance completed time if it's been more than 60 seconds
+        attendance_completed_time = session.get('attendance_completed_time')
+        if attendance_completed_time:
+            time_since_completion = (datetime.now() - datetime.fromisoformat(attendance_completed_time)).total_seconds()
+            if time_since_completion > 60:
+                logger.info(f"🧹 Clearing old attendance_completed_time ({time_since_completion:.1f}s ago)")
+                session.pop('attendance_completed_time', None)
+        
         qr_image, qr_url = generate_qr_code()
         unit_code = get_current_unit_code()
         
@@ -700,7 +715,7 @@ def clear_qr_session():
         session.pop('qr_verified_time', None)
         verified_unit = session.pop('verified_unit_code', None)
         session.pop('last_sync_time', None)
-        session.pop('qr_session_consumed', None)  # Clear consumed flag untuk scan baru
+        # DON'T clear qr_session_consumed - we need it to prevent re-processing!
         
         # Set timestamp saat attendance selesai (untuk grace period)
         session['attendance_completed_time'] = datetime.now().isoformat()
@@ -2922,6 +2937,17 @@ def mark_attendance_mobile():
                                 )
                                 logger.info(f"📱 Device {device_id[:8]}... registered to {user}")
                         
+                        # IMPORTANT: Mark session as consumed to prevent auto-redirect
+                        unit_code = session.get('verified_unit_code')
+                        scan_time = session.get('last_sync_time')
+                        if unit_code and scan_time:
+                            session['qr_session_consumed'] = f"{unit_code}_{scan_time}"
+                            logger.info(f"✅ Mobile QR session marked as consumed: {session['qr_session_consumed']}")
+                        
+                        # Set attendance completed time for grace period
+                        session['attendance_completed_time'] = datetime.now().isoformat()
+                        logger.info(f"✅ Mobile attendance completed time set: {session['attendance_completed_time']}")
+                        
                         return jsonify({
                             'status': 'success',
                             'message': f'✅ Absensi {mode} berhasil untuk {user}!',
@@ -3270,6 +3296,18 @@ def run_attendance_with_camera(mode, camera_id):
             # Check return code
             if process.returncode == 0:
                 logger.info(f"Isolated camera process for {mode} completed successfully")
+                
+                # IMPORTANT: Mark session as consumed to prevent auto-redirect
+                unit_code = session.get('verified_unit_code')
+                scan_time = session.get('last_sync_time')
+                if unit_code and scan_time:
+                    session['qr_session_consumed'] = f"{unit_code}_{scan_time}"
+                    logger.info(f"✅ QR session marked as consumed: {session['qr_session_consumed']}")
+                
+                # Set attendance completed time for grace period
+                session['attendance_completed_time'] = datetime.now().isoformat()
+                logger.info(f"✅ Attendance completed time set: {session['attendance_completed_time']}")
+                
                 return {
                     'status': 'success',
                     'message': f'✅ Absensi {mode} berhasil! Data telah disimpan dengan sistem kamera terisolasi.'

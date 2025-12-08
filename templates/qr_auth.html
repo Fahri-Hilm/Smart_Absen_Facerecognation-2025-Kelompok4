@@ -782,6 +782,7 @@
             // Mark this session as used in localStorage to persist across page reloads
             const sessionKey = `${sessionId}_${timestamp}`;
             localStorage.setItem('last_used_session', sessionKey);
+            localStorage.setItem('last_used_timestamp', Date.now().toString());
             
             fetch('/api/accept_qr_sync', {
                 method: 'POST',
@@ -813,11 +814,19 @@
 
         // Start monitoring on load
         document.addEventListener('DOMContentLoaded', () => {
-            // Load previously processed sessions from localStorage
+            // Clear old processed sessions from localStorage when returning to QR page
             const lastUsedSession = localStorage.getItem('last_used_session');
             if (lastUsedSession) {
-                processedSessions.add(lastUsedSession);
-                console.log('📝 Loaded last used session:', lastUsedSession);
+                const sessionAge = Date.now() - (parseInt(localStorage.getItem('last_used_timestamp') || '0'));
+                // Clear if older than 60 seconds
+                if (sessionAge > 60000) {
+                    localStorage.removeItem('last_used_session');
+                    localStorage.removeItem('last_used_timestamp');
+                    console.log('🧹 Cleared old localStorage session');
+                } else {
+                    processedSessions.add(lastUsedSession);
+                    console.log('📝 Loaded last used session:', lastUsedSession);
+                }
             }
             
             setTimeout(startQRSyncMonitoring, 1000);
