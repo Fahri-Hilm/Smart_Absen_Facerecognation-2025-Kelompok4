@@ -357,6 +357,9 @@ def train_model():
         return False
     
     try:
+        # Set training status - START
+        set_training_status(True, 'Model', 10, 'Memulai training model...')
+        
         logger.info("🚀 Training InsightFace/ArcFace model (99%+ accuracy)...")
         
         # Ensure user packages are prioritized (fix matplotlib/mpl_toolkits conflict)
@@ -365,20 +368,31 @@ def train_model():
         if user_packages not in sys.path:
             sys.path.insert(0, user_packages)
         
+        # Update progress
+        set_training_status(True, 'Model', 30, 'Memuat model InsightFace...')
+        
         success = train_insightface_model()
         
         if success:
+            # Update progress
+            set_training_status(True, 'Model', 80, 'Menyimpan model...')
+            
             stats = get_database_stats()
             logger.info(f"✅ Model trained successfully!")
             logger.info(f"   📊 Total identities: {stats['total_identities']}")
             logger.info(f"   📸 Total embeddings: {stats['total_embeddings']}")
+            
+            # Training selesai
+            set_training_status(False, 'Model', 100, f'Training selesai! {stats["total_identities"]} karyawan siap.')
             return True
         else:
             logger.error("❌ Training failed - no valid face data")
+            set_training_status(False, 'Model', 0, 'Training gagal - tidak ada data wajah valid')
             return False
             
     except Exception as e:
         logger.error(f"❌ Training error: {e}")
+        set_training_status(False, 'Model', 0, f'Training error: {str(e)}')
         import traceback
         traceback.print_exc()
         return False
@@ -1407,6 +1421,11 @@ def capture_wajah_page():
         flash('Gagal memuat halaman capture wajah', 'error')
         return redirect('/admin/employees')
 
+@app.route('/camera-debug')
+def camera_debug():
+    """Debug page untuk test kamera"""
+    return render_template('camera_debug.html')
+
 @app.route('/api/train_model', methods=['POST'])
 @admin_required
 def api_train_model():
@@ -1433,116 +1452,442 @@ def api_train_model():
             'error': f'Error: {str(e)}'
         }), 500
 
-@app.route('/api/save_training_photos', methods=['POST'])
-@admin_required
-def save_training_photos():
-    """API untuk menyimpan training photos dari capture page"""
+@app.route('/test/training-loader')
+def test_training_loader():
+    """Halaman test untuk training loader"""
+    return render_template('test_training_loader.html')
+
+@app.route('/api/simulate_training', methods=['POST'])
+def simulate_training():
+    """Simulate training process untuk test"""
     try:
-        data = request.get_json()
-        logger.info(f"[SAVE_PHOTOS] Received data keys: {data.keys() if data else 'None'}")
+        import threading
+        import time
         
-        employee_id = data.get('employee_id')
-        photos = data.get('photos', [])  # Array of base64 images
+        def simulate_process():
+            steps = [
+                (10, 'Memulai training...'),
+                (30, 'Memuat model InsightFace...'),
+                (50, 'Memproses foto wajah...'),
+                (70, 'Membuat embeddings...'),
+                (90, 'Menyimpan model...'),
+                (100, 'Training selesai!')
+            ]
+            
+            for progress, message in steps:
+                set_training_status(True, 'Test Employee', progress, message)
+                time.sleep(1)
+            
+            # Selesai
+            set_training_status(False, 'Test Employee', 100, 'Training selesai!')
         
-        logger.info(f"[SAVE_PHOTOS] employee_id={employee_id}, photos_count={len(photos)}")
+        # Jalankan di background
+        thread = threading.Thread(target=simulate_process)
+        thread.daemon = True
+        thread.start()
         
-        if not employee_id or not photos:
-            logger.warning(f"[SAVE_PHOTOS] Missing data - employee_id: {employee_id}, photos: {len(photos)}")
-            return jsonify({
-                'status': 'error',
-                'error': 'employee_id dan photos harus ada'
-            }), 400
+        return jsonify({'status': 'success', 'message': 'Simulation started'})
         
-        # InsightFace hanya butuh minimal 5 foto
-        if len(photos) < 5:
-            logger.warning(f"[SAVE_PHOTOS] Not enough photos: {len(photos)}/5")
-            return jsonify({
-                'status': 'error',
-                'error': f'Minimal 5 foto diperlukan untuk InsightFace (saat ini: {len(photos)})'
-            }), 400
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
+# Global training status
+training_status = {
+    'is_training': False,
+    'employee_name': '',
+    'progress': 0,
+    'message': '',
+    'start_time': None
+}
+
+@app.route('/api/training_status')
+def get_training_status():
+    """API untuk mendapatkan status training real-time"""
+    global training_status
+    return jsonify(training_status)
+
+def set_training_status(is_training, employee_name='', progress=0, message=''):
+    """Helper function untuk update training status"""
+    global training_status
+    training_status.update({
+        'is_training': is_training,
+        'employee_name': employee_name,
+        'progress': progress,
+        'message': message,
+        'start_time': datetime.now().isoformat() if is_training else None
+    })
+
+@app.route('/test/auto-training')
+def test_auto_training():
+    """Test endpoint untuk memastikan auto-training berjalan"""
+    try:
+        # Simulasi save foto dan auto-training
+        employee_id = 1
+        saved_count = 10
         
-        # Get employee data
+        # Get employee
         employees = Employee.get_all_employees()
-        if not employees:
-            return jsonify({
-                'status': 'error',
-                'error': 'Tidak bisa mengambil data karyawan'
-            }), 500
-        
-        employee = None
-        for emp in employees:
-            if emp['id'] == int(employee_id):
-                employee = emp
-                break
+        employee = next((emp for emp in employees if emp['id'] == int(employee_id)), None)
         
         if not employee:
-            return jsonify({
-                'status': 'error',
-                'error': 'Karyawan tidak ditemukan'
-            }), 404
+            return "❌ Employee tidak ditemukan"
         
-        # Get NIK from employee
         nik = employee.get('nik', 'unknown')
         full_name = employee.get('name', 'Unknown')
         
-        # Save training photos
+        # Test auto-training
+        train_success = False
+        train_error = ""
+        
         try:
-            faces_dir = f'static/faces/{nik}'
-            os.makedirs(faces_dir, exist_ok=True)
-            
-            # Save base64 photos
-            for idx, photo_base64 in enumerate(photos[:100], 1):
-                try:
-                    # Handle base64 with or without data URL prefix
-                    if photo_base64.startswith('data:image'):
-                        photo_base64 = photo_base64.split(',')[1]
-                    
-                    img_data = base64.b64decode(photo_base64)
-                    photo_filename = f"face_{idx}.jpg"
-                    
-                    with open(os.path.join(faces_dir, photo_filename), 'wb') as f:
-                        f.write(img_data)
-                except Exception as e:
-                    logger.warning(f"Error saving training photo {idx}: {e}")
-            
-            logger.info(f"Saved {min(len(photos), 100)} training photos for {full_name} ({nik})")
-            
-            # Train model with new photos
-            try:
-                train_model()
-                logger.info(f"Face model re-trained after adding photos for {nik}")
-            except Exception as train_err:
-                logger.warning(f"Error training model: {train_err}")
-            
-            # Log success to activity log
-            try:
-                from models import ActivityLog
-                ActivityLog.add_log(
-                    employee_id=employee['id'],
-                    activity_type='add_employee',
-                    description=f'Karyawan ditambahkan dengan {len(photos)} foto training'
-                )
-            except Exception as log_err:
-                logger.warning(f"Error logging activity: {log_err}")
-            
-            return jsonify({
-                'status': 'success',
-                'message': f'🎉 {full_name} telah berhasil ditambahkan ke sistem dengan {len(photos)} foto training! Data sudah tersimpan di database dan siap digunakan untuk absensi.'
-            }), 201
-            
-        except Exception as photo_error:
-            logger.error(f"Error saving training photos: {photo_error}")
-            return jsonify({
-                'status': 'error',
-                'error': f'Error menyimpan foto: {str(photo_error)}'
-            }), 500
+            logger.info(f"🚀 TEST AUTO TRAINING for {full_name}...")
+            train_success = train_model()
+            if train_success:
+                logger.info(f"✅ TEST AUTO TRAINING SUCCESS: {full_name}")
+            else:
+                logger.error(f"❌ TEST AUTO TRAINING FAILED: {full_name}")
+                train_error = "Training model gagal"
+        except Exception as e:
+            logger.error(f"❌ TEST AUTO TRAINING ERROR: {e}")
+            train_error = str(e)
+        
+        # Response message
+        response_message = f'✅ {full_name} test dengan {saved_count} foto!'
+        if train_success:
+            response_message += ' Model berhasil di-training dan siap untuk absensi!'
+        else:
+            response_message += f' ⚠️ Training gagal: {train_error}'
+        
+        return f"""
+        <h2>🧪 Test Auto-Training Result</h2>
+        <p><strong>Employee:</strong> {full_name} (ID: {employee_id}, NIK: {nik})</p>
+        <p><strong>Training Success:</strong> {'✅ YES' if train_success else '❌ NO'}</p>
+        <p><strong>Message:</strong> {response_message}</p>
+        <p><strong>Saved Photos:</strong> {saved_count}</p>
+        {f'<p><strong>Training Error:</strong> {train_error}</p>' if train_error else ''}
+        <hr>
+        <p><a href="/test/auto-training">🔄 Test lagi</a> | <a href="/admin">🏠 Admin Dashboard</a></p>
+        """
         
     except Exception as e:
-        logger.error(f"Error in save_training_photos: {e}")
+        return f"❌ Error: {str(e)}"
+
+@app.route('/capture/optimal')
+def capture_optimal():
+    """Halaman capture wajah dengan layout optimal"""
+    return render_template('capture_optimal.html')
+
+@app.route('/test/save-photos')
+def test_save_photos():
+    """Halaman test untuk save photos dan auto training"""
+    return render_template('test_save_photos.html')
+
+@app.route('/debug/test_save', methods=['POST', 'GET'])
+def debug_test_save():
+    """Debug endpoint untuk test save foto tanpa admin requirement"""
+    if request.method == 'GET':
+        return """
+        <h2>Test Save Training Photos</h2>
+        <form method="POST">
+            <p>Employee ID: <input name="employee_id" value="1" required></p>
+            <p>Jumlah foto dummy: <input name="photo_count" value="10" type="number" min="5" max="50"></p>
+            <button type="submit">Test Save & Training</button>
+        </form>
+        """
+    
+    try:
+        employee_id = request.form.get('employee_id', '1')
+        photo_count = int(request.form.get('photo_count', '10'))
+        
+        # Get employee
+        employees = Employee.get_all_employees()
+        employee = next((emp for emp in employees if emp['id'] == int(employee_id)), None)
+        
+        if not employee:
+            return f"❌ Employee ID {employee_id} tidak ditemukan"
+        
+        nik = employee.get('nik', str(employee_id))
+        name = employee.get('name', 'Unknown')
+        
+        # Create dummy photos (1x1 pixel PNG)
+        dummy_b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77yQAAAABJRU5ErkJggg=="
+        
+        # Save photos
+        faces_dir = f'static/faces/{nik}'
+        os.makedirs(faces_dir, exist_ok=True)
+        
+        saved = 0
+        for i in range(1, photo_count + 1):
+            try:
+                img_data = base64.b64decode(dummy_b64)
+                with open(f'{faces_dir}/test_face_{i}.jpg', 'wb') as f:
+                    f.write(img_data)
+                saved += 1
+            except Exception as e:
+                continue
+        
+        # Training
+        train_success = False
+        train_error = ""
+        try:
+            train_success = train_model()
+        except Exception as e:
+            train_error = str(e)
+        
+        result = f"""
+        <h2>✅ Test Save & Training Result</h2>
+        <p><strong>Employee:</strong> {name} (ID: {employee_id}, NIK: {nik})</p>
+        <p><strong>Photos saved:</strong> {saved}/{photo_count}</p>
+        <p><strong>Save folder:</strong> {faces_dir}</p>
+        <p><strong>Training success:</strong> {'✅ YES' if train_success else '❌ NO'}</p>
+        {f'<p><strong>Training error:</strong> {train_error}</p>' if train_error else ''}
+        <p><a href="/debug/test_save">← Test lagi</a></p>
+        """
+        
+        return result
+        
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
+@app.route('/api/save_photos_simple', methods=['POST'])
+@admin_required
+def save_photos_simple():
+    """Endpoint sederhana untuk save foto dan langsung training"""
+    try:
+        employee_id = request.form.get('employee_id')
+        photos_data = request.form.get('photos')  # JSON string
+        
+        if not employee_id or not photos_data:
+            return jsonify({'success': False, 'message': 'Data tidak lengkap'})
+        
+        import json
+        photos = json.loads(photos_data)
+        
+        if len(photos) < 5:
+            return jsonify({'success': False, 'message': f'Minimal 5 foto (ada {len(photos)})'})
+        
+        # Get employee
+        employees = Employee.get_all_employees()
+        employee = next((emp for emp in employees if emp['id'] == int(employee_id)), None)
+        
+        if not employee:
+            return jsonify({'success': False, 'message': 'Karyawan tidak ditemukan'})
+        
+        nik = employee.get('nik', str(employee_id))
+        name = employee.get('name', 'Unknown')
+        
+        # Save photos
+        faces_dir = f'static/faces/{nik}'
+        os.makedirs(faces_dir, exist_ok=True)
+        
+        saved = 0
+        for i, photo in enumerate(photos[:30], 1):
+            try:
+                if ',' in photo:
+                    photo = photo.split(',')[1]
+                img_data = base64.b64decode(photo)
+                with open(f'{faces_dir}/face_{i}.jpg', 'wb') as f:
+                    f.write(img_data)
+                saved += 1
+            except:
+                continue
+        
+        if saved < 5:
+            return jsonify({'success': False, 'message': 'Gagal menyimpan foto'})
+        
+        # LANGSUNG TRAINING
+        train_success = train_model()
+        
         return jsonify({
-            'status': 'error',
-            'error': f'Error: {str(e)}'
-        }), 500
+            'success': True, 
+            'message': f'✅ {name} berhasil! {saved} foto disimpan dan model di-training.',
+            'trained': train_success
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'})
+
+@app.route('/api/save_face_training', methods=['POST'])
+def save_face_training():
+    """API untuk menyimpan foto wajah dan PASTI langsung training"""
+    try:
+        data = request.get_json()
+        employee_id = data.get('employee_id')
+        photos = data.get('photos', [])
+        
+        logger.info(f"🔄 SAVE_FACE_TRAINING: employee_id={employee_id}, photos={len(photos)}")
+        
+        if not employee_id or not photos:
+            return jsonify({'status': 'error', 'error': 'Data tidak lengkap'}), 400
+        
+        if len(photos) < 5:
+            return jsonify({'status': 'error', 'error': f'Minimal 5 foto (saat ini: {len(photos)})'}), 400
+        
+        # Get employee
+        employees = Employee.get_all_employees()
+        employee = next((emp for emp in employees if emp['id'] == int(employee_id)), None)
+        
+        if not employee:
+            return jsonify({'status': 'error', 'error': 'Karyawan tidak ditemukan'}), 404
+        
+        nik = employee.get('nik', 'unknown')
+        full_name = employee.get('name', 'Unknown')
+        
+        # Set loading status - SAVING
+        set_training_status(True, full_name, 5, f'Menyimpan {len(photos)} foto untuk {full_name}...')
+        
+        # Save photos
+        faces_dir = f'static/faces/{nik}'
+        os.makedirs(faces_dir, exist_ok=True)
+        
+        saved_count = 0
+        for idx, photo_base64 in enumerate(photos[:50], 1):
+            try:
+                if photo_base64.startswith('data:image'):
+                    photo_base64 = photo_base64.split(',')[1]
+                
+                img_data = base64.b64decode(photo_base64)
+                with open(f'{faces_dir}/face_{idx}.jpg', 'wb') as f:
+                    f.write(img_data)
+                saved_count += 1
+                logger.info(f"📸 Saved photo {idx} for {full_name}")
+                
+                # Update progress
+                progress = 5 + (idx / len(photos)) * 20  # 5-25%
+                set_training_status(True, full_name, int(progress), f'Menyimpan foto {idx}/{len(photos)}...')
+                
+            except Exception as e:
+                logger.warning(f"❌ Failed to save photo {idx}: {e}")
+                continue
+        
+        if saved_count < 5:
+            set_training_status(False, full_name, 0, 'Gagal menyimpan foto')
+            return jsonify({'status': 'error', 'error': 'Gagal menyimpan foto'}), 500
+        
+        logger.info(f"✅ SAVED {saved_count} photos for {full_name}")
+        
+        # PASTI AUTO TRAINING - dengan loading status
+        train_success = False
+        train_error = ""
+        try:
+            set_training_status(True, full_name, 30, f'Memulai training model untuk {full_name}...')
+            logger.info(f"🚀 STARTING AUTO TRAINING for {full_name}...")
+            
+            train_success = train_model()  # train_model() akan update progress sendiri
+            
+            if train_success:
+                logger.info(f"✅ AUTO TRAINING SUCCESS: {full_name} dengan {saved_count} foto")
+            else:
+                logger.error(f"❌ AUTO TRAINING FAILED: {full_name}")
+                train_error = "Training model gagal"
+        except Exception as e:
+            logger.error(f"❌ AUTO TRAINING ERROR: {e}")
+            train_error = str(e)
+            set_training_status(False, full_name, 0, f'Training error: {str(e)}')
+        
+        # Response dengan status training
+        response_message = f'✅ {full_name} berhasil disimpan dengan {saved_count} foto!'
+        if train_success:
+            response_message += ' Model berhasil di-training dan siap untuk absensi!'
+        else:
+            response_message += f' ⚠️ Training gagal: {train_error}'
+        
+        return jsonify({
+            'status': 'success',
+            'message': response_message,
+            'trained': train_success,
+            'saved_photos': saved_count,
+            'redirect': '/admin/employees'
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Error save_face_training: {e}")
+        set_training_status(False, '', 0, f'Error: {str(e)}')
+        return jsonify({'status': 'error', 'error': str(e)}), 500
+
+@app.route('/api/save_training_photos', methods=['POST'])
+@admin_required
+def save_training_photos():
+    """API untuk menyimpan training photos dan PASTI langsung training model"""
+    try:
+        data = request.get_json()
+        employee_id = data.get('employee_id')
+        photos = data.get('photos', [])
+        
+        logger.info(f"🔄 SAVE_TRAINING_PHOTOS: employee_id={employee_id}, photos={len(photos)}")
+        
+        if not employee_id or not photos:
+            return jsonify({'status': 'error', 'error': 'Data tidak lengkap'}), 400
+        
+        if len(photos) < 5:
+            return jsonify({'status': 'error', 'error': f'Minimal 5 foto (saat ini: {len(photos)})'}), 400
+        
+        # Get employee
+        employees = Employee.get_all_employees()
+        employee = next((emp for emp in employees if emp['id'] == int(employee_id)), None)
+        
+        if not employee:
+            return jsonify({'status': 'error', 'error': 'Karyawan tidak ditemukan'}), 404
+        
+        nik = employee.get('nik', 'unknown')
+        full_name = employee.get('name', 'Unknown')
+        
+        # Save photos
+        faces_dir = f'static/faces/{nik}'
+        os.makedirs(faces_dir, exist_ok=True)
+        
+        saved_count = 0
+        for idx, photo_base64 in enumerate(photos[:50], 1):
+            try:
+                if photo_base64.startswith('data:image'):
+                    photo_base64 = photo_base64.split(',')[1]
+                
+                img_data = base64.b64decode(photo_base64)
+                with open(f'{faces_dir}/face_{idx}.jpg', 'wb') as f:
+                    f.write(img_data)
+                saved_count += 1
+                logger.info(f"📸 Saved photo {idx} for {full_name}")
+            except Exception as e:
+                logger.warning(f"❌ Failed to save photo {idx}: {e}")
+                continue
+        
+        if saved_count < 5:
+            return jsonify({'status': 'error', 'error': 'Gagal menyimpan foto'}), 500
+        
+        logger.info(f"✅ SAVED {saved_count} photos for {full_name}")
+        
+        # PASTI AUTO TRAINING - dengan detailed logging
+        train_success = False
+        train_error = ""
+        try:
+            logger.info(f"🚀 STARTING AUTO TRAINING for {full_name}...")
+            train_success = train_model()
+            if train_success:
+                logger.info(f"✅ AUTO TRAINING SUCCESS: {full_name} dengan {saved_count} foto")
+            else:
+                logger.error(f"❌ AUTO TRAINING FAILED: {full_name}")
+                train_error = "Training model gagal"
+        except Exception as e:
+            logger.error(f"❌ AUTO TRAINING ERROR: {e}")
+            train_error = str(e)
+        
+        # Response dengan status training
+        response_message = f'✅ {full_name} berhasil disimpan dengan {saved_count} foto!'
+        if train_success:
+            response_message += ' Model berhasil di-training dan siap untuk absensi!'
+        else:
+            response_message += f' ⚠️ Training gagal: {train_error}'
+        
+        return jsonify({
+            'status': 'success',
+            'message': response_message,
+            'trained': train_success,
+            'saved_photos': saved_count
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Error save_training_photos: {e}")
+        return jsonify({'status': 'error', 'error': str(e)}), 500
 
 @app.route('/admin/add_employee_with_face', methods=['POST'])
 @admin_required  

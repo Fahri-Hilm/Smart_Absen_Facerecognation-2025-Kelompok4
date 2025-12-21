@@ -1,0 +1,306 @@
+/* OPTIMIZED FACE CAPTURE LAYOUT */
+
+/* Main Container - Responsive Grid */
+.capture-main {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Camera Section - Left Side */
+.camera-section {
+    position: relative;
+    background: #1a1a1a;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.camera-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3; /* Optimal camera ratio */
+    background: #000;
+}
+
+.camera-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+/* Face Guide Overlay - Centered */
+.face-guide-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.face-guide {
+    width: 280px;
+    height: 350px;
+    border: 3px solid #00ff88;
+    border-radius: 50%;
+    position: relative;
+    animation: pulse 2s infinite;
+}
+
+.face-guide::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 15px solid #00ff88;
+}
+
+.face-guide::after {
+    content: 'Posisikan wajah di dalam lingkaran';
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #00ff88;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Status Indicators */
+.status-indicators {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.status-badge {
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-badge.good { background: rgba(0,255,136,0.9); }
+.status-badge.warning { background: rgba(255,193,7,0.9); }
+.status-badge.error { background: rgba(220,53,69,0.9); }
+
+/* Control Panel - Right Side */
+.control-panel {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.control-section {
+    margin-bottom: 2rem;
+}
+
+.control-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Photo Counter */
+.photo-counter {
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 1.5rem;
+}
+
+.photo-count {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.photo-target {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-capture {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    border: none;
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-capture:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,255,136,0.3);
+}
+
+.btn-capture:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.3);
+}
+
+/* Photo Preview Grid */
+.photo-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.photo-preview img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.photo-preview img:hover {
+    border-color: #007bff;
+    transform: scale(1.05);
+}
+
+/* Tips Section */
+.capture-tips {
+    background: #e8f4fd;
+    border: 1px solid #bee5eb;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.capture-tips h4 {
+    color: #0c5460;
+    font-size: 14px;
+    margin-bottom: 0.5rem;
+}
+
+.capture-tips ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #0c5460;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .capture-main {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .control-panel {
+        position: static;
+        order: -1;
+    }
+    
+    .face-guide {
+        width: 220px;
+        height: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    .capture-main {
+        padding: 0.5rem;
+    }
+    
+    .camera-container {
+        aspect-ratio: 3/4; /* Portrait for mobile */
+    }
+    
+    .face-guide {
+        width: 180px;
+        height: 220px;
+    }
+    
+    .control-panel {
+        padding: 1rem;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(0,255,136,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}

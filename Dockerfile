@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender-dev \
     libgomp1 \
     libgthread-2.0-0 \
+    libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python packages from builder

@@ -1,6 +1,8 @@
 /**
  * Face Capture Module (Simplified - No face-api.js)
  * InsightFace handles all face detection/recognition in backend
+ * 
+ * IMPORTANT: Camera access requires HTTPS or localhost due to browser security
  */
 
 const captureState = {
@@ -18,6 +20,50 @@ const CONFIG = {
     TARGET_PHOTOS: 10,
     AUTO_CAPTURE_INTERVAL: 500
 };
+
+// Security Context Check
+function checkSecurityContext() {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local');
+    const isHTTPS = window.location.protocol === 'https:';
+    const isSecure = window.isSecureContext;
+    
+    console.log('[Security] Hostname:', hostname);
+    console.log('[Security] isLocalhost:', isLocalhost);
+    console.log('[Security] isHTTPS:', isHTTPS);
+    console.log('[Security] isSecureContext:', isSecure);
+    
+    if (!isSecure && !isLocalhost) {
+        showSecurityWarning();
+        return false;
+    }
+    return true;
+}
+
+function showSecurityWarning() {
+    const alertContainer = document.getElementById('alertContainer');
+    const warningHtml = `
+        <div class="alert alert-danger" style="border-left: 4px solid #dc3545;">
+            <h5><i class="bi bi-shield-exclamation"></i> Akses Kamera Diblokir</h5>
+            <p>Browser memblokir akses kamera karena koneksi tidak aman (HTTP).</p>
+            <hr>
+            <p class="mb-2"><strong>Solusi:</strong></p>
+            <ul class="mb-2">
+                <li><strong>Gunakan HTTPS:</strong> Akses via Cloudflare Tunnel atau SSL</li>
+                <li><strong>Akses Lokal:</strong> <a href="http://localhost:5001${window.location.pathname}${window.location.search}" class="alert-link">http://localhost:5001${window.location.pathname}</a></li>
+            </ul>
+            <p class="mb-0 small text-muted">
+                <i class="bi bi-info-circle"></i> Jalankan: <code>cloudflared tunnel --url http://localhost:5001</code>
+            </p>
+        </div>
+    `;
+    alertContainer.innerHTML = warningHtml;
+    
+    // Update UI to show camera blocked
+    document.getElementById('faceStatusBadge').innerHTML = '<i class="bi bi-shield-x"></i> Kamera Diblokir (HTTP)';
+    document.getElementById('faceStatusBadge').className = 'face-status-badge no-face';
+    document.getElementById('faceGuide').className = 'face-guide no-face';
+}
 
 // UI Helpers
 function showAlert(message, type = 'info') {
@@ -71,19 +117,75 @@ function updatePreviewGrid() {
 
 // Camera
 async function initCamera() {
+    // Check security context first
+    if (!checkSecurityContext()) {
+        console.warn('[Camera] Security context check failed - camera access will be blocked');
+        // Don't return here, let the browser show its own error too
+    }
+    
+    // Check if mediaDevices is available
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showAlert('Browser tidak mendukung akses kamera atau koneksi tidak aman (HTTP).', 'danger');
+        document.getElementById('faceStatusBadge').innerHTML = '<i class="bi bi-x-circle"></i> Kamera Tidak Tersedia';
+        document.getElementById('faceStatusBadge').className = 'face-status-badge error';
+        return;
+    }
+    
     try {
+        console.log('[Camera] Requesting camera access...');
+        
         captureState.stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user', width: 640, height: 480 }
+            video: { 
+                facingMode: 'user', 
+                width: { ideal: 640 }, 
+                height: { ideal: 480 } 
+            }
         });
         
-        const video = document.getElementById('videoElement');
+        const video = document.getElementById('trainingWebcam');
         video.srcObject = captureState.stream;
-        video.play();
         
-        document.getElementById('cameraSection').style.display = 'block';
-        showAlert('Camera ready!', 'success');
+        video.onloadedmetadata = () => {
+            video.play();
+            console.log('[Camera] Video playing:', video.videoWidth, 'x', video.videoHeight);
+        };
+        
+        showAlert('✅ Kamera siap! Ambil foto dari berbagai sudut.', 'success');
+        document.getElementById('faceStatusBadge').innerHTML = '<i class="bi bi-check-circle"></i> Kamera Siap';
+        document.getElementById('faceStatusBadge').className = 'face-status-badge detected';
+        document.getElementById('faceGuide').className = 'face-guide detected';
+        
     } catch (error) {
-        showAlert('Camera access denied', 'danger');
+        console.error('[Camera] Error:', error.name, error.message);
+        
+        let errorMsg = 'Gagal mengakses kamera. ';
+        
+        switch (error.name) {
+            case 'NotAllowedError':
+            case 'PermissionDeniedError':
+                errorMsg += 'Izin kamera ditolak. Klik ikon kamera di address bar untuk mengizinkan.';
+                break;
+            case 'NotFoundError':
+            case 'DevicesNotFoundError':
+                errorMsg += 'Kamera tidak ditemukan.';
+                break;
+            case 'NotReadableError':
+            case 'TrackStartError':
+                errorMsg += 'Kamera sedang digunakan aplikasi lain.';
+                break;
+            case 'OverconstrainedError':
+                errorMsg += 'Resolusi kamera tidak didukung.';
+                break;
+            case 'TypeError':
+                errorMsg = 'Akses kamera diblokir karena koneksi tidak aman (HTTP). Gunakan HTTPS atau localhost.';
+                break;
+            default:
+                errorMsg += error.message;
+        }
+        
+        showAlert(errorMsg, 'danger');
+        document.getElementById('faceStatusBadge').innerHTML = '<i class="bi bi-x-circle"></i> Kamera Error';
+        document.getElementById('faceStatusBadge').className = 'face-status-badge no-face';
     }
 }
 
@@ -95,10 +197,16 @@ function stopCamera() {
 
 // Capture
 function capturePhoto() {
-    const video = document.getElementById('videoElement');
+    const video = document.getElementById('trainingWebcam');
+    
+    if (!video.srcObject || video.readyState < 2) {
+        showAlert('Kamera belum siap. Tunggu sebentar...', 'warning');
+        return;
+    }
+    
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
     canvas.getContext('2d').drawImage(video, 0, 0);
     
     captureState.photos.push(canvas.toDataURL('image/jpeg', 0.9));
@@ -107,8 +215,8 @@ function capturePhoto() {
     
     // Flash effect
     const flash = document.getElementById('captureFlash');
-    flash.style.display = 'block';
-    setTimeout(() => flash.style.display = 'none', 200);
+    flash.classList.add('active');
+    setTimeout(() => flash.classList.remove('active'), 200);
 }
 
 function deletePhoto(index) {
@@ -118,7 +226,7 @@ function deletePhoto(index) {
 }
 
 function resetCapture() {
-    if (!confirm('Delete all photos?')) return;
+    if (!confirm('Hapus semua foto?')) return;
     captureState.photos = [];
     updatePreviewGrid();
     updateProgress();
@@ -128,20 +236,30 @@ function resetCapture() {
 function startAutoCapture() {
     if (captureState.isCapturing) return;
     
+    const video = document.getElementById('trainingWebcam');
+    if (!video.srcObject || video.readyState < 2) {
+        showAlert('Kamera belum siap.', 'warning');
+        return;
+    }
+    
     captureState.isCapturing = true;
-    document.getElementById('captureBtn').disabled = true;
-    document.getElementById('autoBtn').disabled = true;
+    document.getElementById('startAutoBtn').disabled = true;
+    document.getElementById('startAutoBtn').innerHTML = '<i class="bi bi-hourglass-split"></i> Capturing...';
+    
+    let count = 0;
+    const maxPhotos = CONFIG.TARGET_PHOTOS - captureState.photos.length;
     
     const interval = setInterval(() => {
-        if (captureState.photos.length >= CONFIG.TARGET_PHOTOS) {
+        if (count >= maxPhotos || captureState.photos.length >= CONFIG.TARGET_PHOTOS) {
             stopAutoCapture();
             return;
         }
         capturePhoto();
+        count++;
     }, CONFIG.AUTO_CAPTURE_INTERVAL);
     
     captureState.autoCaptureInterval = interval;
-    showAlert('Auto capture started', 'info');
+    showAlert('🚀 Auto capture dimulai! Putar kepala perlahan...', 'info');
 }
 
 function stopAutoCapture() {
@@ -149,20 +267,21 @@ function stopAutoCapture() {
         clearInterval(captureState.autoCaptureInterval);
     }
     captureState.isCapturing = false;
-    document.getElementById('captureBtn').disabled = false;
-    document.getElementById('autoBtn').disabled = false;
+    document.getElementById('startAutoBtn').disabled = false;
+    document.getElementById('startAutoBtn').innerHTML = '<i class="bi bi-play-fill"></i> Mulai Auto Capture (10 Foto)';
+    showAlert('✅ Auto capture selesai!', 'success');
 }
 
 // Save
 async function savePhotos() {
     if (captureState.photos.length < CONFIG.MIN_PHOTOS) {
-        showAlert(`Minimum ${CONFIG.MIN_PHOTOS} photos required`, 'warning');
+        showAlert(`Minimum ${CONFIG.MIN_PHOTOS} foto diperlukan`, 'warning');
         return;
     }
     
     const saveBtn = document.getElementById('saveBtn');
     saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
     
     try {
         const response = await fetch('/api/save_face_training', {
@@ -179,27 +298,93 @@ async function savePhotos() {
         const result = await response.json();
         
         if (result.status === 'success') {
-            showAlert('✅ Saved successfully!', 'success');
+            showAlert('✅ Data wajah berhasil disimpan!', 'success');
             setTimeout(() => window.location.href = '/admin/employees', 2000);
         } else {
             throw new Error(result.message);
         }
     } catch (error) {
-        showAlert('Failed: ' + error.message, 'danger');
+        showAlert('Gagal menyimpan: ' + error.message, 'danger');
         saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="bi bi-save"></i> Save';
+        saveBtn.innerHTML = '<i class="bi bi-check2-circle"></i> ✅ Selesai & Simpan (min 5 foto)';
     }
+}
+
+// Mode switching function
+function switchMode(mode) {
+    captureState.mode = mode;
+    
+    // Update mode buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(mode + 'ModeBtn').classList.add('active');
+    
+    // Show/hide controls
+    document.getElementById('manualControls').style.display = mode === 'manual' ? 'block' : 'none';
+    document.getElementById('autoControls').style.display = mode === 'auto' ? 'block' : 'none';
+    document.getElementById('uploadControls').style.display = mode === 'upload' ? 'block' : 'none';
+}
+
+// File upload handler
+function handleFileUpload(event) {
+    const files = Array.from(event.target.files);
+    const validFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (validFiles.length === 0) {
+        showAlert('Pilih file gambar yang valid', 'warning');
+        return;
+    }
+    
+    document.getElementById('selectedFilesCount').textContent = `${validFiles.length} foto dipilih`;
+    document.getElementById('uploadPreviewInfo').style.display = 'block';
+    
+    // Process uploaded files
+    validFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            captureState.photos.push(e.target.result);
+            updatePreviewGrid();
+            updateProgress();
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    showAlert(`📁 ${validFiles.length} foto berhasil dimuat`, 'success');
 }
 
 // Init
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('[Init] Face Capture Module starting...');
+    console.log('[Init] Location:', window.location.href);
+    console.log('[Init] Protocol:', window.location.protocol);
+    console.log('[Init] isSecureContext:', window.isSecureContext);
+    
     const params = new URLSearchParams(window.location.search);
-    captureState.employeeId = params.get('id');
+    captureState.employeeId = params.get('employee_id');
     captureState.employeeName = params.get('name') || 'Unknown';
     captureState.employeeDept = params.get('dept') || 'Unknown';
     
-    document.getElementById('employeeNameDisplay').textContent = captureState.employeeName;
-    document.getElementById('employeeDeptDisplay').textContent = captureState.employeeDept;
+    document.getElementById('employeeName').textContent = captureState.employeeName;
+    document.getElementById('employeeDept').textContent = captureState.employeeDept;
+    
+    // Event Listeners
+    document.getElementById('captureManualBtn').addEventListener('click', capturePhoto);
+    document.getElementById('startAutoBtn').addEventListener('click', startAutoCapture);
+    document.getElementById('selectPhotosBtn').addEventListener('click', () => {
+        document.getElementById('photoUploadInput').click();
+    });
+    document.getElementById('saveBtn').addEventListener('click', savePhotos);
+    document.getElementById('resetBtn').addEventListener('click', resetCapture);
+    document.getElementById('backBtn').addEventListener('click', () => {
+        window.location.href = '/admin/employees';
+    });
+    
+    // Mode switching
+    document.getElementById('manualModeBtn').addEventListener('click', () => switchMode('manual'));
+    document.getElementById('autoModeBtn').addEventListener('click', () => switchMode('auto'));
+    document.getElementById('uploadModeBtn').addEventListener('click', () => switchMode('upload'));
+    
+    // File upload handler
+    document.getElementById('photoUploadInput').addEventListener('change', handleFileUpload);
     
     await initCamera();
     updateProgress();

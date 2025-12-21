@@ -13,6 +13,7 @@ Flask-Limiter==3.5.0
 # Database
 PyMySQL==1.1.2
 DBUtils==3.0.3  # Connection pooling
+cryptography
 
 # Computer Vision & Face Recognition
 opencv-python==4.8.0.76

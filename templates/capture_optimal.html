@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📸 Capture Wajah Optimal - Smart Absen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/css/optimized_capture_layout.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid py-3">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="h3 mb-2">📸 Capture Wajah Training</h1>
+            <p class="text-muted">InsightFace/ArcFace - Akurasi 99%+ dengan 5-10 foto optimal</p>
+        </div>
+
+        <!-- Main Capture Layout -->
+        <div class="capture-main">
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <div class="camera-container">
+                    <video id="webcam" class="camera-video" autoplay playsinline muted></video>
+                    
+                    <!-- Face Guide Overlay -->
+                    <div class="face-guide-overlay">
+                        <div class="face-guide" id="faceGuide"></div>
+                    </div>
+                    
+                    <!-- Status Indicators -->
+                    <div class="status-indicators">
+                        <div class="status-badge" id="faceStatus">
+                            <i class="bi bi-search"></i> Mendeteksi wajah...
+                        </div>
+                        <div class="status-badge" id="lightStatus">
+                            <i class="bi bi-brightness-high"></i> Cahaya: Baik
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <!-- Employee Info -->
+                <div class="control-section">
+                    <h3><i class="bi bi-person-badge"></i> Info Karyawan</h3>
+                    <div class="mb-3">
+                        <label class="form-label">Employee ID</label>
+                        <input type="text" class="form-control" id="employeeId" placeholder="Masukkan ID">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control" id="employeeName" placeholder="Nama karyawan">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Departemen</label>
+                        <select class="form-select" id="employeeDept">
+                            <option value="">Pilih Departemen</option>
+                            <option value="IT">IT</option>
+                            <option value="HR">HR</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Operations">Operations</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Photo Counter -->
+                <div class="photo-counter">
+                    <div class="photo-count" id="photoCount">0</div>
+                    <div class="photo-target">dari 10 foto target</div>
+                    <div class="progress mt-2">
+                        <div class="progress-bar" id="photoProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn-capture" id="captureBtn">
+                        <i class="bi bi-camera"></i> Capture Foto
+                    </button>
+                    <button class="btn-save" id="saveBtn" disabled>
+                        <i class="bi bi-cloud-upload"></i> Save & Train Model
+                    </button>
+                    <button class="btn btn-outline-secondary" id="clearBtn">
+                        <i class="bi bi-trash"></i> Clear All
+                    </button>
+                </div>
+
+                <!-- Photo Preview -->
+                <div class="control-section">
+                    <h3><i class="bi bi-images"></i> Preview Foto</h3>
+                    <div class="photo-preview" id="photoPreview"></div>
+                </div>
+
+                <!-- Tips -->
+                <div class="capture-tips">
+                    <h4><i class="bi bi-lightbulb"></i> Tips Optimal:</h4>
+                    <ul>
+                        <li>Posisikan wajah di tengah lingkaran hijau</li>
+                        <li>Pastikan pencahayaan cukup terang</li>
+                        <li>Variasikan sudut: depan, kiri, kanan</li>
+                        <li>Jangan gunakan kacamata/masker</li>
+                        <li>Minimal 5 foto, optimal 8-10 foto</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Canvas -->
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        // Global variables
+        let video, canvas, ctx;
+        let capturedPhotos = [];
+        let isCapturing = false;
+
+        // Initialize camera
+        async function initCamera() {
+            try {
+                video = document.getElementById('webcam');
+                canvas = document.getElementById('canvas');
+                ctx = canvas.getContext('2d');
+
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                };
+                
+                console.log('Camera initialized successfully');
+            } catch (error) {
+                console.error('Camera error:', error);
+                alert('Tidak dapat mengakses kamera. Pastikan kamera tersedia dan izin diberikan.');
+            }
+        }
+
+        // Capture photo
+        function capturePhoto() {
+            if (!video || video.readyState !== 4) {
+                alert('Kamera belum siap');
+                return;
+            }
+
+            if (capturedPhotos.length >= 50) {
+                alert('Maksimal 50 foto');
+                return;
+            }
+
+            // Draw video frame to canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Get base64 data
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Add to photos array
+            capturedPhotos.push(imageData);
+            
+            // Update UI
+            updatePhotoCounter();
+            addPhotoPreview(imageData);
+            
+            console.log(`Photo ${capturedPhotos.length} captured`);
+        }
+
+        // Save photos and train
+        async function savePhotosAndTrain() {
+            const employeeId = document.getElementById('employeeId').value;
+            const employeeName = document.getElementById('employeeName').value;
+            const employeeDept = document.getElementById('employeeDept').value;
+
+            if (!employeeId || !employeeName || !employeeDept) {
+                alert('Harap isi semua data karyawan');
+                return;
+            }
+
+            if (capturedPhotos.length < 5) {
+                alert('Minimal 5 foto diperlukan');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving & Training...';
+
+            try {
+                const response = await fetch('/api/save_face_training', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        employee_id: employeeId,
+                        employee_name: employeeName,
+                        employee_dept: employeeDept,
+                        photos: capturedPhotos
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert('✅ ' + result.message);
+                    // Clear form and photos
+                    capturedPhotos = [];
+                    document.getElementById('photoPreview').innerHTML = '';
+                    updatePhotoCounter();
+                    
+                    // Redirect to admin employees
+                    setTimeout(() => {
+                        window.location.href = '/admin/employees';
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Save failed');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Error: ' + error.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="bi bi-cloud-upload"></i> Save & Train Model';
+            }
+        }
+
+        // Update photo counter and progress
+        function updatePhotoCounter() {
+            const count = capturedPhotos.length;
+            document.getElementById('photoCount').textContent = count;
+            document.getElementById('photoProgress').style.width = `${(count / 10) * 100}%`;
+            
+            // Enable save button if minimum photos captured
+            document.getElementById('saveBtn').disabled = count < 5;
+            
+            // Update progress bar color
+            const progressBar = document.getElementById('photoProgress');
+            if (count >= 10) {
+                progressBar.className = 'progress-bar bg-success';
+            } else if (count >= 5) {
+                progressBar.className = 'progress-bar bg-warning';
+            } else {
+                progressBar.className = 'progress-bar bg-info';
+            }
+        }
+
+        // Add photo to preview
+        function addPhotoPreview(imageData) {
+            const preview = document.getElementById('photoPreview');
+            const img = document.createElement('img');
+            img.src = imageData;
+            img.title = `Foto ${capturedPhotos.length}`;
+            preview.appendChild(img);
+        }
+
+        // Clear all photos
+        function clearAllPhotos() {
+            capturedPhotos = [];
+            document.getElementById('photoPreview').innerHTML = '';
+            updatePhotoCounter();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initCamera();
+            updatePhotoCounter();
+            
+            document.getElementById('captureBtn').addEventListener('click', capturePhoto);
+            document.getElementById('saveBtn').addEventListener('click', savePhotosAndTrain);
+            document.getElementById('clearBtn').addEventListener('click', clearAllPhotos);
+        });
+    </script>
+</body>
+</html>

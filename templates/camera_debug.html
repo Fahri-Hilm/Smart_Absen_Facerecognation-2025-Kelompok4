@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Camera Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        video { width: 640px; height: 480px; border: 2px solid #333; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Camera Debug Test</h1>
+    <div id="status" class="status">Klik tombol untuk test kamera</div>
+    
+    <video id="video" autoplay playsinline></video>
+    <br>
+    
+    <button onclick="startCamera()">Start Camera</button>
+    <button onclick="stopCamera()">Stop Camera</button>
+    <button onclick="takePhoto()">Take Photo</button>
+    
+    <div id="photos"></div>
+
+    <script>
+        let stream = null;
+        
+        async function startCamera() {
+            const status = document.getElementById('status');
+            const video = document.getElementById('video');
+            
+            try {
+                status.textContent = 'Requesting camera access...';
+                status.className = 'status';
+                
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: 640, height: 480 }
+                });
+                
+                video.srcObject = stream;
+                await video.play();
+                
+                status.textContent = '✅ Camera started successfully!';
+                status.className = 'status success';
+                
+            } catch (error) {
+                status.textContent = '❌ Camera error: ' + error.message;
+                status.className = 'status error';
+                console.error('Camera error:', error);
+            }
+        }
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+                document.getElementById('video').srcObject = null;
+                document.getElementById('status').textContent = 'Camera stopped';
+                document.getElementById('status').className = 'status';
+            }
+        }
+        
+        function takePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            const img = document.createElement('img');
+            img.src = canvas.toDataURL('image/jpeg');
+            img.style.width = '200px';
+            img.style.margin = '10px';
+            img.style.border = '1px solid #ccc';
+            
+            document.getElementById('photos').appendChild(img);
+        }
+        
+        // Auto start camera when page loads
+        window.addEventListener('load', startCamera);
+    </script>
+</body>
+</html>
