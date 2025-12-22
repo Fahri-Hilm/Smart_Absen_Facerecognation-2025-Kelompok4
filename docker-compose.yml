@@ -1,41 +1,36 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: smart-absen-db
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   app:
     build: .
-    container_name: smart-absen-app
     ports:
       - "5001:5001"
     environment:
-      DB_HOST: mysql
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      SECRET_KEY: ${SECRET_KEY}
-      FLASK_ENV: ${FLASK_ENV}
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=smartabsen123
+      - DB_NAME=smart_absen
+      - SECRET_KEY=your-secret-key-here
+      - FLASK_ENV=production
     volumes:
       - ./logs:/app/logs
-      - ./Attendance:/app/Attendance
       - ./face_data:/app/face_data
+      - ./Attendance:/app/Attendance
     depends_on:
-      mysql:
-        condition: service_healthy
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=smartabsen123
+      - MYSQL_DATABASE=smart_absen
+      - MYSQL_USER=absen_user
+      - MYSQL_PASSWORD=absen_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
     restart: unless-stopped
 
 volumes:

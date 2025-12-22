@@ -1,29 +1,57 @@
 #!/bin/bash
 
-# Smart Absen Docker Deployment Script
-# Usage: ./deploy.sh [version]
+# Docker Deployment Script untuk Smart Absen Face Recognition
+# Usage: ./deploy.sh
 
 set -e
 
-VERSION=${1:-"2.0"}
-IMAGE_NAME="smart-absen"
-REGISTRY="ghcr.io"
-USERNAME="fahri-hilm"
-REPO="smart_absen_facerecognation-2025-kelompok4"
+echo "🚀 Starting Smart Absen deployment..."
 
-echo "🐳 Building Docker image..."
-docker build -t ${IMAGE_NAME}:${VERSION} .
+# Check if Docker is installed
+if ! command -v docker &> /dev/null; then
+    echo "❌ Docker tidak terinstall. Install Docker terlebih dahulu."
+    exit 1
+fi
 
-echo "🏷️  Tagging images..."
-docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY}/${USERNAME}/${REPO}:${VERSION}
-docker tag ${IMAGE_NAME}:${VERSION} ${REGISTRY}/${USERNAME}/${REPO}:latest
+# Check if Docker Compose is installed
+if ! command -v docker-compose &> /dev/null; then
+    echo "❌ Docker Compose tidak terinstall. Install Docker Compose terlebih dahulu."
+    exit 1
+fi
 
-echo "📤 Pushing to GitHub Container Registry..."
-docker push ${REGISTRY}/${USERNAME}/${REPO}:${VERSION}
-docker push ${REGISTRY}/${USERNAME}/${REPO}:latest
+# Create .env file if not exists
+if [ ! -f .env ]; then
+    echo "📝 Creating .env file..."
+    cp .env.example .env
+    echo "✅ .env file created. Please edit it with your configuration."
+fi
 
-echo "✅ Deployment complete!"
+# Create necessary directories
+echo "📁 Creating directories..."
+mkdir -p logs face_data Attendance
+
+# Build and start services
+echo "🔨 Building Docker images..."
+docker-compose build --no-cache
+
+echo "🚀 Starting services..."
+docker-compose up -d
+
+# Wait for services to be ready
+echo "⏳ Waiting for services to start..."
+sleep 30
+
+# Initialize database
+echo "🗄️ Initializing database..."
+docker-compose exec app python database.py
+
+echo "✅ Deployment completed!"
 echo ""
-echo "Pull with:"
-echo "  docker pull ${REGISTRY}/${USERNAME}/${REPO}:${VERSION}"
-echo "  docker pull ${REGISTRY}/${USERNAME}/${REPO}:latest"
+echo "🌐 Application is running at: http://localhost:5001"
+echo "🗄️ MySQL is running at: localhost:3306"
+echo ""
+echo "📋 Useful commands:"
+echo "  - View logs: docker-compose logs -f"
+echo "  - Stop services: docker-compose down"
+echo "  - Restart: docker-compose restart"
+echo "  - Update: git pull && docker-compose build --no-cache && docker-compose up -d"

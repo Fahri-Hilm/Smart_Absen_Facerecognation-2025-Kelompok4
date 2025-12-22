@@ -19,6 +19,11 @@ cryptography
 opencv-python==4.8.0.76
 numpy==1.24.3
 
+# InsightFace & Dependencies
+insightface==0.7.3
+onnxruntime==1.16.3
+mxnet==1.9.1
+
 # Machine Learning
 scikit-learn==1.3.0
 joblib==1.3.2
@@ -30,10 +35,9 @@ pandas==2.0.3
 qrcode==7.4.2
 Pillow==10.0.1
 
+# HTTP Requests
+requests==2.31.0
+
 # Note: For public access, install Cloudflare Tunnel separately:
 # sudo apt install cloudflared
 # Or download from: https://github.com/cloudflare/cloudflared/releases
-
-# Logging (built-in Python, no need to install)
-# datetime (built-in Python, no need to install)
-# os (built-in Python, no need to install)
