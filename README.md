@@ -5,6 +5,8 @@ Aplikasi web Flask untuk absensi otomatis via kamera webcam dengan sinkronisasi 
 
 **Version:** 2.1 | **Status:** Production Ready ✅ | **Security Score:** 9/10 🛡️
 
+🌐 **[LIVE DEMO](https://absen.faju.web.id)** - Try the system now!
+
 ---
 
 ## 📸 Screenshots & Demo
