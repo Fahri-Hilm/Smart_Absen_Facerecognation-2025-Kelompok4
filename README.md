@@ -3,9 +3,11 @@
 Sistem absensi pintar berbasis pengenalan wajah dengan akurasi 99%+ menggunakan InsightFace/ArcFace.  
 Aplikasi web Flask untuk absensi otomatis via kamera webcam dengan sinkronisasi QR code cross-device dan database MySQL.
 
-**Version:** 2.1 | **Status:** Production Ready ✅ | **Security Score:** 9/10 🛡️
+## 🚀 LIVE DEMO
+### 🌐 **[https://absen.faju.web.id](https://absen.faju.web.id)** 
+**Coba sistem sekarang juga! Akses langsung tanpa instalasi.**
 
-🌐 **[LIVE DEMO](https://absen.faju.web.id)** - Try the system now!
+**Version:** 2.1 | **Status:** Production Ready ✅ | **Security Score:** 9/10 🛡️
 
 ---
 
