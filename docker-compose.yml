@@ -5,33 +5,10 @@ services:
     build: .
     ports:
       - "5001:5001"
-    environment:
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=smartabsen123
-      - DB_NAME=smart_absen
-      - SECRET_KEY=your-secret-key-here
-      - FLASK_ENV=production
+    env_file:
+      - .env
     volumes:
       - ./logs:/app/logs
       - ./face_data:/app/face_data
       - ./Attendance:/app/Attendance
-    depends_on:
-      - db
     restart: unless-stopped
-
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=smartabsen123
-      - MYSQL_DATABASE=smart_absen
-      - MYSQL_USER=absen_user
-      - MYSQL_PASSWORD=absen_pass
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    restart: unless-stopped
-
-volumes:
-  mysql_data:
