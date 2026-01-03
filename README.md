@@ -180,28 +180,69 @@ MAX_FACES=1
 
 ## 🌐 Deployment
 
-### Docker (Recommended) 🐳
+### 🐳 Docker VPS (Recommended)
 
+**1. Install Docker di Ubuntu VPS:**
 ```bash
-# Local development
-docker-compose up -d
+# Update sistem
+sudo apt update && sudo apt upgrade -y
 
-# Production (pull from GHCR)
-docker pull ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
-docker run -d -p 5001:5001 --env-file .env \
-  -v $(pwd)/logs:/app/logs \
-  -v $(pwd)/face_data:/app/face_data \
-  ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4:latest
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Start Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+newgrp docker
 ```
 
-**Docker Hub:** `ghcr.io/fahri-hilm/smart_absen_facerecognation-2025-kelompok4`
+**2. Deploy Smart Absen:**
+```bash
+# Clone repository
+git clone https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4.git
+cd Smart_Absen_Facerecognation-2025-Kelompok4
 
-### VPS/Cloud
+# Setup environment
+cp .env.example .env
+nano .env  # Edit database credentials
 
-1. Install MySQL 8.0+
-2. Setup Cloudflare Tunnel untuk HTTPS
-3. `gunicorn app:app -w 4 -b 0.0.0.0:5001`
-4. PM2/Nginx untuk production
+# Build dan run dengan Docker Compose (MySQL included)
+docker-compose up -d --build
+
+# Atau build manual
+docker build -t smart_absen .
+docker run -d -p 5001:5001 --name smart_absen \
+  --env-file .env \
+  -v $(pwd)/logs:/app/logs \
+  -v $(pwd)/face_data:/app/face_data \
+  smart_absen
+```
+
+**Akses:** `http://ip-vps:5001`
+
+### 🖥️ Manual Installation (Alternative)
+
+```bash
+# Install dependencies
+sudo apt install python3 python3-pip mysql-server nginx -y
+
+# Clone & setup
+git clone https://github.com/Fahri-Hilm/Smart_Absen_Facerecognation-2025-Kelompok4.git
+cd Smart_Absen_Facerecognation-2025-Kelompok4
+pip3 install -r requirements.txt
+
+# Setup database & environment
+cp .env.example .env
+python3 database.py
+
+# Run with PM2
+npm install -g pm2
+pm2 start "python3 app.py" --name smart_absen
+```
+
+**Docker Hub:** Build locally dengan `docker build -t smart_absen .`
 
 **Detail lengkap:** [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) | [INSTALLATION.md](INSTALLATION.md)
 
